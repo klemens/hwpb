@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock title %} – hwpb</title>
+    <meta name="viewport" content="width=device-width">
+    {% endblock head %}
+</head>
+<body>
+    <h1>{% block heading %}{% endblock heading %}</h1>
+    <div id="main">
+        {% block main %}{% endblock main %}
+    </div>
+</body>

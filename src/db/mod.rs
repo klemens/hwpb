@@ -4,51 +4,49 @@ pub mod schema;
 pub use models::*;
 pub use schema::*;
 
-use chrono::NaiveDate;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use std::collections::HashSet;
+use r2d2;
+use r2d2_diesel::ConnectionManager;
+use rocket::http::Status;
+use rocket::request::{self, FromRequest};
+use rocket::{Request, State, Outcome};
+use std::env;
+use std::ops::Deref;
 
-pub fn print_table(date: &NaiveDate, conn: &PgConnection) -> QueryResult<()> {
-    let event: Event = match events::table.filter(events::date.eq(date)).first(conn) {
-        Ok(event) => event,
-        _ => {
-            println!(" Kein Praktikum am {}!", date);
-            return Ok(());
-        }
-    };
+pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-    let tasks = tasks::table.filter(tasks::experiment_id.eq(event.experiment_id))
-        .order(tasks::name.asc()).load::<Task>(conn)?;
-    let groups = groups_with_students(&event.day_id, conn)?;
+pub fn init_pool() -> Pool {
+    let config = r2d2::Config::default();
+    let manager = ConnectionManager::<PgConnection>::new(env::var("DATABASE_URL").unwrap());
+    r2d2::Pool::new(config, manager).expect("db pool")
+}
 
-    // belonging_to uses eq_any internally, but supports only one parent table
-    let task_ids: Vec<_> = tasks.iter().map(Identifiable::id).collect();
-    let group_ids: Vec<_> = groups.iter().map(|&(ref g, _)| g.id).collect();
-    let completions = completions::table.filter(completions::task_id.eq_any(task_ids))
-        .filter(completions::group_id.eq_any(group_ids)).load::<Completion>(conn)?;
+pub struct Conn(r2d2::PooledConnection<ConnectionManager<PgConnection>>);
 
-    // build set with all groups that completed a task
-    let completions: HashSet<_> = completions.into_iter()
-        .map(|c| (c.group_id, c.task_id)).collect();
+impl Deref for Conn {
+    type Target = PgConnection;
 
-    // print task legent
-    println!("                                       {}", tasks.join(" "));
-
-    for (group, students) in groups {
-        print!("{}, {:35} ", group.desk, students.join(", "));
-
-        for task in &tasks {
-            if completions.contains(&(group.id, task.id)) {
-                print!("✓  ");
-            } else {
-                print!("   ");
-            }
-        }
-        println!();
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
+}
 
-    Ok(())
+impl<'a, 'r> FromRequest<'a, 'r> for Conn {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Conn, ()> {
+        let pool = match <State<Pool> as FromRequest>::from_request(request) {
+            Outcome::Success(pool) => pool,
+            Outcome::Failure(e) => return Outcome::Failure(e),
+            Outcome::Forward(_) => return Outcome::Forward(()),
+        };
+
+        match pool.get() {
+            Ok(conn) => Outcome::Success(Conn(conn)),
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+        }
+    }
 }
 
 pub fn groups_with_students(day: &str, conn: &PgConnection) -> QueryResult<Vec<(Group, Vec<Student>)>> {

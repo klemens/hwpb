@@ -1,0 +1,27 @@
+{% extends "base" %}
+
+{% block title %}{{ day }}, {{ date }}{% endblock title %}
+{% block heading %}Praktikum am {{ date }} ({{ day }}){% endblock heading %}
+
+{% block main %}
+        {% for group in groups %}
+        <div class="group">
+            <h2>Gruppe {{ group.desk }}</h2>
+            <ul>
+                {% for student in group.students %}
+                <li>{{ student }}</li>
+                {% endfor %}
+            </ul>
+            {% for task in group.tasks %}
+            <div class="task">
+                <label>{{ task.0 }}</label>
+                {% if task.1 %}
+                <input type="checkbox" checked="checked" />
+                {% else %}
+                <input type="checkbox" />
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+{% endblock main %}
