@@ -1,0 +1,10 @@
+[package]
+name = "hwpb"
+version = "0.1.0"
+authors = ["Klemens Schölhorn <klemens@schoelhorn.eu>"]
+
+[dependencies]
+chrono = "0.3"
+diesel = { version = "0.12.0", features = ["postgres", "chrono"] }
+diesel_codegen = { version = "0.12.0", features = ["postgres"] }
+dotenv = "0.8.0"
