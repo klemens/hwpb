@@ -1,5 +1,10 @@
 {% extends "base" %}
 
+{% block head %}
+    {{super()}}
+    <script src="/static/event.js"></script>
+{% endblock head %}
+
 {% block title %}{{ day }}, {{ date }}{% endblock title %}
 {% block heading %}Praktikum am {{ date }} ({{ day }}){% endblock heading %}
 

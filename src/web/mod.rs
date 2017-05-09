@@ -45,7 +45,7 @@ fn event(date: Date, conn: db::Conn) -> Template {
 
 #[get("/static/<path..>")]
 fn static_file(path: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("templates/").join(path)).ok()
+    NamedFile::open(Path::new("templates/static/").join(path)).ok()
 }
 
 pub mod api {
