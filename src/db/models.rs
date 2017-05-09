@@ -52,7 +52,8 @@ pub struct Task {
     pub name: String,
 }
 
-#[derive(Debug, Queryable, Identifiable, Associations)]
+#[derive(Debug, Queryable, Insertable, Identifiable, Associations)]
+#[table_name="completions"]
 #[primary_key(group_id, task_id)]
 #[belongs_to(Group)]
 #[belongs_to(Task)]

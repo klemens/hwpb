@@ -24,5 +24,6 @@ fn main() {
     rocket::ignite()
         .manage(db::init_pool())
         .mount("/", routes![ web::index, web::event, web::static_file ])
+        .mount("/api", routes![ web::api::mark_completed, web::api::unmark_completed ])
         .launch();
 }

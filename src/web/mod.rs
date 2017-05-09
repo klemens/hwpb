@@ -47,3 +47,38 @@ fn event(date: Date, conn: db::Conn) -> Template {
 fn static_file(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("templates/").join(path)).ok()
 }
+
+pub mod api {
+    use db;
+    use diesel;
+    use diesel::prelude::*;
+
+    #[derive(Debug)]
+    struct Error{}
+
+    #[put("/completed/<group>/<task>")]
+    fn mark_completed(group: i32, task: i32, conn: db::Conn) -> Result<&'static str, Error> {
+        let completion = db::models::Completion {
+            group_id: group,
+            task_id: task,
+            tutor: None,
+            completed_at: None,
+        };
+
+        diesel::insert(&completion)
+            .into(db::completions::table)
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+        Ok("")
+    }
+
+    #[delete("/completed/<group>/<task>")]
+    fn unmark_completed(group: i32, task: i32, conn: db::Conn) -> Result<&'static str, Error> {
+        diesel::delete(db::completions::table
+            .filter(db::completions::group_id.eq(group))
+            .filter(db::completions::task_id.eq(task)))
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+        Ok("")
+    }
+}
