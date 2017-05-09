@@ -6,9 +6,10 @@ use std::collections::HashSet;
 
 #[derive(Serialize)]
 pub struct Group {
+    pub id: i32,
     pub desk: i32,
     pub students: Vec<String>,
-    pub tasks: Vec<(String, bool)>,
+    pub tasks: Vec<(i32, String, bool)>,
 }
 
 #[derive(Serialize)]
@@ -57,6 +58,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
 
     for (group, students) in groups {
         let mut web_group = Group {
+            id: group.id,
             desk: group.desk,
             students: students.into_iter().map(|s| { s.name }).collect(),
             tasks: Vec::with_capacity(tasks.len()),
@@ -64,7 +66,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
 
         for task in &tasks {
             let completed = completions.contains(&(group.id, task.id));
-            web_group.tasks.push((task.name.clone(), completed));
+            web_group.tasks.push((task.id, task.name.clone(), completed));
         }
 
         web_groups.push(web_group)

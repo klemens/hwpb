@@ -5,7 +5,7 @@
 
 {% block main %}
         {% for group in groups %}
-        <div class="group">
+        <div class="group" data-id="{{ group.id }}">
             <h2>Gruppe {{ group.desk }}</h2>
             <ul>
                 {% for student in group.students %}
@@ -13,12 +13,12 @@
                 {% endfor %}
             </ul>
             {% for task in group.tasks %}
-            <div class="task">
-                <label>{{ task.0 }}</label>
-                {% if task.1 %}
-                <input type="checkbox" checked="checked" />
+            <div class="task" data-id="{{ task.0 }}">
+                <label for="task-{{ group.id }}-{{ task.0 }}">{{ task.1 }}</label>
+                {% if task.2 %}
+                <input type="checkbox" checked="checked" id="task-{{ group.id }}-{{ task.0 }}" />
                 {% else %}
-                <input type="checkbox" />
+                <input type="checkbox" id="task-{{ group.id }}-{{ task.0 }}" />
                 {% endif %}
             </div>
             {% endfor %}
