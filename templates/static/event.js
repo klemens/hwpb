@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw "API error";
                 }
             } catch(e) {
+                toast("error", e);
                 console.log("Error changing " + event.target.id + " completion: " + e);
                 event.target.checked = !checked;
             }

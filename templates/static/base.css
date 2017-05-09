@@ -2,3 +2,19 @@ body {
     font-family: sans-serif;
     background: #f9fbe7;
 }
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1rem;
+    width: 40rem;
+    margin-left: -20rem;
+    padding: .3rem;
+    box-sizing: border-box;
+    box-shadow: 2px 3px 10px rgb(100, 100, 100);
+}
+
+.toast.error {
+    color: white;
+    background: #d50000;
+}
