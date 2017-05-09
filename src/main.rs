@@ -23,6 +23,6 @@ fn main() {
 
     rocket::ignite()
         .manage(db::init_pool())
-        .mount("/", routes![ web::index, web::event ])
+        .mount("/", routes![ web::index, web::event, web::static_file ])
         .launch();
 }

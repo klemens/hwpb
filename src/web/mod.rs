@@ -4,9 +4,11 @@ use chrono;
 use db;
 use rocket::http::RawStr;
 use rocket::request::FromParam;
+use rocket::response::NamedFile;
 use rocket_contrib::Template;
 use std::collections::HashMap;
 use std::ops::Deref;
+use std::path::{Path, PathBuf};
 
 struct Date(chrono::NaiveDate);
 
@@ -39,4 +41,9 @@ fn event(date: Date, conn: db::Conn) -> Template {
     let context = models::load_event(&date, &conn).unwrap();
 
     Template::render("event", &context)
+}
+
+#[get("/static/<path..>")]
+fn static_file(path: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("templates/").join(path)).ok()
 }
