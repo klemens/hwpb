@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, UTC};
 
 use super::schema::*;
 
@@ -60,6 +60,7 @@ pub struct Completion {
     pub group_id: i32,
     pub task_id: i32,
     pub tutor: Option<String>,
+    pub completed_at: Option<DateTime<UTC>>,
 }
 
 use std::borrow::Borrow;
