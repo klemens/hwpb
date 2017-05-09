@@ -2,6 +2,7 @@
 
 {% block head %}
     {{super()}}
+    <link rel="stylesheet" href="/static/event.css" />
     <script src="/static/event.js"></script>
 {% endblock head %}
 

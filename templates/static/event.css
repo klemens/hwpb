@@ -1,0 +1,35 @@
+body {
+    font-family: sans-serif;
+    background: #f9fbe7;
+}
+
+.group {
+    max-width: 30rem;
+    margin: .5rem auto 1.5rem auto;
+    padding: .3rem;
+    box-shadow: 2px 3px 10px rgb(100, 100, 100);
+    background: #cddc39;
+}
+
+.group ul {
+    list-style: none;
+    padding: 0;
+}
+.group ul li {
+    display: inline-block;
+}
+.group ul li:after {
+    content: ', ';
+}
+.group ul li:last-of-type:after {
+    content: '';
+}
+
+.task {
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.task label {
+    text-align: center;
+}
