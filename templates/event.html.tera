@@ -10,8 +10,16 @@
 {% block heading %}Praktikum am {{ date }} ({{ day }}){% endblock heading %}
 
 {% block main %}
+    <div class="experiment" data-id="{{ experiment }}">
         {% for group in groups %}
         <div class="group" data-id="{{ group.id }}">
+            <select class="elaboration" autocomplete="off">
+                <option {% if not group.elaboration %}selected="selected"{% endif %}>Ausarbeitung ausstehend</option>
+                <option {% if group.elaboration and not group.elaboration.0 and not group.elaboration.1 %}selected="selected" {% endif %} data-rework="0" data-accepted="0">Ausarbeitung abgegeben</option>
+                <option {% if group.elaboration and not group.elaboration.0 and     group.elaboration.1 %}selected="selected" {% endif %} data-rework="0" data-accepted="1">Ausarbeitung akzeptiert</option>
+                <option {% if group.elaboration and     group.elaboration.0 and not group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="0">Nachbesserung nötig</option>
+                <option {% if group.elaboration and     group.elaboration.0 and     group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="1">Nachbesserung akzeptiert</option>
+            </select>
             <h2>Gruppe {{ group.desk }}</h2>
             <ul>
                 {% for student in group.students %}
@@ -30,4 +38,5 @@
             {% endfor %}
         </div>
         {% endfor %}
+    </div>
 {% endblock main %}

@@ -51,7 +51,10 @@ fn static_file(path: PathBuf) -> Option<NamedFile> {
 pub mod api {
     use db;
     use diesel;
+    use diesel::pg::upsert::*;
     use diesel::prelude::*;
+    use rocket::response::status;
+    use rocket_contrib::JSON;
 
     #[derive(Debug)]
     struct Error{}
@@ -80,5 +83,43 @@ pub mod api {
             .execute(&*conn)
             .map_err(|_| Error{})?;
         Ok("")
+    }
+
+    #[derive(Deserialize)]
+    struct Elaboration {
+        rework_required: bool,
+        accepted: bool,
+    }
+
+    #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
+    fn put_elaboration(group: i32, experiment: String, elaboration: JSON<Elaboration>, conn: db::Conn) -> Result<status::NoContent, Error> {
+        let elaboration = db::models::Elaboration {
+            group_id: group,
+            experiment_id: experiment,
+            rework_required: elaboration.rework_required,
+            accepted: elaboration.accepted,
+            accepted_by: None,
+        };
+
+        diesel::insert(
+            &elaboration.on_conflict(
+                (db::elaborations::group_id, db::elaborations::experiment_id),
+                do_update().set(&elaboration)
+            )
+        ).into(db::elaborations::table).execute(&*conn)
+            .map_err(|_| Error{})?;
+
+        Ok(status::NoContent)
+    }
+
+    #[delete("/group/<group>/elaboration/<experiment>")]
+    fn delete_elaboration(group: i32, experiment: String, conn: db::Conn) -> Result<status::NoContent, Error> {
+        diesel::delete(db::elaborations::table
+            .filter(db::elaborations::group_id.eq(group))
+            .filter(db::elaborations::experiment_id.eq(experiment)))
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+
+        Ok(status::NoContent)
     }
 }

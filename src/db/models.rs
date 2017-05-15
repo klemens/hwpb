@@ -11,6 +11,7 @@ pub struct Day {
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[has_many(events)]
 #[has_many(tasks)]
+#[has_many(elaborations)]
 pub struct Experiment {
     pub id: String,
 }
@@ -28,6 +29,7 @@ pub struct Event {
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[has_many(students)]
 #[has_many(completions)]
+#[has_many(elaborations)]
 pub struct Group {
     pub id: i32,
     pub desk: i32,
@@ -62,6 +64,19 @@ pub struct Completion {
     pub task_id: i32,
     pub tutor: Option<String>,
     pub completed_at: Option<DateTime<UTC>>,
+}
+
+#[derive(Debug, Queryable, Insertable, AsChangeset, Identifiable, Associations)]
+#[table_name="elaborations"]
+#[primary_key(group_id, experiment_id)]
+#[belongs_to(Group)]
+#[belongs_to(Experiment)]
+pub struct Elaboration {
+    pub group_id: i32,
+    pub experiment_id: String,
+    pub rework_required: bool,
+    pub accepted: bool,
+    pub accepted_by: Option<String>,
 }
 
 use std::borrow::Borrow;
