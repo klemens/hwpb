@@ -22,9 +22,9 @@
             <div class="task" data-id="{{ task.0 }}">
                 <label for="task-{{ group.id }}-{{ task.0 }}">{{ task.1 }}</label>
                 {% if task.2 %}
-                <input type="checkbox" checked="checked" id="task-{{ group.id }}-{{ task.0 }}" />
+                <input type="checkbox" checked="checked" autocomplete="off" id="task-{{ group.id }}-{{ task.0 }}" />
                 {% else %}
-                <input type="checkbox" id="task-{{ group.id }}-{{ task.0 }}" />
+                <input type="checkbox" autocomplete="off" id="task-{{ group.id }}-{{ task.0 }}" />
                 {% endif %}
             </div>
             {% endfor %}
