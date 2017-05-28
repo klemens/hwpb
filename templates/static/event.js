@@ -6,9 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 let url = "/api/completed/" + ids[1] + "/" + ids[2];
-                let options = { method: checked ? "PUT" : "DELETE" };
+                let options = {
+                    method: checked ? "PUT" : "DELETE",
+                    deadline: 4000
+                };
 
-                let response = await fetch(url, options);
+                let response = await myfetch(url, options);
                 if(!response.ok) {
                     throw "API error";
                 }
