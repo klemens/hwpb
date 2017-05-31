@@ -59,8 +59,8 @@ pub mod api {
     #[derive(Debug)]
     struct Error{}
 
-    #[put("/completed/<group>/<task>")]
-    fn mark_completed(group: i32, task: i32, conn: db::Conn) -> Result<&'static str, Error> {
+    #[put("/group/<group>/completed/<task>")]
+    fn put_completion(group: i32, task: i32, conn: db::Conn) -> Result<status::NoContent, Error> {
         let completion = db::models::Completion {
             group_id: group,
             task_id: task,
@@ -68,21 +68,23 @@ pub mod api {
             completed_at: None,
         };
 
-        diesel::insert(&completion)
+        diesel::insert(&completion.on_conflict_do_nothing())
             .into(db::completions::table)
             .execute(&*conn)
             .map_err(|_| Error{})?;
-        Ok("")
+
+        Ok(status::NoContent)
     }
 
-    #[delete("/completed/<group>/<task>")]
-    fn unmark_completed(group: i32, task: i32, conn: db::Conn) -> Result<&'static str, Error> {
+    #[delete("/group/<group>/completed/<task>")]
+    fn delete_completion(group: i32, task: i32, conn: db::Conn) -> Result<status::NoContent, Error> {
         diesel::delete(db::completions::table
             .filter(db::completions::group_id.eq(group))
             .filter(db::completions::task_id.eq(task)))
             .execute(&*conn)
             .map_err(|_| Error{})?;
-        Ok("")
+
+        Ok(status::NoContent)
     }
 
     #[derive(Deserialize)]

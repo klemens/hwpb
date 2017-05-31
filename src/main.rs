@@ -25,8 +25,8 @@ fn main() {
         .manage(db::init_pool())
         .mount("/", routes![ web::index, web::event, web::static_file ])
         .mount("/api", routes![
-            web::api::mark_completed,
-            web::api::unmark_completed,
+            web::api::put_completion,
+            web::api::delete_completion,
             web::api::put_elaboration,
             web::api::delete_elaboration,
         ])
