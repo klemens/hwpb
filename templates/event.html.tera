@@ -36,6 +36,13 @@
                 {% endif %}
             </div>
             {% endfor %}
+            <div class="comment">
+                <textarea autocomplete="off">{{ group.comment }}</textarea>
+                <div class="buttons">
+                    <button class="date">+Datum</button>
+                    <button class="save">Speichern</button>
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>

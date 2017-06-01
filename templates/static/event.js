@@ -63,4 +63,52 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    for(saveButton of document.querySelectorAll(".comment button.save")) {
+        saveButton.addEventListener("click", async (event) => {
+            let group = event.target.closest(".group").dataset.id;
+            let comment = event.target.closest(".comment").querySelector("textarea").value;
+
+            try {
+                let url = "/api/group/" + group + "/comment";
+
+                let response = await myfetch(url, {
+                    method: "PUT",
+                    headers: new Headers({"Content-Type": "text/plain"}),
+                    body: comment
+                });
+                if(!response.ok) {
+                    throw "API error";
+                }
+
+                event.target.closest(".comment").classList.remove("unsaved");
+            } catch(e) {
+                toast("error", e);
+            }
+        });
+    }
+
+    for(addDate of document.querySelectorAll(".comment button.date")) {
+        addDate.addEventListener("click", (event) => {
+            let comment = event.target.closest(".comment").querySelector("textarea");
+
+            let value = "";
+            if(!comment.value.endsWith("\n")) {
+                value += "\n";
+            }
+            value += new Date().toISOString().substr(0, 10);
+            value += ": ";
+
+            comment.focus();
+            comment.value += value;
+
+            event.target.closest(".comment").classList.add("unsaved");
+        });
+    }
+
+    for(comment of document.querySelectorAll(".comment textarea")) {
+        comment.addEventListener("input", (event) => {
+            event.target.closest(".comment").classList.add("unsaved");
+        });
+    }
 });

@@ -10,7 +10,8 @@ pub struct Group {
     pub desk: i32,
     pub students: Vec<String>,
     pub tasks: Vec<(i32, String, bool)>,
-    pub elaboration: Option<(bool, bool)>
+    pub elaboration: Option<(bool, bool)>,
+    pub comment: String,
 }
 
 #[derive(Serialize)]
@@ -75,6 +76,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
             students: students.into_iter().map(|s| { s.name }).collect(),
             tasks: Vec::with_capacity(tasks.len()),
             elaboration: elaborations.get(&group.id).cloned(),
+            comment: group.comment,
         };
 
         for task in &tasks {

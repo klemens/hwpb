@@ -29,6 +29,7 @@ fn main() {
             web::api::delete_completion,
             web::api::put_elaboration,
             web::api::delete_elaboration,
+            web::api::put_comment,
         ])
         .launch();
 }

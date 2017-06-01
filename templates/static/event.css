@@ -55,3 +55,35 @@ ul.students li:last-of-type:after {
     min-width: 2rem;
     min-height: 2rem;
 }
+
+.comment {
+    display: flex;
+    margin-top: .5rem;
+}
+
+.comment textarea {
+    flex: 1;
+    resize: none;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    sborder-top: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: transparent;
+}
+
+.comment .buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment .buttons button {
+    flex: 1 0;
+    padding: .4rem .6rem;
+    border: none;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.comment.unsaved button.save {
+    font-weight: bold;
+}

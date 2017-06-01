@@ -124,4 +124,14 @@ pub mod api {
 
         Ok(status::NoContent)
     }
+
+    #[put("/group/<group>/comment", data = "<comment>")]
+    fn put_comment(group: i32, comment: String, conn: db::Conn) -> Result<status::NoContent, Error> {
+        diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
+            .set(db::groups::comment.eq(comment))
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+
+        Ok(status::NoContent)
+    }
 }
