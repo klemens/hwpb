@@ -21,7 +21,7 @@
                 <option {% if group.elaboration and     group.elaboration.0 and     group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="1">Nachbesserung akzeptiert</option>
             </select>
             <h2>Gruppe {{ group.desk }}</h2>
-            <ul>
+            <ul class="students">
                 {% for student in group.students %}
                 <li>{{ student }}</li>
                 {% endfor %}

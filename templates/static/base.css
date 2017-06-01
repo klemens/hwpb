@@ -3,6 +3,12 @@ body {
     background: #f9fbe7;
 }
 
+select,
+textarea,
+button {
+    font-size: 1rem;
+}
+
 .toast {
     position: fixed;
     left: 0;
