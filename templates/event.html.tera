@@ -6,8 +6,8 @@
     <script src="/static/event.js"></script>
 {% endblock head %}
 
-{% block title %}{{ day }}, {{ date }}{% endblock title %}
-{% block heading %}Praktikum am {{ date }} ({{ day }}){% endblock heading %}
+{% block title %}{{ experiment }}, {{ day }}, {{ date }}{% endblock title %}
+{% block heading %}{{ experiment }}, {{ day }}, {{ date }}{% endblock heading %}
 
 {% block main %}
     <div class="experiment" data-id="{{ experiment }}">
