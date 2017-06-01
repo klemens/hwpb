@@ -50,7 +50,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Conn {
 }
 
 pub fn groups_with_students(day: &str, conn: &PgConnection) -> QueryResult<Vec<(Group, Vec<Student>)>> {
-    let groups = groups::table.filter(groups::day_id.eq(day)).load::<Group>(conn)?;
+    let groups = groups::table.filter(groups::day_id.eq(day)).order(groups::desk.asc()).load::<Group>(conn)?;
     let students = Student::belonging_to(&groups).load::<Student>(conn)?.grouped_by(&groups);
     Ok(groups.into_iter().zip(students).collect())
 }
