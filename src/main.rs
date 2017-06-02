@@ -1,4 +1,4 @@
-#![feature(plugin)]
+#![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
 
 extern crate chrono;
@@ -12,6 +12,7 @@ extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
 
 pub mod db;
+pub mod user;
 pub mod web;
 
 use dotenv::dotenv;
@@ -23,7 +24,15 @@ fn main() {
 
     rocket::ignite()
         .manage(db::init_pool())
-        .mount("/", routes![ web::index, web::event, web::static_file ])
+        .mount("/", routes![
+            web::index,
+            web::event,
+            web::static_file,
+            web::session::index,
+            web::session::get_login,
+            web::session::post_login,
+            web::session::logout,
+        ])
         .mount("/api", routes![
             web::api::put_completion,
             web::api::delete_completion,

@@ -9,6 +9,10 @@ function myfetch(input, options) {
                 reject(new Error("Timeout: deadline reached"))
             }, options.deadline);
         }
+
+        // always send cookies
+        options.credentials = 'same-origin';
+
         fetch(input, options).then(resolve, reject);
     });
 }
