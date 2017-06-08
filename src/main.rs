@@ -31,5 +31,6 @@ fn main() {
             web::api::delete_elaboration,
             web::api::put_comment,
         ])
+        .attach(rocket_contrib::Template::fairing())
         .launch();
 }
