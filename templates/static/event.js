@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         })
                     });
                 } else {
-                    response = await fetch(url, {
+                    response = await myfetch(url, {
                         method: "DELETE"
                     });
                 }
