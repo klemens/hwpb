@@ -41,5 +41,13 @@ fn main() {
             web::api::put_comment,
         ])
         .attach(rocket_contrib::Template::fairing())
+        .attach(rocket::fairing::AdHoc::on_attach(|rocket| {
+            let allowed_users = {
+                let users = rocket.config().get_slice("allowed_users").unwrap_or(&[]);
+                let users = users.iter().filter_map(|u| u.as_str());
+                web::session::AllowedUsers::new(users)
+            };
+            Ok(rocket.manage(allowed_users))
+        }))
         .launch();
 }

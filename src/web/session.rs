@@ -1,10 +1,18 @@
-use rocket::Outcome;
+use rocket::{Outcome, State};
 use rocket::http::{Cookie, Session};
 use rocket::request::{self, FlashMessage, Form, FromRequest, Request};
 use rocket::response::{Flash, Redirect};
 use rocket_contrib::Template;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use user;
+
+pub struct AllowedUsers(HashSet<String>);
+
+impl AllowedUsers {
+    pub fn new<'a, I: IntoIterator<Item = &'a str>>(users: I) -> Self {
+        AllowedUsers(users.into_iter().map(|s| s.to_string()).collect())
+    }
+}
 
 pub struct User(String);
 
@@ -45,8 +53,13 @@ struct Login {
 }
 
 #[post("/login", data = "<login>")]
-fn post_login(mut session: Session, login: Form<Login>) -> Result<Redirect, Flash<Redirect>> {
+fn post_login(mut session: Session, login: Form<Login>, allowed_users: State<AllowedUsers>) -> Result<Redirect, Flash<Redirect>> {
     let login = login.into_inner();
+
+    if !allowed_users.0.contains(&login.username) {
+        let msg = "Ungültiger Benutzername!";
+        return Err(Flash::error(Redirect::to("/login"), msg))
+    }
 
     let result = user::authenticate(&login.username, &login.password);
     println!("{:?}", result);
