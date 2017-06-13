@@ -9,6 +9,13 @@
 {% block title %}{{ experiment }}, {{ day }}, {{ date }}{% endblock title %}
 {% block heading %}{{ experiment }}, {{ day }}, {{ date }}{% endblock heading %}
 
+{% block overlay %}
+    <div class="search">
+        <input type="text" placeholder="Name…" autocomplete="off" />
+        <ul></ul>
+    </div>
+{% endblock overlay %}
+
 {% block main %}
     <div class="experiment" data-id="{{ experiment }}"><!--
         {% for group in groups %}
@@ -22,6 +29,7 @@
             </select>
             <h2>Gruppe {{ group.desk }}</h2>
             <ul class="students">
+                <li class="add button round">+</li>
                 {% for student in group.students %}
                 <li data-id="{{ student.id }}">{{ student.name }}</li>
                 {% endfor %}

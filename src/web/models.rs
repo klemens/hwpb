@@ -22,6 +22,12 @@ pub struct Event {
     pub groups: Vec<Group>,
 }
 
+#[derive(Serialize)]
+pub struct Student {
+    pub id: String,
+    pub name: String,
+}
+
 pub fn find_events(conn: &PgConnection) -> QueryResult<Vec<Event>> {
     Ok(db::events::table.order(db::events::date.asc()).load::<db::Event>(conn)?
         .into_iter().map(|e| Event {
@@ -95,5 +101,23 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
         day: event.day_id,
         experiment: event.experiment_id,
         groups: web_groups,
+    })
+}
+
+pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> QueryResult<Vec<Student>> {
+    use db::students;
+
+    let mut query = students::table.into_boxed();
+    for term in terms {
+        query = query.filter(students::name.ilike(format!("%{}%", term.as_ref())))
+    }
+
+    query.order(students::name.asc()).load::<db::Student>(conn).map(|students| {
+        students.into_iter().map(|student| {
+            Student {
+                id: student.id,
+                name: student.name,
+            }
+        }).collect()
     })
 }

@@ -163,4 +163,12 @@ pub mod api {
 
         Ok(status::NoContent)
     }
+
+    #[post("/student/search", data = "<terms>")]
+    fn search_students(terms: JSON<Vec<String>>, conn: db::Conn, _user: User) -> Result<JSON<Vec<super::models::Student>>, Error> {
+        let students = super::models::find_students(&*terms, &conn)
+            .map_err(|_| Error{})?;
+        
+        Ok(JSON(students))
+    }
 }

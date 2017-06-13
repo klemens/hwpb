@@ -5,7 +5,8 @@ body {
 
 select,
 textarea,
-button {
+button,
+input {
     font-size: 1rem;
 }
 
@@ -37,4 +38,12 @@ button {
 }
 #overlay.active {
     display: block;
+}
+
+.button.round {
+    border-radius: 50%;
+    text-align: center;
+    color: #ffffff;
+    background-color: #d23f31;
+    cursor: pointer;
 }
