@@ -4,6 +4,7 @@ use rocket::request::{self, FlashMessage, Form, FromRequest, Request};
 use rocket::response::{Flash, Redirect};
 use rocket_contrib::Template;
 use std::collections::{HashMap, HashSet};
+use std::path::PathBuf;
 use user;
 
 pub struct AllowedUsers(HashSet<String>);
@@ -31,8 +32,9 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
     }
 }
 
-#[get("/", rank = 2)]
-fn index() -> Redirect {
+#[get("/<ignore..>", rank = 2)]
+#[allow(unused_variables)]
+fn index(ignore: PathBuf) -> Redirect {
     Redirect::to("/login")
 }
 
