@@ -9,8 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 let url = "/api/group/" + group + "/completed/" + task;
                 let options = {
-                    method: checked ? "PUT" : "DELETE",
-                    deadline: 4000
+                    method: checked ? "PUT" : "DELETE"
                 };
 
                 let response = await myfetch(url, options);

@@ -4,11 +4,12 @@
 /// See https://github.com/whatwg/fetch/issues/179 for details.
 function myfetch(input, options) {
     return new Promise((resolve, reject) => {
-        if(options.deadline) {
-            setTimeout(() => {
-                reject(new Error("Timeout: deadline reached"))
-            }, options.deadline);
-        }
+        // default timeout is 4 seconds
+        let timeout = options.deadline || 4000;
+
+        setTimeout(() => {
+            reject(new Error("Timeout: deadline reached"))
+        }, timeout);
 
         // always send cookies
         options.credentials = 'same-origin';
