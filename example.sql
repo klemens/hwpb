@@ -14,11 +14,18 @@ INSERT INTO groups VALUES
     (3, 1, 'Do', '');
 
 INSERT INTO students VALUES
-    ('fm41abdf', 'Franz Maier', 1),
-    ('aw43cldu', 'Anna Walter', 1),
-    ('ph73aoxo', 'Peter Huber', 2),
-    ('ms18gwhd', 'Maria Schneider', 3),
-    ('az63zbwp', 'Alex Zimmer', 3);
+    ('fm41abdf', 'Franz Maier'),
+    ('aw43cldu', 'Anna Walter'),
+    ('ph73aoxo', 'Peter Huber'),
+    ('ms18gwhd', 'Maria Schneider'),
+    ('az63zbwp', 'Alex Zimmer');
+
+INSERT INTO group_mappings VALUES
+    ('fm41abdf', 1),
+    ('aw43cldu', 1),
+    ('ph73aoxo', 2),
+    ('ms18gwhd', 3),
+    ('az63zbwp', 3);
 
 INSERT INTO tasks VALUES
     (1, 'Versuch 1', '1a'),

@@ -27,9 +27,9 @@ pub struct Event {
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
-#[has_many(students)]
 #[has_many(completions)]
 #[has_many(elaborations)]
+#[has_many(group_mappings)]
 pub struct Group {
     pub id: i32,
     pub desk: i32,
@@ -38,11 +38,19 @@ pub struct Group {
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
-#[belongs_to(Group)]
+#[has_many(group_mappings)]
 pub struct Student {
     pub id: String,
     pub name: String,
-    pub group_id: Option<i32>,
+}
+
+#[derive(Debug, Queryable, Identifiable, Associations)]
+#[primary_key(student_id, group_id)]
+#[belongs_to(Student)]
+#[belongs_to(Group)]
+pub struct GroupMapping {
+    pub student_id: String,
+    pub group_id: i32,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
