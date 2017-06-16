@@ -39,6 +39,8 @@ fn main() {
             web::api::put_elaboration,
             web::api::delete_elaboration,
             web::api::put_comment,
+            web::api::put_group_student,
+            web::api::delete_group_student,
         ])
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {

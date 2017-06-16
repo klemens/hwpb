@@ -137,4 +137,30 @@ pub mod api {
 
         Ok(status::NoContent)
     }
+
+    #[put("/group/<group>/student/<student>")]
+    fn put_group_student(group: i32, student: String, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
+        let mapping = db::models::GroupMapping {
+            student_id: student,
+            group_id: group,
+        };
+
+        diesel::insert(&mapping)
+            .into(db::group_mappings::table)
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+
+        Ok(status::NoContent)
+    }
+
+    #[delete("/group/<group>/student/<student>")]
+    fn delete_group_student(group: i32, student: String, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
+        diesel::delete(db::group_mappings::table
+            .filter(db::group_mappings::student_id.eq(student))
+            .filter(db::group_mappings::group_id.eq(group)))
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+
+        Ok(status::NoContent)
+    }
 }

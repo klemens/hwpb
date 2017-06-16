@@ -44,7 +44,8 @@ pub struct Student {
     pub name: String,
 }
 
-#[derive(Debug, Queryable, Identifiable, Associations)]
+#[derive(Debug, Queryable, Insertable, Identifiable, Associations)]
+#[table_name="group_mappings"]
 #[primary_key(student_id, group_id)]
 #[belongs_to(Student)]
 #[belongs_to(Group)]
