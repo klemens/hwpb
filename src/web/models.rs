@@ -8,7 +8,7 @@ use std::collections::{HashMap, HashSet};
 pub struct Group {
     pub id: i32,
     pub desk: i32,
-    pub students: Vec<String>,
+    pub students: Vec<Student>,
     pub tasks: Vec<(i32, String, bool)>,
     pub elaboration: Option<(bool, bool)>,
     pub comment: String,
@@ -73,7 +73,10 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
         let mut web_group = Group {
             id: group.id,
             desk: group.desk,
-            students: students.into_iter().map(|s| { s.name }).collect(),
+            students: students.into_iter().map(|s| Student {
+                id: s.id,
+                name: s.name,
+            }).collect(),
             tasks: Vec::with_capacity(tasks.len()),
             elaboration: elaborations.get(&group.id).cloned(),
             comment: group.comment,

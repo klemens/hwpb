@@ -23,7 +23,7 @@
             <h2>Gruppe {{ group.desk }}</h2>
             <ul class="students">
                 {% for student in group.students %}
-                <li>{{ student }}</li>
+                <li data-id="{{ student.id }}">{{ student.name }}</li>
                 {% endfor %}
             </ul>
             {% for task in group.tasks %}
