@@ -17,7 +17,8 @@
 {% endblock overlay %}
 
 {% block main %}
-    <div class="experiment" data-id="{{ experiment }}"><!--
+    <div id="add-group" class="button round" title="Gruppe hinzufügen">+</div>
+    <div class="experiment" data-id="{{ experiment }}" data-day="{{ day }}"><!--
         {% for group in groups %}
         --><div class="group" data-id="{{ group.id }}">
             <select class="elaboration" autocomplete="off">

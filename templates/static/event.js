@@ -118,6 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
     for(let students of document.querySelectorAll("ul.students")) {
         students.addEventListener("click", onStudentClick);
     }
+
+    document.querySelector("#add-group").addEventListener("click", onNewGroup);
 });
 
 class SearchBox {
@@ -312,5 +314,45 @@ async function onStudentClick(event) {
             toast("error", e);
             parent.appendChild(target);
         }
+    }
+}
+
+async function onNewGroup(event) {
+    let input = prompt("Tischnumer der neuen Gruppe:");
+    if(input == null) {
+        return;
+    }
+    let desk = parseInt(input, 10);
+    if(isNaN(desk)) {
+        toast("error", "Keine gültige Tischnummer.");
+    }
+
+    let day = document.querySelector(".experiment").dataset.day;
+
+    try {
+        let url = "/api/group";
+
+        console.log(JSON.stringify({
+                desk: desk,
+                day_id: day,
+                comment: ""
+            }));
+
+        let response = await myfetch(url, {
+            method: "POST",
+            headers: new Headers({"Content-Type": "application/json"}),
+            body: JSON.stringify({
+                desk: desk,
+                day_id: day,
+                comment: ""
+            })
+        });
+        if(!response.ok) {
+            throw "API error";
+        }
+
+        toast("info", "Die neue Gruppe wurde hinzugefügt. Seite neuladen um sie anzuzeigen!")
+    } catch(e) {
+        toast("error", e);
     }
 }
