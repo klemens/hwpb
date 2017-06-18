@@ -62,6 +62,16 @@ pub mod api {
     #[derive(Debug)]
     struct Error{}
 
+    #[post("/group", data = "<group>")]
+    fn post_group(group: JSON<db::models::NewGroup>, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
+        diesel::insert(&*group)
+            .into(db::groups::table)
+            .execute(&*conn)
+            .map_err(|_| Error{})?;
+
+        Ok(status::NoContent)
+    }
+
     #[put("/group/<group>/completed/<task>")]
     fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<status::NoContent, Error> {
         let completion = db::models::Completion {

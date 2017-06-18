@@ -33,8 +33,16 @@ pub struct Event {
 pub struct Group {
     pub id: i32,
     pub desk: i32,
-    pub date: String,
+    pub day_id: String,
     pub comment: String,
+}
+
+#[derive(Debug, Deserialize, Insertable)]
+#[table_name="groups"]
+pub struct NewGroup {
+    desk: i32,
+    day_id: String,
+    comment: String,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]

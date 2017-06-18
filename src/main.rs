@@ -35,6 +35,7 @@ fn main() {
             web::session::logout,
         ])
         .mount("/api", routes![
+            web::api::post_group,
             web::api::put_completion,
             web::api::delete_completion,
             web::api::put_elaboration,
