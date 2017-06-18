@@ -15,7 +15,9 @@ impl AllowedUsers {
     }
 }
 
-pub struct User(String);
+pub struct User {
+    pub name: String
+}
 
 impl<'a, 'r> FromRequest<'a, 'r> for User {
     type Error = ();
@@ -23,7 +25,9 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
     fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
         let user = request.session()
             .get("username")
-            .map(|cookie| User(cookie.value().into()));
+            .map(|cookie| User {
+                name: cookie.value().into()
+            });
 
         match user {
             Some(user) => Outcome::Success(user),

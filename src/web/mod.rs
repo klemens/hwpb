@@ -63,11 +63,11 @@ pub mod api {
     struct Error{}
 
     #[put("/group/<group>/completed/<task>")]
-    fn put_completion(group: i32, task: i32, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
+    fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<status::NoContent, Error> {
         let completion = db::models::Completion {
             group_id: group,
             task_id: task,
-            tutor: None,
+            tutor: Some(user.name),
             completed_at: None,
         };
 
@@ -97,13 +97,13 @@ pub mod api {
     }
 
     #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
-    fn put_elaboration(group: i32, experiment: String, elaboration: JSON<Elaboration>, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
+    fn put_elaboration(group: i32, experiment: String, elaboration: JSON<Elaboration>, conn: db::Conn, user: User) -> Result<status::NoContent, Error> {
         let elaboration = db::models::Elaboration {
             group_id: group,
             experiment_id: experiment,
             rework_required: elaboration.rework_required,
             accepted: elaboration.accepted,
-            accepted_by: None,
+            accepted_by: Some(user.name),
         };
 
         diesel::insert(
