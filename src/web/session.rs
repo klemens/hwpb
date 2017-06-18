@@ -36,9 +36,14 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
     }
 }
 
-#[get("/<ignore..>", rank = 2)]
+#[get("/", rank = 2)]
+fn nologin_index() -> Redirect {
+    Redirect::to("/login")
+}
+
+#[get("/<path..>", rank = 2)]
 #[allow(unused_variables)]
-fn index(ignore: PathBuf) -> Redirect {
+fn nologin_path(path: PathBuf) -> Redirect {
     Redirect::to("/login")
 }
 
