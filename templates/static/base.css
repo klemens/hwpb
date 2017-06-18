@@ -39,6 +39,8 @@ input {
     top: 0;
     left: 0;
     display: none;
+    z-index: 100;
+    background: rgba(0,0,0,.1);
 }
 #overlay.active {
     display: block;
