@@ -19,10 +19,17 @@ function myfetch(input, options) {
 }
 
 function toast(type, message) {
+    let prefix = "";
+    if(type === "error") {
+        prefix = "Fehler: ";
+    } else if(type === "info") {
+        prefix = "Info: ";
+    }
+
     let toast = document.createElement("div");
     toast.classList.add("toast");
     toast.classList.add(type);
-    toast.textContent = "Fehler: " + message;
+    toast.textContent = prefix + message;
 
     document.body.appendChild(toast);
     setTimeout(() => {
