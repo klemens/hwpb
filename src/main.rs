@@ -49,7 +49,8 @@ fn main() {
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {
             let allowed_users = {
-                let users = rocket.config().get_slice("allowed_users").unwrap_or(&[]);
+                let default = vec![];
+                let users = rocket.config().get_slice("allowed_users").unwrap_or(&default);
                 let users = users.iter().filter_map(|u| u.as_str());
                 web::session::AllowedUsers::new(users)
             };

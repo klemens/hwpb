@@ -1,5 +1,5 @@
 use rocket::{Outcome, State};
-use rocket::http::{Cookie, Session};
+use rocket::http::{Cookie, Cookies};
 use rocket::request::{self, FlashMessage, Form, FromRequest, Request};
 use rocket::response::{Flash, Redirect};
 use rocket_contrib::Template;
@@ -23,8 +23,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
-        let user = request.session()
-            .get("username")
+        let user = request.cookies()
+            .get_private("username")
             .map(|cookie| User {
                 name: cookie.value().into()
             });
@@ -64,7 +64,7 @@ struct Login {
 }
 
 #[post("/login", data = "<login>")]
-fn post_login(mut session: Session, login: Form<Login>, allowed_users: State<AllowedUsers>) -> Result<Redirect, Flash<Redirect>> {
+fn post_login(mut cookies: Cookies, login: Form<Login>, allowed_users: State<AllowedUsers>) -> Result<Redirect, Flash<Redirect>> {
     let login = login.into_inner();
 
     if !allowed_users.0.contains(&login.username) {
@@ -74,7 +74,7 @@ fn post_login(mut session: Session, login: Form<Login>, allowed_users: State<All
 
     let result = user::authenticate(&login.username, &login.password);
     if result == Ok(true) {
-        session.set(Cookie::new("username", login.username));
+        cookies.add_private(Cookie::new("username", login.username));
         Ok(Redirect::to("/"))
     } else {
         let msg = "Ungültiger Benutzername oder Passwort!";
@@ -83,7 +83,7 @@ fn post_login(mut session: Session, login: Form<Login>, allowed_users: State<All
 }
 
 #[get("/logout")]
-fn logout(mut session: Session) -> Redirect {
-    session.remove(Cookie::named("username"));
+fn logout(mut cookies: Cookies) -> Redirect {
+    cookies.remove_private(Cookie::named("username"));
     Redirect::to("/")
 }
