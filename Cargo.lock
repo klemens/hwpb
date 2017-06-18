@@ -6,6 +6,7 @@ dependencies = [
  "diesel 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "diesel_codegen 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pam-auth 0.5.0 (git+https://github.com/klemens/pam-auth.git?branch=pam_conv_string_termination)",
  "r2d2 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.2.8 (git+https://github.com/SergioBenitez/Rocket.git)",
@@ -303,6 +304,24 @@ dependencies = [
 name = "ordermap"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "pam-auth"
+version = "0.5.0"
+source = "git+https://github.com/klemens/pam-auth.git?branch=pam_conv_string_termination#2d48a035c76b35bc96b92b97ea63f4a30ec4f61f"
+dependencies = [
+ "libc 0.2.23 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pam-sys 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "users 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "pam-sys"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.2.23 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "pear"
@@ -657,6 +676,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "users"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.2.23 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "utf8-ranges"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -725,6 +752,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum num-traits 0.1.37 (registry+https://github.com/rust-lang/crates.io-index)" = "e1cbfa3781f3fe73dc05321bed52a06d2d491eaa764c52335cf4399f046ece99"
 "checksum num_cpus 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6e416ba127a4bb3ff398cb19546a8d0414f73352efe2857f4060d36f5fe5983a"
 "checksum ordermap 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)" = "c036a53e6bb62d7eee2edf7e087df56fd84c7bbae6a0bd93c2b9f54bddf62e03"
+"checksum pam-auth 0.5.0 (git+https://github.com/klemens/pam-auth.git?branch=pam_conv_string_termination)" = "<none>"
+"checksum pam-sys 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "17d52c4c46aa1aa2d8cc76edde08b519eb7c1cb06a35aa04c1741633a2130156"
 "checksum pear 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "03bdef30696afb7abba52c3c9e0c88bcd90a485a02d70164e1be1cd6947a1c34"
 "checksum pear_codegen 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "cb02ae5b57ee91c2079ab181891f1bccc979f4fce6c2b76c83be064f98786299"
 "checksum pest 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3e2e823a5967bb4cdc6d3e46f47baaf4ecfeae44413a642b74ad44e59e49c7f6"
@@ -768,6 +797,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum unreachable 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1f2ae5ddb18e1c92664717616dd9549dde73f539f01bd7b77c2edb2446bdff91"
 "checksum untrusted 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6b65243989ef6aacd9c0d6bd2b822765c3361d8ed352185a6f3a41f3a718c673"
 "checksum url 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3e2ba3456fbe5c0098cb877cf08b92b76c3e18e0be9e47c35b487220d377d24e"
+"checksum users 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "a7ae8fdf783cb9652109c99886459648feb92ecc749e6b8e7930f6decba74c7c"
 "checksum utf8-ranges 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "662fab6525a98beff2921d7f61a39e7d59e0b425ebc7d0d9e66d316e55124122"
 "checksum version_check 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "2bb3950bf29e36796dea723df1747619dd331881aefef75b7cf1c58fdd738afe"
 "checksum void 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"

@@ -64,7 +64,6 @@ fn post_login(mut session: Session, login: Form<Login>, allowed_users: State<All
     }
 
     let result = user::authenticate(&login.username, &login.password);
-    println!("{:?}", result);
     if result == Ok(true) {
         session.set(Cookie::new("username", login.username));
         Ok(Redirect::to("/"))
