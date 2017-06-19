@@ -6,7 +6,7 @@ dependencies = [
  "diesel 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "diesel_codegen 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "pam-auth 0.5.0 (git+https://github.com/klemens/pam-auth.git?branch=pam_conv_string_termination)",
+ "pam-auth 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rocket 0.3.0-dev (git+https://github.com/SergioBenitez/Rocket.git)",
@@ -330,8 +330,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pam-auth"
-version = "0.5.0"
-source = "git+https://github.com/klemens/pam-auth.git?branch=pam_conv_string_termination#2d48a035c76b35bc96b92b97ea63f4a30ec4f61f"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.24 (registry+https://github.com/rust-lang/crates.io-index)",
  "pam-sys 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -798,7 +798,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum num-traits 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)" = "1708c0628602a98b52fad936cf3edb9a107af06e52e49fdf0707e884456a6af6"
 "checksum num_cpus 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6e416ba127a4bb3ff398cb19546a8d0414f73352efe2857f4060d36f5fe5983a"
 "checksum ordermap 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)" = "c036a53e6bb62d7eee2edf7e087df56fd84c7bbae6a0bd93c2b9f54bddf62e03"
-"checksum pam-auth 0.5.0 (git+https://github.com/klemens/pam-auth.git?branch=pam_conv_string_termination)" = "<none>"
+"checksum pam-auth 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "2cdeee90dcbeb2337c9a8e3cd5cbc903877cf347a9c0c46a726fb09019286204"
 "checksum pam-sys 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "17d52c4c46aa1aa2d8cc76edde08b519eb7c1cb06a35aa04c1741633a2130156"
 "checksum pear 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "03bdef30696afb7abba52c3c9e0c88bcd90a485a02d70164e1be1cd6947a1c34"
 "checksum pear_codegen 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "cb02ae5b57ee91c2079ab181891f1bccc979f4fce6c2b76c83be064f98786299"
