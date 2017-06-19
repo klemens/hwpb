@@ -11,16 +11,24 @@ use r2d2_diesel::ConnectionManager;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
-use std::env;
 use std::collections::HashMap;
 use std::ops::Deref;
 
+embed_migrations!();
+
+pub fn run_migrations(database_url: &str) {
+    let connection = PgConnection::establish(database_url)
+        .expect("Could not connect to DB to run migrations");
+    embedded_migrations::run(&connection)
+        .expect("Could not run pending migrations.");
+}
+
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-pub fn init_pool() -> Pool {
+pub fn init_pool(database_url: &str) -> Pool {
     let config = r2d2::Config::default();
-    let manager = ConnectionManager::<PgConnection>::new(env::var("DATABASE_URL").unwrap());
-    r2d2::Pool::new(config, manager).expect("db pool")
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    r2d2::Pool::new(config, manager).expect("Could not init DB pool")
 }
 
 pub struct Conn(r2d2::PooledConnection<ConnectionManager<PgConnection>>);

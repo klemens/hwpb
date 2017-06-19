@@ -23,8 +23,14 @@ use db::*;
 fn main() {
     dotenv().ok();
 
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL not set");
+
+    // run any pending database migrations
+    db::run_migrations(&database_url);
+
     rocket::ignite()
-        .manage(db::init_pool())
+        .manage(db::init_pool(&database_url))
         .mount("/", routes![
             web::index,
             web::event,
