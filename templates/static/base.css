@@ -1,6 +1,7 @@
 body {
     font-family: sans-serif;
     background: #f9fbe7;
+    padding-bottom: .2rem;
 }
 
 select,
@@ -52,4 +53,12 @@ input {
     color: #ffffff;
     background-color: #d23f31;
     cursor: pointer;
+}
+
+.version {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    font-size: .7rem;
+    margin: .2rem;
 }

@@ -8,7 +8,6 @@ use rocket::request::FromParam;
 use rocket::response::NamedFile;
 use rocket_contrib::Template;
 use web::session::User;
-use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
@@ -32,8 +31,11 @@ impl Deref for Date {
 
 #[get("/")]
 fn index(conn: db::Conn, _user: User) -> Template {
-    let mut context = HashMap::new();
-    context.insert("events", models::find_events(&conn).unwrap());
+    let context = models::Index {
+        events: models::find_events(&conn).unwrap(),
+        version: env!("CARGO_PKG_VERSION"),
+        commit_id: include_str!(concat!(env!("OUT_DIR"), "/commit-id")),
+    };
 
     Template::render("index", &context)
 }

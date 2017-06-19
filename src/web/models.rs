@@ -5,6 +5,13 @@ use diesel::pg::PgConnection;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
+pub struct Index {
+    pub events: Vec<Event>,
+    pub version: &'static str,
+    pub commit_id: &'static str,
+}
+
+#[derive(Serialize)]
 pub struct Group {
     pub id: i32,
     pub desk: i32,

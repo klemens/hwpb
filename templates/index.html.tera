@@ -9,4 +9,5 @@
             <li><a href="/{{ event.date }}">{{ event.day }}: {{ event.date }}</a></li>
             {% endfor %}
         </ul>
+        <div class="version">hwpb {{ version }}-g{{ commit_id }}</div>
 {% endblock main %}
