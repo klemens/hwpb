@@ -5,6 +5,7 @@ extern crate chrono;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
+#[macro_use] extern crate error_chain;
 extern crate pam_auth;
 extern crate r2d2;
 extern crate r2d2_diesel;
@@ -17,17 +18,22 @@ mod errors;
 mod user;
 mod web;
 
-fn main() {
-    dotenv::dotenv().ok();
+use errors::*;
+
+quick_main!(run);
+
+fn run() -> Result<()> {
+    dotenv::dotenv()
+        .chain_err(|| "Could not read .env file")?;
 
     let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL not set");
+        .chain_err(|| "DATABASE_URL not set")?;
 
     // run any pending database migrations
-    db::run_migrations(&database_url);
+    db::run_migrations(&database_url)?;
 
     rocket::ignite()
-        .manage(db::init_pool(&database_url))
+        .manage(db::init_pool(&database_url)?)
         .mount("/", routes![
             web::index,
             web::event,
@@ -60,4 +66,6 @@ fn main() {
             Ok(rocket.manage(allowed_users))
         }))
         .launch();
+
+    Ok(())
 }

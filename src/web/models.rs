@@ -2,6 +2,7 @@ use chrono::NaiveDate;
 use db;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
+use errors::*;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
@@ -35,7 +36,7 @@ pub struct Student {
     pub name: String,
 }
 
-pub fn find_events(conn: &PgConnection) -> QueryResult<Vec<Event>> {
+pub fn find_events(conn: &PgConnection) -> Result<Vec<Event>> {
     Ok(db::events::table.order(db::events::date.asc()).load::<db::Event>(conn)?
         .into_iter().map(|e| Event {
             date: format!("{}", e.date),
@@ -45,7 +46,7 @@ pub fn find_events(conn: &PgConnection) -> QueryResult<Vec<Event>> {
         }).collect())
 }
 
-pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
+pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
     use db::{completions, elaborations, events, tasks};
 
     let event: db::Event = match events::table.filter(events::date.eq(date)).first(conn) {
@@ -111,7 +112,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> QueryResult<Event> {
     })
 }
 
-pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> QueryResult<Vec<Student>> {
+pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Vec<Student>> {
     use db::students;
 
     let mut query = students::table.into_boxed();
@@ -119,12 +120,12 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> QueryRe
         query = query.filter(students::name.ilike(format!("%{}%", term.as_ref())))
     }
 
-    query.order(students::name.asc()).load::<db::Student>(conn).map(|students| {
+    Ok(query.order(students::name.asc()).load::<db::Student>(conn).map(|students| {
         students.into_iter().map(|student| {
             Student {
                 id: student.id,
                 name: student.name,
             }
         }).collect()
-    })
+    })?)
 }

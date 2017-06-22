@@ -6,6 +6,7 @@ pub use self::schema::*;
 
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
+use errors::*;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
 use rocket::http::Status;
@@ -16,19 +17,19 @@ use std::ops::Deref;
 
 embed_migrations!();
 
-pub fn run_migrations(database_url: &str) {
+pub fn run_migrations(database_url: &str) -> Result<()> {
     let connection = PgConnection::establish(database_url)
-        .expect("Could not connect to DB to run migrations");
+        .chain_err(|| "Could not connect to DB to run migrations")?;
     embedded_migrations::run(&connection)
-        .expect("Could not run pending migrations.");
+        .chain_err(|| "Could not run pending migrations.")
 }
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-pub fn init_pool(database_url: &str) -> Pool {
+pub fn init_pool(database_url: &str) -> Result<Pool> {
     let config = r2d2::Config::default();
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    r2d2::Pool::new(config, manager).expect("Could not init DB pool")
+    r2d2::Pool::new(config, manager).chain_err(|| "Could not init DB pool")
 }
 
 pub struct Conn(r2d2::PooledConnection<ConnectionManager<PgConnection>>);
@@ -58,7 +59,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Conn {
     }
 }
 
-pub fn groups_with_students(day: &str, conn: &PgConnection) -> QueryResult<Vec<(Group, Vec<Student>)>> {
+pub fn groups_with_students(day: &str, conn: &PgConnection) -> Result<Vec<(Group, Vec<Student>)>> {
     let groups = groups::table.filter(groups::day_id.eq(day)).order(groups::desk.asc()).load::<Group>(conn)?;
     let mappings = GroupMapping::belonging_to(&groups).load::<GroupMapping>(conn)?;
 

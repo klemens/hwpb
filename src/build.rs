@@ -8,10 +8,11 @@ fn main() {
     let commit_id = Command::new("git")
         .args(&["rev-parse", "--short=7", "HEAD"])
         .output()
-        .expect("")
+        .expect("Executing git rev-parse failed.")
         .stdout;
 
-    let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR")
+        .expect("Env variable OUT_DIR not set."));
     File::create(out_dir.join("commit-id"))
         .expect("Could not open 'commit-id'.")
         .write_all(&commit_id)
