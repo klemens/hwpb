@@ -12,16 +12,13 @@ extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
 
-pub mod db;
-pub mod user;
-pub mod web;
-
-use dotenv::dotenv;
-
-use db::*;
+mod db;
+mod errors;
+mod user;
+mod web;
 
 fn main() {
-    dotenv().ok();
+    dotenv::dotenv().ok();
 
     let database_url = std::env::var("DATABASE_URL")
         .expect("DATABASE_URL not set");

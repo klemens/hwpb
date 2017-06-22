@@ -1,4 +1,4 @@
-pub mod models;
+mod models;
 pub mod session;
 
 use chrono;
@@ -65,7 +65,7 @@ pub mod api {
     struct Error{}
 
     #[post("/group", data = "<group>")]
-    fn post_group(group: JSON<db::models::NewGroup>, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
+    fn post_group(group: JSON<db::NewGroup>, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
         diesel::insert(&*group)
             .into(db::groups::table)
             .execute(&*conn)
@@ -76,7 +76,7 @@ pub mod api {
 
     #[put("/group/<group>/completed/<task>")]
     fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<status::NoContent, Error> {
-        let completion = db::models::Completion {
+        let completion = db::Completion {
             group_id: group,
             task_id: task,
             tutor: Some(user.name),
@@ -110,7 +110,7 @@ pub mod api {
 
     #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
     fn put_elaboration(group: i32, experiment: String, elaboration: JSON<Elaboration>, conn: db::Conn, user: User) -> Result<status::NoContent, Error> {
-        let elaboration = db::models::Elaboration {
+        let elaboration = db::Elaboration {
             group_id: group,
             experiment_id: experiment,
             rework_required: elaboration.rework_required,
@@ -152,7 +152,7 @@ pub mod api {
 
     #[put("/group/<group>/student/<student>")]
     fn put_group_student(group: i32, student: String, conn: db::Conn, _user: User) -> Result<status::NoContent, Error> {
-        let mapping = db::models::GroupMapping {
+        let mapping = db::GroupMapping {
             student_id: student,
             group_id: group,
         };

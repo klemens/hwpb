@@ -1,8 +1,8 @@
-pub mod models;
-pub mod schema;
+mod models;
+mod schema;
 
-pub use models::*;
-pub use schema::*;
+pub use self::models::*;
+pub use self::schema::*;
 
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
