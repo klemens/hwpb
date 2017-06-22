@@ -61,7 +61,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
 
     let tasks = tasks::table.filter(tasks::experiment_id.eq(&event.experiment_id))
         .order(tasks::name.asc()).load::<db::Task>(conn)?;
-    let groups = db::groups_with_students(&event.day_id, conn)?;
+    let groups = load_groups_with_students(&event.day_id, conn)?;
 
     // belonging_to uses eq_any internally, but supports only one parent table
     let task_ids: Vec<_> = tasks.iter().map(Identifiable::id).collect();
@@ -128,4 +128,39 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<
             }
         }).collect()
     })?)
+}
+
+pub fn load_groups_with_students(day: &str, conn: &PgConnection) -> Result<Vec<(db::Group, Vec<db::Student>)>> {
+    use db::{students, groups};
+
+    let groups = groups::table
+        .filter(groups::day_id.eq(day))
+        .order(groups::desk.asc())
+        .load::<db::Group>(conn)?;
+    let mappings = db::GroupMapping::belonging_to(&groups)
+        .load::<db::GroupMapping>(conn)?;
+
+    // TODO: replace with proper multi-join once diesel 0.14 lands
+    let student_map: HashMap<_,_> = {
+        let student_ids: Vec<_> = mappings.iter()
+            .map(|m| m.student_id.as_str())
+            .collect();
+        let students = students::table
+            .filter(students::id.eq_any(&student_ids))
+            .load::<db::Student>(conn)?;
+        students.into_iter().map(|s| (s.id, s.name)).collect()
+    };
+
+    let mappings = mappings.grouped_by(&groups);
+    Ok(groups.into_iter().zip(mappings).map(|(group, mappings)| {
+        let students = mappings.into_iter().map(|mapping| {
+            let name = student_map[&mapping.student_id].clone();
+            db::Student {
+                id: mapping.student_id,
+                name: name,
+            }
+        }).collect();
+
+        (group, students)
+    }).collect())
 }
