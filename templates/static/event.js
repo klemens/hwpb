@@ -237,7 +237,6 @@ class SearchBox {
                 this.clearStudents();
                 this.insertStudents(students);
             } catch(e) {
-                console.log(e);
                 toast("error", e);
             }
         }, 250);
@@ -331,12 +330,6 @@ async function onNewGroup(event) {
 
     try {
         let url = "/api/group";
-
-        console.log(JSON.stringify({
-                desk: desk,
-                day_id: day,
-                comment: ""
-            }));
 
         let response = await myfetch(url, {
             method: "POST",
