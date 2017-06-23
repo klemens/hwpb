@@ -49,15 +49,7 @@ pub fn find_events(conn: &PgConnection) -> Result<Vec<Event>> {
 pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
     use db::{completions, elaborations, events, tasks};
 
-    let event: db::Event = match events::table.filter(events::date.eq(date)).first(conn) {
-        Ok(event) => event,
-        _ => return Ok(Event {
-            date: "?".into(),
-            day: "?".into(),
-            experiment: "?".into(),
-            groups: vec![],
-        }),
-    };
+    let event: db::Event = events::table.filter(events::date.eq(date)).first(conn)?;
 
     let tasks = tasks::table.filter(tasks::experiment_id.eq(&event.experiment_id))
         .order(tasks::name.asc()).load::<db::Task>(conn)?;
