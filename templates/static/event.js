@@ -75,8 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 let response = await myfetch(url, {
                     method: "PUT",
-                    headers: new Headers({"Content-Type": "text/plain"}),
-                    body: comment
+                    headers: new Headers({"Content-Type": "application/json"}),
+                    body: JSON.stringify(comment)
                 });
                 if(!response.ok) {
                     throw "API error";

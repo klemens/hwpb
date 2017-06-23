@@ -79,9 +79,9 @@ fn delete_elaboration(group: i32, experiment: String, conn: db::Conn, _user: Use
 }
 
 #[put("/group/<group>/comment", data = "<comment>")]
-fn put_comment(group: i32, comment: String, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn put_group_comment(group: i32, comment: JSON<String>, conn: db::Conn, _user: User) -> Result<NoContent> {
     diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
-        .set(db::groups::comment.eq(comment))
+        .set(db::groups::comment.eq(comment.into_inner()))
         .execute(&*conn)?;
 
     Ok(NoContent)
