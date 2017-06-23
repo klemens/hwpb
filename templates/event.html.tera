@@ -20,7 +20,7 @@
     <div id="add-group" class="button round" title="Gruppe hinzufügen">+</div>
     <div class="experiment" data-id="{{ experiment }}" data-day="{{ day }}"><!--
         {% for group in groups %}
-        --><div class="group" data-id="{{ group.id }}">
+        --><div class="group {% if group.disqualified %}disqualified{% endif %}" data-id="{{ group.id }}">
             <select class="elaboration" autocomplete="off">
                 <option {% if not group.elaboration %}selected="selected"{% endif %}>Ausarbeitung ausstehend</option>
                 <option {% if group.elaboration and not group.elaboration.0 and not group.elaboration.1 %}selected="selected" {% endif %} data-rework="0" data-accepted="0">Ausarbeitung abgegeben</option>

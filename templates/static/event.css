@@ -91,6 +91,10 @@ body {
     }
 }
 
+.group.disqualified {
+    filter: sepia(.8) grayscale(1);
+}
+
 .group h2 {
     margin: 0;
 }

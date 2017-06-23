@@ -19,6 +19,7 @@ pub struct Group {
     pub students: Vec<Student>,
     pub tasks: Vec<(i32, String, bool)>,
     pub elaboration: Option<(bool, bool)>,
+    pub disqualified: bool,
     pub comment: String,
 }
 
@@ -85,6 +86,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
             }).collect(),
             tasks: Vec::with_capacity(tasks.len()),
             elaboration: elaborations.get(&group.id).cloned(),
+            disqualified: group.comment.contains("(ENDE)"),
             comment: group.comment,
         };
 
@@ -127,7 +129,7 @@ pub fn load_groups_with_students(day: &str, conn: &PgConnection) -> Result<Vec<(
 
     let groups = groups::table
         .filter(groups::day_id.eq(day))
-        .order(groups::desk.asc())
+        .order((groups::comment.like("%(ENDE)%".to_string()).asc(), groups::desk.asc()))
         .load::<db::Group>(conn)?;
     let mappings = db::GroupMapping::belonging_to(&groups)
         .load::<db::GroupMapping>(conn)?;
