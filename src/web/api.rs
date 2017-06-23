@@ -87,6 +87,15 @@ fn put_group_comment(group: i32, comment: JSON<String>, conn: db::Conn, _user: U
     Ok(NoContent)
 }
 
+#[put("/group/<group>/desk", data = "<desk>")]
+fn put_group_desk(group: i32, desk: JSON<i32>, conn: db::Conn, _user: User) -> Result<NoContent> {
+    diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
+        .set(db::groups::desk.eq(desk.into_inner()))
+        .execute(&*conn)?;
+
+    Ok(NoContent)
+}
+
 #[put("/group/<group>/student/<student>")]
 fn put_group_student(group: i32, student: String, conn: db::Conn, _user: User) -> Result<NoContent> {
     let mapping = db::GroupMapping {

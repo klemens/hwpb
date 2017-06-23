@@ -28,7 +28,7 @@
                 <option {% if group.elaboration and     group.elaboration.0 and not group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="0">Nachbesserung nötig</option>
                 <option {% if group.elaboration and     group.elaboration.0 and     group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="1">Nachbesserung akzeptiert</option>
             </select>
-            <h2>Gruppe {{ group.desk }}</h2>
+            <h2>Gruppe {{ group.desk }} <a href=""><img alt="Tischnummer ändern" src="/static/icons/edit.svg" /></a></h2>
             <ul class="students">
                 <li class="add button round">+</li>
                 {% for student in group.students %}

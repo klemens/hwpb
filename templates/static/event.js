@@ -120,6 +120,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.querySelector("#add-group").addEventListener("click", onNewGroup);
+
+    for(let editButton of document.querySelectorAll(".group h2 img")) {
+        editButton.addEventListener("click", onGroupDeskChange);
+    }
 });
 
 class SearchBox {
@@ -316,14 +320,25 @@ async function onStudentClick(event) {
     }
 }
 
-async function onNewGroup(event) {
-    let input = prompt("Tischnumer der neuen Gruppe:");
+function promptInt(message) {
+    let input = prompt(message);
     if(input == null) {
-        return;
+        return null;
     }
+
     let desk = parseInt(input, 10);
     if(isNaN(desk)) {
         toast("error", "Keine gültige Tischnummer.");
+        return null;
+    }
+
+    return desk;
+}
+
+async function onNewGroup(event) {
+    let desk = promptInt("Tischnumer der neuen Gruppe:");
+    if(desk === null) {
+        return;
     }
 
     let day = document.querySelector(".experiment").dataset.day;
@@ -345,6 +360,35 @@ async function onNewGroup(event) {
         }
 
         toast("info", "Die neue Gruppe wurde hinzugefügt. Seite neuladen um sie anzuzeigen!")
+    } catch(e) {
+        toast("error", e);
+    }
+}
+
+async function onGroupDeskChange(event) {
+    // do not reload page (empty href)
+    event.preventDefault();
+
+    let desk = promptInt("Neue Tischnumer der Gruppe:");
+    if(desk === null) {
+        return;
+    }
+
+    let group = event.target.closest(".group").dataset.id;
+
+    try {
+        let url = "/api/group/" + group + "/desk";
+
+        let response = await myfetch(url, {
+            method: "PUT",
+            headers: new Headers({"Content-Type": "application/json"}),
+            body: JSON.stringify(desk)
+        });
+        if(!response.ok) {
+            throw "API error";
+        }
+
+        toast("info", "Die Tischnummer der Gruppe wurde geändert. Seite neuladen um sie anzuzeigen!")
     } catch(e) {
         toast("error", e);
     }

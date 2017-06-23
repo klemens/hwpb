@@ -95,6 +95,10 @@ body {
     margin: 0;
 }
 
+.group h2 img {
+    height: 1rem;
+}
+
 .group select {
     float: right;
     margin-top: .2rem;
