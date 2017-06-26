@@ -84,25 +84,6 @@ header a[href="/"] {
     padding-bottom: 3rem;
 }
 
-.group {
-    display: inline-block;
-    width: 35rem;
-    margin: .7rem;
-    padding: .5rem;
-    box-sizing: border-box;
-    box-shadow: 2px 3px 10px rgb(100, 100, 100);
-    background: #cddc39;
-}
-
-@media (max-width: 74rem) {
-    .group {
-        display: block;
-        max-width: 40rem;
-        width: auto;
-        margin: 1.4rem auto;
-    }
-}
-
 .group.disqualified {
     filter: sepia(.8) grayscale(1);
 }

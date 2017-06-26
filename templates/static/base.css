@@ -46,6 +46,30 @@ input {
     font-size: 1rem;
 }
 
+.box-wrapper {
+    max-width: 72.8rem;
+    margin: auto;
+}
+
+.box {
+    display: inline-block;
+    width: 35rem;
+    margin: .7rem;
+    padding: .5rem;
+    box-sizing: border-box;
+    box-shadow: 2px 3px 10px rgb(100, 100, 100);
+    background: #cddc39;
+}
+
+@media (max-width: 74rem) {
+    .box {
+        display: block;
+        max-width: 40rem;
+        width: auto;
+        margin: 1.4rem auto;
+    }
+}
+
 .toast {
     position: fixed;
     left: 0;
