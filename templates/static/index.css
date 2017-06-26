@@ -1,0 +1,25 @@
+.experiment h2 {
+    margin: 0;
+}
+
+.experiment ul {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: .2rem 0;
+}
+
+.experiment ul li {
+    list-style: none;
+    flex: 1 0 8rem;
+}
+
+.experiment ul li a {
+    display: block;
+    padding: .3rem .5rem;
+    margin: .3rem;
+    text-decoration: none;
+    background: #33691e;
+    color: #ffffff;
+    box-shadow: 1px 1px 3px -1px black;
+}

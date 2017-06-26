@@ -1,13 +1,25 @@
 {% extends "base" %}
 
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/index.css" />
+{% endblock head %}
+
 {% block title %}Übersicht{% endblock title %}
 {% block heading %}Hardwarepraktikum{% endblock heading %}
 
 {% block main %}
-        <ul>
-            {% for event in events %}
-            <li><a href="/{{ event.date }}">{{ event.day }}: {{ event.date }}</a></li>
-            {% endfor %}
-        </ul>
-        <div class="version">hwpb {{ version }}-g{{ commit_id }}</div>
+    <div class="box-wrapper"><!--
+        {% for experiment in experiments %}
+        --><div class="experiment box">
+            <h2>{{ experiment.id }}</h2>
+            <ul>
+                {% for event in experiment.events %}
+                <li><a href="/{{ event.date }}">{{ event.day }}<br />{{ event.date }}</a></li>
+                {% endfor %}
+            </ul>
+        </div><!--
+        {% endfor %}
+    --></div>
+    <div class="version">hwpb {{ version }}-g{{ commit_id }}</div>
 {% endblock main %}

@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
 pub struct Index {
-    pub events: Vec<Event>,
+    pub experiments: Vec<Experiment>,
     pub version: &'static str,
     pub commit_id: &'static str,
 }
@@ -21,6 +21,12 @@ pub struct Group {
     pub elaboration: Option<(bool, bool)>,
     pub disqualified: bool,
     pub comment: String,
+}
+
+#[derive(Serialize)]
+pub struct Experiment {
+    pub id: String,
+    pub events: Vec<Event>,
 }
 
 #[derive(Serialize)]
@@ -39,8 +45,10 @@ pub struct Student {
     pub name: String,
 }
 
-pub fn find_events(conn: &PgConnection) -> Result<Vec<Event>> {
-    Ok(db::events::table.order(db::events::date.asc()).load::<db::Event>(conn)?
+pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
+    let events = db::events::table
+        .order((db::events::experiment_id.asc(), db::events::date.asc()))
+        .load::<db::Event>(conn)?
         .into_iter().map(|e| Event {
             date: format!("{}", e.date),
             day: e.day_id,
@@ -48,7 +56,25 @@ pub fn find_events(conn: &PgConnection) -> Result<Vec<Event>> {
             groups: vec![],
             prev_event: None,
             next_event: None,
-        }).collect())
+        });
+
+    // group the events by experiment
+    let mut result: Vec<Experiment> = vec![];
+    for new_event in events {
+        if let Some(event) = result.last_mut() {
+            if new_event.experiment == event.id {
+                event.events.push(new_event);
+                continue;
+            }
+        }
+
+        result.push(Experiment {
+            id: new_event.experiment.clone(),
+            events: vec![new_event],
+        });
+    }
+
+    Ok(result)
 }
 
 pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {

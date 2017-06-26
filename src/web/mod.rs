@@ -34,7 +34,7 @@ impl Deref for Date {
 #[get("/")]
 fn index(conn: db::Conn, _user: User) -> Result<Template> {
     let context = models::Index {
-        events: models::find_events(&conn)?,
+        experiments: models::find_events(&conn)?,
         version: env!("CARGO_PKG_VERSION"),
         commit_id: include_str!(concat!(env!("OUT_DIR"), "/commit-id")),
     };
