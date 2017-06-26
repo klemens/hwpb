@@ -9,6 +9,14 @@
 {% block title %}{{ experiment }}, {{ day }}, {{ date }}{% endblock title %}
 {% block heading %}{{ experiment }}, {{ day }}, {{ date }}{% endblock heading %}
 
+{% block header %}
+    <div class="limit-width">
+        <a href="/{{ prev_event }}">«</a>
+        {{super()}}
+        <a href="/{{ next_event }}">»</a>
+    </div>
+{% endblock header %}
+
 {% block overlay %}
     <div class="search">
         <input type="text" placeholder="Name…" autocomplete="off" />

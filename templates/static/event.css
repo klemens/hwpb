@@ -56,8 +56,26 @@
     z-index: 10;
 }
 
-h1 {
-    text-align: center;
+header > div.limit-width {
+    max-width: 72rem;
+    margin: auto;
+    display: flex;
+}
+
+header h1 {
+    flex: auto;
+}
+
+header a {
+    flex: none;
+    padding: .5rem 1rem;
+    font-weight: bold;
+    color: #eee;
+    text-decoration: none;
+}
+
+header a[href="/"] {
+    visibility: hidden;
 }
 
 .experiment {

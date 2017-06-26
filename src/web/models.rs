@@ -29,6 +29,8 @@ pub struct Event {
     pub day: String,
     pub experiment: String,
     pub groups: Vec<Group>,
+    pub prev_event: Option<String>,
+    pub next_event: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -44,6 +46,8 @@ pub fn find_events(conn: &PgConnection) -> Result<Vec<Event>> {
             day: e.day_id,
             experiment: e.experiment_id,
             groups: vec![],
+            prev_event: None,
+            next_event: None,
         }).collect())
 }
 
@@ -98,11 +102,25 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
         web_groups.push(web_group)
     }
 
+    // find previous and next event if any
+    let prev_event: Option<db::Event> = events::table
+        .filter(events::day_id.eq(&event.day_id))
+        .filter(events::date.lt(&event.date))
+        .order(events::date.desc())
+        .first(conn).optional()?;
+    let next_event: Option<db::Event> = events::table
+        .filter(events::day_id.eq(&event.day_id))
+        .filter(events::date.gt(&event.date))
+        .order(events::date.asc())
+        .first(conn).optional()?;
+
     Ok(Event {
         date: format!("{}", date),
         day: event.day_id,
         experiment: event.experiment_id,
         groups: web_groups,
+        prev_event: prev_event.map(|e| format!("{}", e.date)),
+        next_event: next_event.map(|e| format!("{}", e.date)),
     })
 }
 
