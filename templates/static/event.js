@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let comment = event.target.closest(".comment").querySelector("textarea");
 
             let value = "";
-            if(!comment.value.endsWith("\n")) {
+            if(!comment.value.endsWith("\n") && comment.value !== "") {
                 value += "\n";
             }
             value += new Date().toISOString().substr(0, 10);
