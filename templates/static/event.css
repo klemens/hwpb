@@ -60,13 +60,10 @@ h1 {
     text-align: center;
 }
 
-body {
-    padding-bottom: 3rem;
-}
-
 .experiment {
     max-width: 72.8rem;
     margin: auto;
+    padding-bottom: 3rem;
 }
 
 .group {
@@ -80,10 +77,6 @@ body {
 }
 
 @media (max-width: 74rem) {
-    body {
-        margin: 0;
-    }
-
     .group {
         display: block;
         max-width: 40rem;
