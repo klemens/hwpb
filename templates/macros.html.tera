@@ -1,0 +1,44 @@
+{% macro group_card(group, experiment) %}
+    <div class="group box {% if group.disqualified %}disqualified{% endif %}" data-id="{{ group.id }}">
+        <select class="elaboration" autocomplete="off">
+            <option {% if not group.elaboration %}selected="selected"{% endif %}>Ausarbeitung ausstehend</option>
+            <option {% if group.elaboration and not group.elaboration.0 and not group.elaboration.1 %}selected="selected" {% endif %} data-rework="0" data-accepted="0">Ausarbeitung abgegeben</option>
+            <option {% if group.elaboration and not group.elaboration.0 and     group.elaboration.1 %}selected="selected" {% endif %} data-rework="0" data-accepted="1">Ausarbeitung akzeptiert</option>
+            <option {% if group.elaboration and     group.elaboration.0 and not group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="0">Nachbesserung nötig</option>
+            <option {% if group.elaboration and     group.elaboration.0 and     group.elaboration.1 %}selected="selected" {% endif %} data-rework="1" data-accepted="1">Nachbesserung akzeptiert</option>
+        </select>
+
+        {% if experiment is string %}
+            <h2>{{ experiment }}</h2>
+        {% else %}
+            <h2>Gruppe {{ group.desk }} <a href=""><img alt="Tischnummer ändern" src="/static/icons/edit.svg" /></a></h2>
+            <ul class="students">
+                <li class="add button round">+</li>
+                {% for student in group.students %}
+                <li data-id="{{ student.id }}">{{ student.name }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% for task in group.tasks %}
+            <div class="task" data-id="{{ task.0 }}">
+                <label for="task-{{ group.id }}-{{ task.0 }}">{{ task.1 }}</label>
+                {% if task.2 %}
+                <input type="checkbox" checked="checked" autocomplete="off" id="task-{{ group.id }}-{{ task.0 }}" />
+                {% else %}
+                <input type="checkbox" autocomplete="off" id="task-{{ group.id }}-{{ task.0 }}" />
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        {% if experiment is string %}{% else %}
+            <div class="comment">
+                <textarea autocomplete="off">{{ group.comment }}</textarea>
+                <div class="buttons">
+                    <button class="date">+Datum</button>
+                    <button class="save">Speichern</button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endmacro group_card %}

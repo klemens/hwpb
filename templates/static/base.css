@@ -121,3 +121,105 @@ input {
     font-size: .7rem;
     margin: .2rem;
 }
+
+.group.disqualified {
+    filter: sepia(.8) grayscale(1);
+}
+
+.group h2 {
+    margin: 0;
+}
+
+.group h2 img {
+    height: 1rem;
+}
+
+.group select {
+    float: right;
+    margin-top: .2rem;
+    padding: .2rem 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: transparent;
+    text-align: center;
+}
+
+.group ul.students {
+    list-style: none;
+    padding: 0;
+}
+.group ul.students li {
+    display: inline-block;
+}
+.group ul.students li:not(.add):after {
+    content: ', ';
+}
+.group ul.students li:not(.add):last-of-type:after {
+    content: '';
+}
+
+.group ul.students li:not(.add):hover {
+    text-decoration: line-through;
+    cursor: pointer;
+    color: #666666;
+}
+
+.group ul.students li.add.button {
+    margin: 0 .3rem;
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: 1.1rem;
+    line-height: 1.4rem;
+    vertical-align: bottom;
+}
+
+
+.group .task {
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.group .task label {
+    text-align: center;
+}
+
+.group .task input[type=checkbox] {
+    margin: 0;
+    min-width: 2rem;
+    min-height: 2rem;
+}
+
+.group .comment {
+    display: flex;
+    margin-top: .5rem;
+}
+
+.group .comment textarea {
+    flex: 1;
+    resize: none;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    sborder-top: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: transparent;
+}
+
+.group .comment .buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.group .comment .buttons button {
+    flex: 1 0;
+    padding: .4rem .6rem;
+    border: none;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.group .comment.unsaved button.save {
+    font-weight: bold;
+}
