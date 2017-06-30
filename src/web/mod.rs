@@ -49,6 +49,13 @@ fn event(date: Date, conn: db::Conn, _user: User) -> Result<Template> {
     Ok(Template::render("event", &context))
 }
 
+#[get("/group/<group>")]
+fn group(group: i32, conn: db::Conn, _user: User) -> Result<Template> {
+    let context = models::load_group(group, &conn)?;
+
+    Ok(Template::render("group", &context))
+}
+
 #[get("/static/<path..>")]
 fn static_file(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("templates/static/").join(path)).ok()

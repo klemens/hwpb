@@ -3,7 +3,8 @@ use db;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use errors::*;
-use std::collections::{HashMap, HashSet};
+use itertools::Itertools;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 #[derive(Serialize)]
 pub struct Index {
@@ -12,16 +13,6 @@ pub struct Index {
     pub commit_id: &'static str,
 }
 
-#[derive(Serialize)]
-pub struct Group {
-    pub id: i32,
-    pub desk: i32,
-    pub students: Vec<Student>,
-    pub tasks: Vec<(i32, String, bool)>,
-    pub elaboration: Option<(bool, bool)>,
-    pub disqualified: bool,
-    pub comment: String,
-}
 
 #[derive(Serialize)]
 pub struct Experiment {
@@ -34,9 +25,43 @@ pub struct Event {
     pub date: String,
     pub day: String,
     pub experiment: String,
-    pub groups: Vec<Group>,
+    pub groups: Vec<EventGroup>,
     pub prev_event: Option<String>,
     pub next_event: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct EventGroup {
+    pub id: i32,
+    pub desk: i32,
+    pub students: Vec<Student>,
+    pub tasks: Vec<(i32, String, bool)>,
+    pub elaboration: Option<(bool, bool)>,
+    pub disqualified: bool,
+    pub comment: String,
+}
+
+#[derive(Serialize)]
+pub struct GroupOverview {
+    pub desk: i32,
+    pub day: String,
+    pub comment: String,
+    pub students: Vec<Student>,
+    pub events: Vec<GroupOverviewEvent>,
+}
+
+#[derive(Serialize)]
+pub struct GroupOverviewEvent {
+    pub experiment: String,
+    pub group: GroupOverviewGroup,
+}
+
+#[derive(Serialize)]
+pub struct GroupOverviewGroup {
+    pub id: i32,
+    pub disqualified: bool,
+    pub tasks: Vec<(i32, String, bool)>,
+    pub elaboration: Option<(bool, bool)>,
 }
 
 #[derive(Serialize)]
@@ -111,7 +136,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
     let mut web_groups = vec![];
 
     for (group, students) in groups {
-        let mut web_group = Group {
+        let mut web_group = EventGroup {
             id: group.id,
             desk: group.desk,
             students: students.into_iter().map(|s| Student {
@@ -151,6 +176,68 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
         groups: web_groups,
         prev_event: prev_event.map(|e| format!("{}", e.date)),
         next_event: next_event.map(|e| format!("{}", e.date)),
+    })
+}
+
+pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
+    use db::{completions, elaborations, groups, tasks};
+
+    let group: db::Group = groups::table.find(group).first(conn)?;
+    let disqualified = group.comment.contains("(ENDE)");
+
+    // Load all available tasks and group by experiment
+    let tasks: BTreeMap<_,Vec<_>> = tasks::table
+        .order((tasks::experiment_id.asc(), tasks::name.asc()))
+        .load::<db::Task>(conn)?.into_iter()
+        .group_by(|task| task.experiment_id.clone()).into_iter()
+        .map(|(k, v)| (k, v.collect()))
+        .collect();
+
+    // Load all completions and elaborations for the group
+    let completions: HashSet<_> = completions::table
+        .filter(completions::group_id.eq(group.id))
+        .load::<db::Completion>(conn)?.into_iter()
+        .map(|c| c.task_id)
+        .collect();
+    let elaborations: HashMap<_,_> = elaborations::table
+        .filter(elaborations::group_id.eq(group.id))
+        .load::<db::Elaboration>(conn)?.into_iter()
+        .map(|e| (e.experiment_id, (e.rework_required, e.accepted)))
+        .collect();
+
+    let events = tasks.into_iter().map(|(experiment, tasks)| {
+        // Check which tasks the the group has completed
+        let tasks = tasks.into_iter().map(|task| {
+            let completed = completions.contains(&task.id);
+            (task.id, task.name, completed)
+        }).collect();
+
+        GroupOverviewEvent {
+            group: GroupOverviewGroup {
+                id: group.id,
+                disqualified: disqualified,
+                tasks: tasks,
+                elaboration: elaborations.get(&experiment).cloned(),
+            },
+            experiment: experiment,
+        }
+    }).collect();
+
+    let students = load_students_for_groups(vec![group.clone()], conn)?
+        .pop().ok_or("error while loading students of group")?
+        .1.into_iter()
+        .map(|student| Student {
+            id: student.id,
+            name: student.name,
+        })
+        .collect();
+
+    Ok(GroupOverview {
+        desk: group.desk,
+        day: group.day_id,
+        comment: group.comment,
+        students: students,
+        events: events,
     })
 }
 

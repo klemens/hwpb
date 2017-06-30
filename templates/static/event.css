@@ -81,3 +81,11 @@ header a[href="/"] {
 .experiment {
     padding-bottom: 3rem;
 }
+
+.group h2 a:first-of-type {
+    text-decoration: none;
+    color: inherit;
+}
+.group h2 a:first-of-type:hover {
+    text-decoration: underline;
+}

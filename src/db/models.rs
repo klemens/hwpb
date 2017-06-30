@@ -26,7 +26,7 @@ pub struct Event {
     pub date: NaiveDate,
 }
 
-#[derive(Debug, Queryable, Identifiable, Associations)]
+#[derive(Debug, Clone, Queryable, Identifiable, Associations)]
 #[has_many(completions)]
 #[has_many(elaborations)]
 #[has_many(group_mappings)]

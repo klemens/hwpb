@@ -1,0 +1,30 @@
+#group {
+    display: block;
+    max-width: 40rem;
+    margin: .7rem auto;
+}
+
+#group .students {
+    margin-top: .4rem;
+    padding-left: .5rem;
+}
+
+#group .students li:hover {
+    text-decoration: none;
+    cursor: unset;
+    color: inherit;
+}
+
+#group textarea {
+    height: 6rem;
+}
+
+.group h2 {
+    margin-bottom: .5rem;
+}
+
+/* Temporarily disable interactive controls (does not work for keyboard) */
+.group .task,
+.group select {
+    pointer-events: none;
+}

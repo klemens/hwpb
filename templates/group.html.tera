@@ -1,0 +1,31 @@
+{% extends "base" %}
+
+{% import "macros" as macros %}
+
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/group.css" />
+    <script src="/static/group.js"></script>
+{% endblock head %}
+
+{% block title %}Gruppe {{ desk }}, {{ day }}{% endblock title %}
+{% block heading %}Gruppe {{ desk }}, {{ day }}{% endblock heading %}
+
+{% block main %}
+    <div id="group" class="group box">
+        <ul class="students">
+            {% for student in students %}
+            <li>{{ student.name }}</li>
+            {% endfor %}
+        </ul>
+        <div class="comment">
+            <textarea autocomplete="off" disabled="disabled">{{ comment }}</textarea>
+        </div>
+    </div>
+    <div class="box-wrapper"><!--
+        {% for event in events %}
+        -->{{ macros::group_card(group=event.group, experiment=event.experiment) }}<!--
+        {% endfor %}
+    --></div>
+{% endblock main %}
+

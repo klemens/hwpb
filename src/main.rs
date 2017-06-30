@@ -6,6 +6,7 @@ extern crate chrono;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
 #[macro_use] extern crate error_chain;
+extern crate itertools;
 extern crate pam_auth;
 extern crate r2d2;
 extern crate r2d2_diesel;
@@ -37,6 +38,7 @@ fn run() -> Result<()> {
         .mount("/", routes![
             web::index,
             web::event,
+            web::group,
             web::static_file,
             web::session::nologin_index,
             web::session::nologin_path,
