@@ -78,13 +78,17 @@ pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
 }
 
 pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
-    use db::{completions, elaborations, events, tasks};
+    use db::{completions, elaborations, events, groups, tasks};
 
     let event: db::Event = events::table.filter(events::date.eq(date)).first(conn)?;
 
     let tasks = tasks::table.filter(tasks::experiment_id.eq(&event.experiment_id))
         .order(tasks::name.asc()).load::<db::Task>(conn)?;
-    let groups = load_groups_with_students(&event.day_id, conn)?;
+    let groups = groups::table
+        .filter(groups::day_id.eq(&event.day_id))
+        .order((groups::comment.like("%(ENDE)%".to_string()).asc(), groups::desk.asc()))
+        .load::<db::Group>(conn)?;
+    let groups = load_students_for_groups(groups, conn)?;
 
     // belonging_to uses eq_any internally, but supports only one parent table
     let task_ids: Vec<_> = tasks.iter().map(Identifiable::id).collect();
@@ -168,13 +172,9 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<
     })?)
 }
 
-pub fn load_groups_with_students(day: &str, conn: &PgConnection) -> Result<Vec<(db::Group, Vec<db::Student>)>> {
-    use db::{students, groups};
+fn load_students_for_groups(groups: Vec<db::Group>, conn: &PgConnection) -> Result<Vec<(db::Group, Vec<db::Student>)>> {
+    use db::students;
 
-    let groups = groups::table
-        .filter(groups::day_id.eq(day))
-        .order((groups::comment.like("%(ENDE)%".to_string()).asc(), groups::desk.asc()))
-        .load::<db::Group>(conn)?;
     let mappings = db::GroupMapping::belonging_to(&groups)
         .load::<db::GroupMapping>(conn)?;
 
