@@ -1,6 +1,6 @@
 [package]
 name = "hwpb"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Klemens Schölhorn <klemens@schoelhorn.eu>"]
 
 build = "src/build.rs"
