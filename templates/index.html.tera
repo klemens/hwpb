@@ -3,12 +3,17 @@
 {% block head %}
     {{super()}}
     <link rel="stylesheet" href="/static/index.css" />
+    <script src="/static/index.js"></script>
 {% endblock head %}
 
 {% block title %}Übersicht{% endblock title %}
 {% block heading %}Hardwarepraktikum{% endblock heading %}
 
 {% block main %}
+    <div class="search">
+        <input type="text" placeholder="Gruppe suchen…" autocomplete="off" />
+        <ul></ul>
+    </div>
     <div class="box-wrapper"><!--
         {% for experiment in experiments %}
         --><div class="experiment box">

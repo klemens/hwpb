@@ -1,3 +1,26 @@
+#main {
+    position: relative;
+}
+
+.search {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 41rem;
+    box-sizing: border-box;
+    max-height: calc(100vh - 7rem);
+}
+
+.search.active {
+    box-shadow: 2px 3px 10px rgb(100, 100, 100);
+    background: #00bcd4;
+}
+
+.box-wrapper {
+    margin-top: 4rem;
+}
+
 .experiment h2 {
     margin: 0;
 }
