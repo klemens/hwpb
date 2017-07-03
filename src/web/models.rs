@@ -70,6 +70,14 @@ pub struct Student {
     pub name: String,
 }
 
+#[derive(Serialize)]
+pub struct SearchGroup {
+    pub id: i32,
+    pub desk: i32,
+    pub day: String,
+    pub students: Vec<Student>,
+}
+
 pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
     let events = db::events::table
         .order((db::events::experiment_id.asc(), db::events::date.asc()))
@@ -257,6 +265,47 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<
             }
         }).collect()
     })?)
+}
+
+pub fn find_groups<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Vec<SearchGroup>> {
+    use db::{groups, group_mappings, students};
+
+    let group_ids = {
+        let mut query = students::table
+            .inner_join(group_mappings::table)
+            .select(group_mappings::group_id)
+            .into_boxed();
+        for term in terms {
+            query = query.filter(
+                students::name.ilike(format!("%{}%", term.as_ref()))
+            );
+        }
+        query.load::<i32>(conn)?
+    };
+    let groups = groups::table
+        .filter(groups::id.eq_any(group_ids))
+        .order((groups::day_id, groups::desk))
+        .load(conn)?;
+
+    let search_groups = load_students_for_groups(groups, conn)?
+        .into_iter().map(|(group, students)| {
+            let students = students.into_iter().map(|student| {
+                Student {
+                    id: student.id,
+                    name: student.name,
+                }
+            }).collect();
+
+            SearchGroup {
+                id: group.id,
+                desk: group.desk,
+                day: group.day_id,
+                students: students,
+            }
+        })
+        .collect();
+
+    Ok(search_groups)
 }
 
 fn load_students_for_groups(groups: Vec<db::Group>, conn: &PgConnection) -> Result<Vec<(db::Group, Vec<db::Student>)>> {

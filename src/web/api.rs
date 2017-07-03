@@ -120,10 +120,16 @@ fn delete_group_student(group: i32, student: String, conn: db::Conn, _user: User
     Ok(NoContent)
 }
 
+#[post("/group/search", data = "<terms>")]
+fn search_groups(terms: JSON<Vec<String>>, conn: db::Conn, _user: User) -> Result<JSON<Vec<super::models::SearchGroup>>> {
+    let groups = super::models::find_groups(&*terms, &conn)?;
+
+    Ok(JSON(groups))
+}
+
 #[post("/student/search", data = "<terms>")]
 fn search_students(terms: JSON<Vec<String>>, conn: db::Conn, _user: User) -> Result<JSON<Vec<super::models::Student>>> {
     let students = super::models::find_students(&*terms, &conn)?;
 
     Ok(JSON(students))
 }
-

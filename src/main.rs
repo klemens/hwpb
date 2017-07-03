@@ -56,6 +56,7 @@ fn run() -> Result<()> {
             web::api::put_group_desk,
             web::api::put_group_student,
             web::api::delete_group_student,
+            web::api::search_groups,
             web::api::search_students,
         ])
         .attach(rocket_contrib::Template::fairing())
