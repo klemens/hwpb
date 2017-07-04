@@ -106,6 +106,19 @@ input {
     display: block;
 }
 
+#overlay .search {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    max-width: 25rem;
+    margin: 4rem auto 0 auto;
+    max-height: calc(100vh - 5rem);
+    box-shadow: 2px 3px 10px rgb(100, 100, 100);
+    background: #00bcd4;
+}
+
 .button.round {
     border-radius: 50%;
     text-align: center;
