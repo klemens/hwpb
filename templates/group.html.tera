@@ -9,7 +9,7 @@
 {% endblock head %}
 
 {% block title %}Gruppe {{ desk }}, {{ day }}{% endblock title %}
-{% block heading %}Gruppe {{ desk }}, {{ day }}{% endblock heading %}
+{% block heading %}<a href="/">Gruppe {{ desk }}, {{ day }}</a>{% endblock heading %}
 
 {% block overlay %}
     <div class="search">
