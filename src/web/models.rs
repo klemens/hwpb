@@ -43,6 +43,7 @@ pub struct EventGroup {
 
 #[derive(Serialize)]
 pub struct GroupOverview {
+    pub id: i32,
     pub desk: i32,
     pub day: String,
     pub comment: String,
@@ -241,6 +242,7 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
         .collect();
 
     Ok(GroupOverview {
+        id: group.id,
         desk: group.desk,
         day: group.day_id,
         comment: group.comment,

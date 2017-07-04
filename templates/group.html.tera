@@ -11,15 +11,27 @@
 {% block title %}Gruppe {{ desk }}, {{ day }}{% endblock title %}
 {% block heading %}Gruppe {{ desk }}, {{ day }}{% endblock heading %}
 
+{% block overlay %}
+    <div class="search">
+        <input type="text" placeholder="Name…" autocomplete="off" />
+        <ul></ul>
+    </div>
+{% endblock overlay %}
+
 {% block main %}
-    <div id="group" class="group box">
+    <div id="group" class="group box" data-id="{{ id }}">
         <ul class="students">
+            <li class="add button round">+</li>
             {% for student in students %}
-            <li>{{ student.name }}</li>
+            <li data-id="{{ student.id }}">{{ student.name }}</li>
             {% endfor %}
         </ul>
         <div class="comment">
-            <textarea autocomplete="off" disabled="disabled">{{ comment }}</textarea>
+            <textarea autocomplete="off">{{ comment }}</textarea>
+            <div class="buttons">
+                <button class="date">+Datum</button>
+                <button class="save">Speichern</button>
+            </div>
         </div>
     </div>
     <div class="box-wrapper"><!--
