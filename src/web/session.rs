@@ -63,6 +63,7 @@ struct Login {
     password: String
 }
 
+#[allow(unmanaged_state)]
 #[post("/login", data = "<login>")]
 fn post_login(mut cookies: Cookies, login: Form<Login>, allowed_users: State<AllowedUsers>) -> Result<Redirect, Flash<Redirect>> {
     let login = login.into_inner();
