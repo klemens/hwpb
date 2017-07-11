@@ -1,17 +1,13 @@
-use chrono::{DateTime, NaiveDate, UTC};
+use chrono::{DateTime, NaiveDate, Utc};
 
 use super::schema::*;
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
-#[has_many(events)]
 pub struct Day {
     pub id: String,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
-#[has_many(events)]
-#[has_many(tasks)]
-#[has_many(elaborations)]
 pub struct Experiment {
     pub id: String,
 }
@@ -27,9 +23,6 @@ pub struct Event {
 }
 
 #[derive(Debug, Clone, Queryable, Identifiable, Associations)]
-#[has_many(completions)]
-#[has_many(elaborations)]
-#[has_many(group_mappings)]
 pub struct Group {
     pub id: i32,
     pub desk: i32,
@@ -46,7 +39,6 @@ pub struct NewGroup {
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
-#[has_many(group_mappings)]
 pub struct Student {
     pub id: String,
     pub name: String,
@@ -64,7 +56,6 @@ pub struct GroupMapping {
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[belongs_to(Experiment)]
-#[has_many(completions)]
 pub struct Task {
     pub id: i32,
     pub experiment_id: String,
@@ -80,7 +71,7 @@ pub struct Completion {
     pub group_id: i32,
     pub task_id: i32,
     pub tutor: Option<String>,
-    pub completed_at: Option<DateTime<UTC>>,
+    pub completed_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Queryable, Insertable, AsChangeset, Identifiable, Associations)]

@@ -6,15 +6,15 @@ authors = ["Klemens Schölhorn <klemens@schoelhorn.eu>"]
 build = "src/build.rs"
 
 [dependencies]
-chrono = "0.3"
-diesel = { version = "0.13.0", features = ["postgres", "chrono"] }
-diesel_codegen = { version = "0.13.0", features = ["postgres"] }
+chrono = "0.4"
+diesel = { version = "0.14.0", features = ["postgres", "chrono"] }
+diesel_codegen = { version = "0.14.0", features = ["postgres"] }
 dotenv = "0.9.0"
 error-chain = "0.10.0"
 itertools = "0.6"
 pam-auth = "0.5.2"
 r2d2 = "0.7.0"
-r2d2-diesel = "0.13.0"
+r2d2-diesel = "0.14.0"
 rocket = { git = "https://github.com/SergioBenitez/Rocket.git" }
 rocket_codegen = { git = "https://github.com/SergioBenitez/Rocket.git" }
 rocket_contrib = { git = "https://github.com/SergioBenitez/Rocket.git", default_features = false, features = [ "json", "tera_templates" ] }
