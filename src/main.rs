@@ -1,6 +1,7 @@
 #![feature(plugin, custom_derive)]
 #![plugin(rocket_codegen)]
 
+extern crate bit_vec;
 extern crate chrono;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
@@ -58,6 +59,10 @@ fn run() -> Result<()> {
             web::api::delete_group_student,
             web::api::search_groups,
             web::api::search_students,
+        ])
+        .mount("/analysis", routes![
+            web::analysis::passed,
+            web::analysis::missing_reworks,
         ])
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {

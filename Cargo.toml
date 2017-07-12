@@ -6,6 +6,7 @@ authors = ["Klemens Schölhorn <klemens@schoelhorn.eu>"]
 build = "src/build.rs"
 
 [dependencies]
+bit-vec = "0.4"
 chrono = "0.4"
 diesel = { version = "0.14.0", features = ["postgres", "chrono"] }
 diesel_codegen = { version = "0.14.0", features = ["postgres"] }
