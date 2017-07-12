@@ -256,7 +256,11 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<
 
     let mut query = students::table.into_boxed();
     for term in terms {
-        query = query.filter(students::name.ilike(format!("%{}%", term.as_ref())))
+        query = query.filter(
+            students::name.ilike(format!("%{}%", term.as_ref())).or(
+                students::id.ilike(format!("%{}%", term.as_ref()))
+            )
+        );
     }
 
     Ok(query.order(students::name.asc()).load::<db::Student>(conn).map(|students| {
@@ -279,7 +283,9 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Ve
             .into_boxed();
         for term in terms {
             query = query.filter(
-                students::name.ilike(format!("%{}%", term.as_ref()))
+                students::name.ilike(format!("%{}%", term.as_ref())).or(
+                    students::id.ilike(format!("%{}%", term.as_ref()))
+                )
             );
         }
         query.load::<i32>(conn)?
