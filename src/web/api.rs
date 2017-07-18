@@ -4,11 +4,11 @@ use diesel::pg::upsert::*;
 use diesel::prelude::*;
 use errors::*;
 use rocket::response::status::NoContent;
-use rocket_contrib::JSON;
+use rocket_contrib::Json;
 use web::session::User;
 
 #[post("/group", data = "<group>")]
-fn post_group(group: JSON<db::NewGroup>, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn post_group(group: Json<db::NewGroup>, conn: db::Conn, _user: User) -> Result<NoContent> {
     diesel::insert(&*group)
         .into(db::groups::table)
         .execute(&*conn)?;
@@ -49,7 +49,7 @@ struct Elaboration {
 }
 
 #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
-fn put_elaboration(group: i32, experiment: String, elaboration: JSON<Elaboration>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_elaboration(group: i32, experiment: String, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> Result<NoContent> {
     let elaboration = db::Elaboration {
         group_id: group,
         experiment_id: experiment,
@@ -79,7 +79,7 @@ fn delete_elaboration(group: i32, experiment: String, conn: db::Conn, _user: Use
 }
 
 #[put("/group/<group>/comment", data = "<comment>")]
-fn put_group_comment(group: i32, comment: JSON<String>, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, _user: User) -> Result<NoContent> {
     diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
         .set(db::groups::comment.eq(comment.into_inner()))
         .execute(&*conn)?;
@@ -88,7 +88,7 @@ fn put_group_comment(group: i32, comment: JSON<String>, conn: db::Conn, _user: U
 }
 
 #[put("/group/<group>/desk", data = "<desk>")]
-fn put_group_desk(group: i32, desk: JSON<i32>, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, _user: User) -> Result<NoContent> {
     diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
         .set(db::groups::desk.eq(desk.into_inner()))
         .execute(&*conn)?;
@@ -121,15 +121,15 @@ fn delete_group_student(group: i32, student: String, conn: db::Conn, _user: User
 }
 
 #[post("/group/search", data = "<terms>")]
-fn search_groups(terms: JSON<Vec<String>>, conn: db::Conn, _user: User) -> Result<JSON<Vec<super::models::SearchGroup>>> {
+fn search_groups(terms: Json<Vec<String>>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::SearchGroup>>> {
     let groups = super::models::find_groups(&*terms, &conn)?;
 
-    Ok(JSON(groups))
+    Ok(Json(groups))
 }
 
 #[post("/student/search", data = "<terms>")]
-fn search_students(terms: JSON<Vec<String>>, conn: db::Conn, _user: User) -> Result<JSON<Vec<super::models::Student>>> {
+fn search_students(terms: Json<Vec<String>>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::Student>>> {
     let students = super::models::find_students(&*terms, &conn)?;
 
-    Ok(JSON(students))
+    Ok(Json(students))
 }
