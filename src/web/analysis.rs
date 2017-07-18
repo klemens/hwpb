@@ -16,8 +16,13 @@ struct Analysis {
     students: Vec<Student>,
 }
 
-#[get("/passed")]
-fn passed(conn: db::Conn, _user: User) -> Result<Template> {
+#[derive(FromForm)]
+struct Export {
+    format: String,
+}
+
+#[get("/passed?<export>")]
+fn passed(export: Export, conn: db::Conn, _user: User) -> Result<Template> {
     let students = load_elaborations_by_student(None, Some(true), &*conn)?
         .into_iter()
         .filter_map(|(student, elaboration)| {
@@ -30,11 +35,15 @@ fn passed(conn: db::Conn, _user: User) -> Result<Template> {
         students: students,
     };
 
-    Ok(Template::render("analysis", &context))
+    match export.format.as_str() {
+        "html" => Ok(Template::render("analysis", &context)),
+        "text" => Ok(Template::render("analysis-text", &context)),
+        e => Err(format!("Invalid format specified: {}", e).into()),
+    }
 }
 
-#[get("/missing-reworks")]
-fn missing_reworks(conn: db::Conn, _user: User) -> Result<Template> {
+#[get("/missing-reworks?<export>")]
+fn missing_reworks(export: Export, conn: db::Conn, _user: User) -> Result<Template> {
     let students_with_all_tasks = load_tasks_by_student(&*conn)?
         .into_iter()
         .filter_map(|(student, tasks)| {
@@ -64,7 +73,11 @@ fn missing_reworks(conn: db::Conn, _user: User) -> Result<Template> {
         students: students,
     };
 
-    Ok(Template::render("analysis", &context))
+    match export.format.as_str() {
+        "html" => Ok(Template::render("analysis", &context)),
+        "text" => Ok(Template::render("analysis-text", &context)),
+        e => Err(format!("Invalid format specified: {}", e).into()),
+    }
 }
 
 

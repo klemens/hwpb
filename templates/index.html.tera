@@ -11,8 +11,8 @@
 
 {% block content %}
     <nav class="analysis">
-        <a href="/analysis/missing-reworks">Fehlende Nachbesserungen</a>
-        <a href="/analysis/passed">Zugelassene Studenten</a>
+        <a href="/analysis/missing-reworks?format=html">Fehlende Nachbesserungen</a>
+        <a href="/analysis/passed?format=html">Zugelassene Studenten</a>
     </nav>
     {{super()}}
 {% endblock content %}
