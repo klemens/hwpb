@@ -6,7 +6,7 @@
 {% endblock head %}
 
 {% block title %}{{ heading }}{% endblock title %}
-{% block heading %}{{ heading }}{% endblock heading %}
+{% block heading %}<a href="/">{{ heading }}</a>{% endblock heading %}
 
 {% block main %}
     <div class="box-wrapper">

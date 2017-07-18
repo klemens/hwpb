@@ -19,11 +19,6 @@ header h1 {
     flex: auto;
 }
 
-header h1 a {
-    color: inherit;
-    text-decoration: none;
-}
-
 header a.nav {
     flex: none;
     padding: .5rem 1rem;

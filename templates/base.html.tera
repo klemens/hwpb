@@ -16,7 +16,9 @@
         <h1>{% block heading %}{% endblock heading %}</h1>
         {% endblock header %}
     </header>
+    {% block content %}
     <div id="main">
         {% block main %}{% endblock main %}
     </div>
+    {% endblock content %}
 </body>
