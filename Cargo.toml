@@ -9,8 +9,7 @@ build = "src/build.rs"
 bit-vec = "0.4"
 chrono = "0.4"
 diesel = { version = "0.16", features = ["postgres", "chrono"] }
-diesel_codegen = { version = "0.16", features = ["postgres"] }
-dotenv = "0.10"
+diesel_codegen = { version = "0.16", default-features = false, features = ["postgres"] }
 error-chain = "0.10"
 itertools = "0.6"
 pam-auth = "0.5.2"

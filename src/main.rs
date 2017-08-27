@@ -5,7 +5,6 @@ extern crate bit_vec;
 extern crate chrono;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
-extern crate dotenv;
 #[macro_use] extern crate error_chain;
 extern crate itertools;
 extern crate pam_auth;
@@ -25,10 +24,9 @@ use errors::*;
 quick_main!(run);
 
 fn run() -> Result<()> {
-    dotenv::dotenv()
-        .chain_err(|| "Could not read .env file")?;
+    let rocket = rocket::ignite();
 
-    let database_url = std::env::var("DATABASE_URL")
+    let database_url = rocket.config().get_str("database")
         .chain_err(|| "DATABASE_URL not set")?;
 
     // run any pending database migrations

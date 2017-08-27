@@ -1,4 +1,5 @@
 [global]
+database = "postgres://user:password@host/database"
 allowed_users = [
     "user1",
     "user2",

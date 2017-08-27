@@ -1,7 +1,3 @@
-// This can be used during development for generating the table
-// definitions from the database schema
-//infer_schema!("dotenv:DATABASE_URL");
-
 // These table definitions can be generated using `diesel print-schema`
 table! {
     completions (group_id, task_id) {
