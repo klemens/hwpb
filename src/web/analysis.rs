@@ -111,7 +111,8 @@ fn load_tasks_by_student(conn: &PgConnection) -> Result<Vec<(Student, BitVec)>> 
         .collect();
 
     Ok(db::completions::table
-        .inner_join(db::group_mappings::table)
+        .inner_join(db::group_mappings::table
+            .on(db::completions::group_id.eq(db::group_mappings::group_id)))
         .order(db::group_mappings::student_id.asc())
         .load::<(db::Completion, db::GroupMapping)>(conn)?.into_iter()
         .group_by(|&(_, ref mapping)| mapping.student_id.clone()).into_iter()
@@ -149,7 +150,8 @@ fn load_elaborations_by_student(rework_required: Option<bool>, accepted: Option<
         .collect();
 
     let mut query = db::elaborations::table
-        .inner_join(db::group_mappings::table)
+        .inner_join(db::group_mappings::table
+            .on(db::elaborations::group_id.eq(db::group_mappings::group_id)))
         .into_boxed();
     if let Some(rework) = rework_required {
         query = query.filter(db::elaborations::rework_required.eq(rework));
