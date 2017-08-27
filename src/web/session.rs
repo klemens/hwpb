@@ -41,9 +41,8 @@ fn nologin_index() -> Redirect {
     Redirect::to("/login")
 }
 
-#[get("/<path..>", rank = 2)]
-#[allow(unused_variables)]
-fn nologin_path(path: PathBuf) -> Redirect {
+#[get("/<_path..>", rank = 2)]
+fn nologin_path(_path: PathBuf) -> Redirect {
     Redirect::to("/login")
 }
 
@@ -63,7 +62,6 @@ struct Login {
     password: String
 }
 
-#[allow(unmanaged_state)]
 #[post("/login", data = "<login>")]
 fn post_login(mut cookies: Cookies, login: Form<Login>, allowed_users: State<AllowedUsers>) -> Result<Redirect, Flash<Redirect>> {
     let login = login.into_inner();
