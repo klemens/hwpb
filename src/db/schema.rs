@@ -4,8 +4,7 @@
 
 // These table definitions can be generated using `diesel print-schema`
 table! {
-    completions (group_id,
-    task_id) {
+    completions (group_id, task_id) {
         group_id -> Int4,
         task_id -> Int4,
         tutor -> Nullable<Text>,
@@ -20,8 +19,7 @@ table! {
 }
 
 table! {
-    elaborations (group_id,
-    experiment_id) {
+    elaborations (group_id, experiment_id) {
         group_id -> Int4,
         experiment_id -> Text,
         rework_required -> Bool,
@@ -46,8 +44,7 @@ table! {
 }
 
 table! {
-    group_mappings (student_id,
-    group_id) {
+    group_mappings (student_id, group_id) {
         student_id -> Text,
         group_id -> Int4,
     }
@@ -76,6 +73,17 @@ table! {
         name -> Text,
     }
 }
+
+joinable!(events -> days (day_id));
+joinable!(events -> experiments (experiment_id));
+joinable!(groups -> days (day_id));
+joinable!(tasks -> experiments (experiment_id));
+joinable!(elaborations -> groups (group_id));
+joinable!(elaborations -> experiments (experiment_id));
+joinable!(completions -> groups (group_id));
+joinable!(completions -> tasks (task_id));
+joinable!(group_mappings -> students (student_id));
+joinable!(group_mappings -> groups (group_id));
 
 
 // This is a hack until arbitrary joins or "through associations" are allowed.
