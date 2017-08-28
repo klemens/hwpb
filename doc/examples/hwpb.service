@@ -1,0 +1,16 @@
+[Unit]
+Description=Manage student progress during the hardware course
+After=postgresql.service
+
+[Service]
+User=hwpb
+Environment=ROCKET_ENV=production
+WorkingDirectory=/srv/hwpb
+ExecStart=/srv/hwpb/hwpb
+
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

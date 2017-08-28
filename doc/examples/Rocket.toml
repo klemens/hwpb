@@ -1,3 +1,11 @@
+[production]
+address = "localhost"
+port = 8080
+workers = 20
+
+# generate using `openssl rand -base64 32`
+secret_key = "*"
+
 [global]
 database = "postgres://user:password@host/database"
 allowed_users = [
