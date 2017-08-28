@@ -26,7 +26,8 @@ authentication mechanism.
 ./target/release/hwpb
 ```
 
-See the [`doc/DEPLOY.md`] file for more details.
+See the [`doc/DEPLOY.md`] and [`doc/DEVELOP.md`] files for more details.
 
 [`rustup`]: https://www.rustup.rs/
 [`doc/DEPLOY.md`]: doc/DEPLOY.md
+[`doc/DEVELOP.md`]: doc/DEVELOP.md
