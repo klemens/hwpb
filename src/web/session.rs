@@ -59,7 +59,7 @@ fn nologin_index() -> Redirect {
     redirect_to_login("/")
 }
 
-#[get("/<_path..>", rank = 2)]
+#[get("/<_path..>", rank = 3)]
 fn nologin_path(uri: &URI, _path: PathBuf, _user: NotLoggedIn) -> Redirect {
     redirect_to_login(uri.as_str())
 }

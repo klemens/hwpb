@@ -6,12 +6,14 @@ use super::schema::*;
 pub struct Day {
     pub id: i32,
     pub name: String,
+    pub year: i16,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
 pub struct Experiment {
     pub id: i32,
     pub name: String,
+    pub year: i16,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -40,11 +42,12 @@ pub struct NewGroup {
     comment: String,
 }
 
-#[derive(Debug, Queryable, Identifiable, Associations)]
+#[derive(Debug, Clone, Queryable, Identifiable, Associations)]
 pub struct Student {
     pub id: i32,
     pub matrikel: String,
     pub name: String,
+    pub year: i16,
 }
 
 #[derive(Debug, Queryable, Insertable, Identifiable, Associations)]

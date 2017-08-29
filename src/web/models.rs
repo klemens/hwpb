@@ -8,11 +8,16 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
 pub struct Index {
-    pub experiments: Vec<Experiment>,
+    pub years: Vec<i16>,
     pub version: &'static str,
     pub commit_id: &'static str,
 }
 
+#[derive(Serialize)]
+pub struct Overview {
+    pub year: i16,
+    pub experiments: Vec<Experiment>,
+}
 
 #[derive(Serialize)]
 pub struct Experiment {
@@ -23,6 +28,7 @@ pub struct Experiment {
 
 #[derive(Serialize)]
 pub struct Event {
+    pub year: i16,
     pub date: String,
     pub day_id: i32,
     pub day: String,
@@ -48,6 +54,7 @@ pub struct EventGroup {
 pub struct GroupOverview {
     pub id: i32,
     pub desk: i32,
+    pub year: i16,
     pub day: String,
     pub comment: String,
     pub students: Vec<Student>,
@@ -83,13 +90,30 @@ pub struct SearchGroup {
     pub students: Vec<Student>,
 }
 
-pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
+pub fn find_years(conn: &PgConnection) -> Result<Vec<i16>> {
+    let years = db::days::table
+        .select(db::days::year)
+        .distinct()
+        .order(db::days::year.desc())
+        .load::<i16>(conn)?;
+
+    Ok(years)
+}
+
+pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
+    let days_this_year = db::days::table
+        .filter(db::days::year.eq(year))
+        .select(db::days::id)
+        .load::<i32>(conn)?;
+
     let events = db::events::table
+        .filter(db::events::day_id.eq_any(days_this_year))
         .order((db::events::experiment_id.asc(), db::events::date.asc()))
         .inner_join(db::days::table)
         .inner_join(db::experiments::table)
         .load::<(db::Event, db::Day, db::Experiment)>(conn)?
         .into_iter().map(|(event, day, experiment)| Event {
+            year: year,
             date: format!("{}", event.date),
             day_id: day.id,
             day: day.name,
@@ -192,6 +216,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
         .first(conn).optional()?;
 
     Ok(Event {
+        year: day.year,
         date: format!("{}", date),
         day_id: day.id,
         day: day.name,
@@ -268,6 +293,7 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
     Ok(GroupOverview {
         id: group.id,
         desk: group.desk,
+        year: day.year,
         day: day.name,
         comment: group.comment,
         students: students,
@@ -356,18 +382,13 @@ fn load_students_for_groups(groups: Vec<db::Group>, conn: &PgConnection) -> Resu
         let students = students::table
             .filter(students::id.eq_any(&student_ids))
             .load::<db::Student>(conn)?;
-        students.into_iter().map(|s| (s.id, (s.matrikel, s.name))).collect()
+        students.into_iter().map(|s| (s.id, s)).collect()
     };
 
     let mappings = mappings.grouped_by(&groups);
     Ok(groups.into_iter().zip(mappings).map(|(group, mappings)| {
         let students = mappings.into_iter().map(|mapping| {
-            let (matrikel, name) = student_map[&mapping.student_id].clone();
-            db::Student {
-                id: mapping.student_id,
-                matrikel: matrikel,
-                name: name,
-            }
+            student_map[&mapping.student_id].clone()
         }).collect();
 
         (group, students)

@@ -1,0 +1,68 @@
+#main {
+    position: relative;
+    padding: 0;
+}
+
+nav.analysis {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%; /* seems to be necessary when margin: auto in flexbox */
+    max-width: 41.6rem;
+    margin: .2rem auto 0;
+}
+
+nav.analysis a {
+    flex: auto;
+    text-decoration: none;
+    padding: .3rem .5rem;
+    margin: .3rem;
+    background: #33691e;
+    color: #ffffff;
+    box-shadow: 1px 1px 3px -1px black;
+}
+
+.search {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 41rem;
+    box-sizing: border-box;
+    max-height: calc(100vh - 7rem);
+}
+
+.search.active {
+    box-shadow: 2px 3px 10px rgb(100, 100, 100);
+    background: #00bcd4;
+}
+
+.box-wrapper {
+    margin-top: 3.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.experiment h2 {
+    margin: 0;
+}
+
+.experiment ul {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: .2rem 0;
+}
+
+.experiment ul li {
+    list-style: none;
+    flex: 1 0 8rem;
+}
+
+.experiment ul li a {
+    display: block;
+    padding: .3rem .5rem;
+    margin: .3rem;
+    text-decoration: none;
+    background: #33691e;
+    color: #ffffff;
+    box-shadow: 1px 1px 3px -1px black;
+}

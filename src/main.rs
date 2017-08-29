@@ -36,6 +36,7 @@ fn run() -> Result<()> {
         .manage(db::init_pool(&database_url)?)
         .mount("/", routes![
             web::index,
+            web::overview,
             web::event,
             web::group,
             web::static_file,

@@ -3,36 +3,20 @@
 {% block head %}
     {{super()}}
     <link rel="stylesheet" href="/static/index.css" />
-    <script src="/static/index.js"></script>
 {% endblock head %}
 
 {% block title %}Übersicht{% endblock title %}
 {% block heading %}Hardwarepraktikum{% endblock heading %}
 
 {% block content %}
-    <nav class="analysis">
-        <a href="/analysis/missing-reworks?format=html">Fehlende Nachbesserungen</a>
-        <a href="/analysis/passed?format=html">Zugelassene Studenten</a>
+    <nav class="years">
+        {% for year in years %}
+        <a href="/{{ year }}">Hardwarepraktikum {{ year }}</a>
+        {% endfor %}
     </nav>
     {{super()}}
 {% endblock content %}
 
 {% block main %}
-    <div class="search">
-        <input type="text" placeholder="Gruppe suchen…" autocomplete="off" />
-        <ul></ul>
-    </div>
-    <div class="box-wrapper"><!--
-        {% for experiment in experiments %}
-        --><div class="experiment box">
-            <h2>{{ experiment.name }}</h2>
-            <ul>
-                {% for event in experiment.events %}
-                <li><a href="/{{ event.date }}">{{ event.day }}<br />{{ event.date }}</a></li>
-                {% endfor %}
-            </ul>
-        </div><!--
-        {% endfor %}
-    --></div>
     <div class="version" title="{{ commit_id }}"><a href="https://git.informatik.uni-leipzig.de/ti/hwprak/hwpb">hwpb</a> {{ version }}</div>
 {% endblock main %}

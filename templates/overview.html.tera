@@ -1,0 +1,39 @@
+{% extends "base" %}
+
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/overview.css" />
+    <script src="/static/overview.js"></script>
+{% endblock head %}
+
+{% block data %}data-year="{{ year }}"{% endblock data %}
+
+{% block title %}Hardwarepraktikum {{ year }}{% endblock title %}
+{% block heading %}<a href="/">Hardwarepraktikum {{ year }}</a>{% endblock heading %}
+
+{% block content %}
+    <nav class="analysis">
+        <a href="/analysis/{{ year }}/missing-reworks?format=html">Fehlende Nachbesserungen</a>
+        <a href="/analysis/{{ year }}/passed?format=html">Zugelassene Studenten</a>
+    </nav>
+    {{super()}}
+{% endblock content %}
+
+{% block main %}
+    <div class="search">
+        <input type="text" placeholder="Gruppe suchen…" autocomplete="off" />
+        <ul></ul>
+    </div>
+    <div class="box-wrapper"><!--
+        {% for experiment in experiments %}
+        --><div class="experiment box">
+            <h2>{{ experiment.name }}</h2>
+            <ul>
+                {% for event in experiment.events %}
+                <li><a href="/{{ event.date }}">{{ event.day }}<br />{{ event.date }}</a></li>
+                {% endfor %}
+            </ul>
+        </div><!--
+        {% endfor %}
+    --></div>
+{% endblock main %}

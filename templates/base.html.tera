@@ -9,7 +9,7 @@
     <script src="/static/base.js"></script>
     {% endblock head %}
 </head>
-<body>
+<body {% block data %}{% endblock data %}>
     <div id="overlay">{% block overlay %}{% endblock overlay %}</div>
     <header>
         {% block header %}

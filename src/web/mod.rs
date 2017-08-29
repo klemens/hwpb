@@ -35,12 +35,22 @@ impl Deref for Date {
 #[get("/")]
 fn index(conn: db::Conn, _user: User) -> Result<Template> {
     let context = models::Index {
-        experiments: models::find_events(&conn)?,
+        years: models::find_years(&conn)?,
         version: env!("CARGO_PKG_VERSION"),
         commit_id: include_str!(concat!(env!("OUT_DIR"), "/commit-id")),
     };
 
     Ok(Template::render("index", &context))
+}
+
+#[get("/<year>", rank = 2)]
+fn overview(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
+    let context = models::Overview {
+        year: year,
+        experiments: models::find_events(year, &conn)?,
+    };
+
+    Ok(Template::render("overview", &context))
 }
 
 #[get("/<date>")]

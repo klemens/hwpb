@@ -8,8 +8,10 @@
     <script src="/static/group.js"></script>
 {% endblock head %}
 
+{% block data %}data-year="{{ year }}"{% endblock data %}
+
 {% block title %}Gruppe {{ desk }}, {{ day }}{% endblock title %}
-{% block heading %}<a href="/">Gruppe {{ desk }}, {{ day }}</a>{% endblock heading %}
+{% block heading %}<a href="/{{ year }}">Gruppe {{ desk }}, {{ day }}</a>{% endblock heading %}
 
 {% block overlay %}
     <div class="search">

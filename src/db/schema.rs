@@ -12,6 +12,7 @@ table! {
     days (id) {
         id -> Int4,
         name -> Text,
+        year -> Int2,
     }
 }
 
@@ -38,6 +39,7 @@ table! {
     experiments (id) {
         id -> Int4,
         name -> Text,
+        year -> Int2,
     }
 }
 
@@ -62,6 +64,7 @@ table! {
         id -> Int4,
         matrikel -> Text,
         name -> Text,
+        year -> Int2,
     }
 }
 
