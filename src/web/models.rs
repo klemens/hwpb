@@ -4,7 +4,7 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use errors::*;
 use itertools::Itertools;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
 pub struct Index {
@@ -16,14 +16,17 @@ pub struct Index {
 
 #[derive(Serialize)]
 pub struct Experiment {
-    pub id: String,
+    pub id: i32,
+    pub name: String,
     pub events: Vec<Event>,
 }
 
 #[derive(Serialize)]
 pub struct Event {
     pub date: String,
+    pub day_id: i32,
     pub day: String,
+    pub experiment_id: i32,
     pub experiment: String,
     pub groups: Vec<EventGroup>,
     pub prev_event: Option<String>,
@@ -53,6 +56,7 @@ pub struct GroupOverview {
 
 #[derive(Serialize)]
 pub struct GroupOverviewEvent {
+    pub experiment_id: i32,
     pub experiment: String,
     pub group: GroupOverviewGroup,
 }
@@ -67,7 +71,7 @@ pub struct GroupOverviewGroup {
 
 #[derive(Serialize)]
 pub struct Student {
-    pub id: String,
+    pub id: i32,
     pub name: String,
 }
 
@@ -82,11 +86,15 @@ pub struct SearchGroup {
 pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
     let events = db::events::table
         .order((db::events::experiment_id.asc(), db::events::date.asc()))
-        .load::<db::Event>(conn)?
-        .into_iter().map(|e| Event {
-            date: format!("{}", e.date),
-            day: e.day_id,
-            experiment: e.experiment_id,
+        .inner_join(db::days::table)
+        .inner_join(db::experiments::table)
+        .load::<(db::Event, db::Day, db::Experiment)>(conn)?
+        .into_iter().map(|(event, day, experiment)| Event {
+            date: format!("{}", event.date),
+            day_id: day.id,
+            day: day.name,
+            experiment_id: experiment.id,
+            experiment: experiment.name,
             groups: vec![],
             prev_event: None,
             next_event: None,
@@ -96,14 +104,15 @@ pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
     let mut result: Vec<Experiment> = vec![];
     for new_event in events {
         if let Some(event) = result.last_mut() {
-            if new_event.experiment == event.id {
+            if new_event.experiment_id == event.id {
                 event.events.push(new_event);
                 continue;
             }
         }
 
         result.push(Experiment {
-            id: new_event.experiment.clone(),
+            id: new_event.experiment_id,
+            name: new_event.experiment.clone(),
             events: vec![new_event],
         });
     }
@@ -114,7 +123,11 @@ pub fn find_events(conn: &PgConnection) -> Result<Vec<Experiment>> {
 pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
     use db::{completions, elaborations, events, groups, tasks};
 
-    let event: db::Event = events::table.filter(events::date.eq(date)).first(conn)?;
+    let (event, day, experiment) = events::table
+        .inner_join(db::days::table)
+        .inner_join(db::experiments::table)
+        .filter(events::date.eq(date))
+        .first::<(db::Event, db::Day, db::Experiment)>(conn)?;
 
     let tasks = tasks::table.filter(tasks::experiment_id.eq(&event.experiment_id))
         .order(tasks::name.asc()).load::<db::Task>(conn)?;
@@ -180,8 +193,10 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
 
     Ok(Event {
         date: format!("{}", date),
-        day: event.day_id,
-        experiment: event.experiment_id,
+        day_id: day.id,
+        day: day.name,
+        experiment_id: experiment.id,
+        experiment: experiment.name,
         groups: web_groups,
         prev_event: prev_event.map(|e| format!("{}", e.date)),
         next_event: next_event.map(|e| format!("{}", e.date)),
@@ -191,15 +206,23 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
 pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
     use db::{completions, elaborations, groups, tasks};
 
-    let group: db::Group = groups::table.find(group).first(conn)?;
+    let (group, day) = groups::table
+        .inner_join(db::days::table)
+        .filter(db::groups::id.eq(group))
+        .first::<(db::Group, db::Day)>(conn)?;
     let disqualified = group.comment.contains("(ENDE)");
 
     // Load all available tasks and group by experiment
-    let tasks: BTreeMap<_,Vec<_>> = tasks::table
-        .order((tasks::experiment_id.asc(), tasks::name.asc()))
-        .load::<db::Task>(conn)?.into_iter()
-        .group_by(|task| task.experiment_id.clone()).into_iter()
-        .map(|(k, v)| (k, v.collect()))
+    let tasks: Vec<(_, Vec<_>)> = tasks::table
+        .inner_join(db::experiments::table)
+        .order((db::experiments::name.asc(), tasks::name.asc()))
+        .load::<(db::Task, db::Experiment)>(conn)?.into_iter()
+        .group_by(|&(_, ref experiment)| experiment.name.clone()).into_iter()
+        .map(|(_, grouped_values)| {
+            let (tasks, mut experiments): (Vec<_>, Vec<_>) = grouped_values.unzip();
+            let experiment = experiments.pop().expect("all groups are non-empty");
+            (experiment, tasks)
+        })
         .collect();
 
     // Load all completions and elaborations for the group
@@ -226,9 +249,10 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
                 id: group.id,
                 disqualified: disqualified,
                 tasks: tasks,
-                elaboration: elaborations.get(&experiment).cloned(),
+                elaboration: elaborations.get(&experiment.id).cloned(),
             },
-            experiment: experiment,
+            experiment_id: experiment.id,
+            experiment: experiment.name,
         }
     }).collect();
 
@@ -244,7 +268,7 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
     Ok(GroupOverview {
         id: group.id,
         desk: group.desk,
-        day: group.day_id,
+        day: day.name,
         comment: group.comment,
         students: students,
         events: events,
@@ -258,7 +282,7 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<
     for term in terms {
         query = query.filter(
             students::name.ilike(format!("%{}%", term.as_ref())).or(
-                students::id.ilike(format!("%{}%", term.as_ref()))
+                students::matrikel.ilike(format!("%{}%", term.as_ref()))
             )
         );
     }
@@ -284,19 +308,21 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Ve
         for term in terms {
             query = query.filter(
                 students::name.ilike(format!("%{}%", term.as_ref())).or(
-                    students::id.ilike(format!("%{}%", term.as_ref()))
+                    students::matrikel.ilike(format!("%{}%", term.as_ref()))
                 )
             );
         }
         query.load::<i32>(conn)?
     };
-    let groups = groups::table
+    let (groups, days): (_, Vec<_>) = groups::table
+        .inner_join(db::days::table)
         .filter(groups::id.eq_any(group_ids))
-        .order((groups::day_id, groups::desk))
-        .load(conn)?;
+        .order((db::days::name, groups::desk))
+        .load::<(db::Group, db::Day)>(conn)?
+        .into_iter().unzip();
 
     let search_groups = load_students_for_groups(groups, conn)?
-        .into_iter().map(|(group, students)| {
+        .into_iter().zip(days).map(|((group, students), day)| {
             let students = students.into_iter().map(|student| {
                 Student {
                     id: student.id,
@@ -307,7 +333,7 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Ve
             SearchGroup {
                 id: group.id,
                 desk: group.desk,
-                day: group.day_id,
+                day: day.name,
                 students: students,
             }
         })
@@ -325,20 +351,21 @@ fn load_students_for_groups(groups: Vec<db::Group>, conn: &PgConnection) -> Resu
     // TODO: replace with proper multi-join once diesel 0.14 lands
     let student_map: HashMap<_,_> = {
         let student_ids: Vec<_> = mappings.iter()
-            .map(|m| m.student_id.as_str())
+            .map(|m| m.student_id)
             .collect();
         let students = students::table
             .filter(students::id.eq_any(&student_ids))
             .load::<db::Student>(conn)?;
-        students.into_iter().map(|s| (s.id, s.name)).collect()
+        students.into_iter().map(|s| (s.id, (s.matrikel, s.name))).collect()
     };
 
     let mappings = mappings.grouped_by(&groups);
     Ok(groups.into_iter().zip(mappings).map(|(group, mappings)| {
         let students = mappings.into_iter().map(|mapping| {
-            let name = student_map[&mapping.student_id].clone();
+            let (matrikel, name) = student_map[&mapping.student_id].clone();
             db::Student {
                 id: mapping.student_id,
+                matrikel: matrikel,
                 name: name,
             }
         }).collect();

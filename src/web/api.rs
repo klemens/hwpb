@@ -49,7 +49,7 @@ struct Elaboration {
 }
 
 #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
-fn put_elaboration(group: i32, experiment: String, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> Result<NoContent> {
     let elaboration = db::Elaboration {
         group_id: group,
         experiment_id: experiment,
@@ -69,7 +69,7 @@ fn put_elaboration(group: i32, experiment: String, elaboration: Json<Elaboration
 }
 
 #[delete("/group/<group>/elaboration/<experiment>")]
-fn delete_elaboration(group: i32, experiment: String, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, _user: User) -> Result<NoContent> {
     diesel::delete(db::elaborations::table
         .filter(db::elaborations::group_id.eq(group))
         .filter(db::elaborations::experiment_id.eq(experiment)))
@@ -97,7 +97,7 @@ fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, _user: User) -> R
 }
 
 #[put("/group/<group>/student/<student>")]
-fn put_group_student(group: i32, student: String, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn put_group_student(group: i32, student: i32, conn: db::Conn, _user: User) -> Result<NoContent> {
     let mapping = db::GroupMapping {
         student_id: student,
         group_id: group,
@@ -111,7 +111,7 @@ fn put_group_student(group: i32, student: String, conn: db::Conn, _user: User) -
 }
 
 #[delete("/group/<group>/student/<student>")]
-fn delete_group_student(group: i32, student: String, conn: db::Conn, _user: User) -> Result<NoContent> {
+fn delete_group_student(group: i32, student: i32, conn: db::Conn, _user: User) -> Result<NoContent> {
     diesel::delete(db::group_mappings::table
         .filter(db::group_mappings::student_id.eq(student))
         .filter(db::group_mappings::group_id.eq(group)))

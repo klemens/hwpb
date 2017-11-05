@@ -4,12 +4,14 @@ use super::schema::*;
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
 pub struct Day {
-    pub id: String,
+    pub id: i32,
+    pub name: String,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
 pub struct Experiment {
-    pub id: String,
+    pub id: i32,
+    pub name: String,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
@@ -17,8 +19,8 @@ pub struct Experiment {
 #[belongs_to(Experiment)]
 pub struct Event {
     pub id: i32,
-    pub day_id: String,
-    pub experiment_id: String,
+    pub day_id: i32,
+    pub experiment_id: i32,
     pub date: NaiveDate,
 }
 
@@ -26,7 +28,7 @@ pub struct Event {
 pub struct Group {
     pub id: i32,
     pub desk: i32,
-    pub day_id: String,
+    pub day_id: i32,
     pub comment: String,
 }
 
@@ -34,13 +36,14 @@ pub struct Group {
 #[table_name="groups"]
 pub struct NewGroup {
     desk: i32,
-    day_id: String,
+    day_id: i32,
     comment: String,
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
 pub struct Student {
-    pub id: String,
+    pub id: i32,
+    pub matrikel: String,
     pub name: String,
 }
 
@@ -50,7 +53,7 @@ pub struct Student {
 #[belongs_to(Student)]
 #[belongs_to(Group)]
 pub struct GroupMapping {
-    pub student_id: String,
+    pub student_id: i32,
     pub group_id: i32,
 }
 
@@ -58,7 +61,7 @@ pub struct GroupMapping {
 #[belongs_to(Experiment)]
 pub struct Task {
     pub id: i32,
-    pub experiment_id: String,
+    pub experiment_id: i32,
     pub name: String,
 }
 
@@ -81,7 +84,7 @@ pub struct Completion {
 #[belongs_to(Experiment)]
 pub struct Elaboration {
     pub group_id: i32,
-    pub experiment_id: String,
+    pub experiment_id: i32,
     pub rework_required: bool,
     pub accepted: bool,
     pub accepted_by: Option<String>,

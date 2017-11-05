@@ -28,9 +28,9 @@
 
 {% block main %}
     <div id="add-group" class="button round" title="Gruppe hinzufügen">+</div>
-    <div class="experiment box-wrapper" data-id="{{ experiment }}" data-day="{{ day }}"><!--
+    <div class="experiment box-wrapper" data-id="{{ experiment_id }}" data-day="{{ day_id }}"><!--
         {% for group in groups %}
-        -->{{ macros::group_card(group=group, experiment=false) }}<!--
+        -->{{ macros::group_card(group=group, experiment=false, experiment_id=false) }}<!--
         {% endfor %}
     --></div>
 {% endblock main %}

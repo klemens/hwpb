@@ -25,7 +25,7 @@
     <div class="box-wrapper"><!--
         {% for experiment in experiments %}
         --><div class="experiment box">
-            <h2>{{ experiment.id }}</h2>
+            <h2>{{ experiment.name }}</h2>
             <ul>
                 {% for event in experiment.events %}
                 <li><a href="/{{ event.date }}">{{ event.day }}<br />{{ event.date }}</a></li>

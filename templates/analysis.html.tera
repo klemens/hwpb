@@ -13,7 +13,7 @@
         <table>
             {% for student in students %}
             <tr>
-                <td>{{ student.id }}</td>
+                <td>{{ student.matrikel }}</td>
                 <td>
                     {% for group in student.groups %}
                     <a href="/group/{{ group }}">Gruppe {{ group }}</a>{% if not loop.last %},{% endif %}

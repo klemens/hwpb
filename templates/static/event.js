@@ -70,7 +70,7 @@ async function onNewGroup(event) {
             headers: new Headers({"Content-Type": "application/json"}),
             body: JSON.stringify({
                 desk: desk,
-                day_id: day,
+                day_id: parseInt(day, 10),
                 comment: ""
             })
         });

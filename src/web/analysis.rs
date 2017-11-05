@@ -66,7 +66,7 @@ fn missing_reworks(export: Export, conn: db::Conn, _user: User) -> Result<Templa
         .cloned()
         .collect();
 
-    students.sort_by(|left, right| left.id.cmp(&right.id));
+    students.sort_by(|left, right| left.matrikel.cmp(&right.matrikel));
 
     let context = Analysis {
         heading: "Fehlende Nachbesserungen",
@@ -83,18 +83,18 @@ fn missing_reworks(export: Export, conn: db::Conn, _user: User) -> Result<Templa
 
 #[derive(Clone, Debug, Eq, Serialize)]
 struct Student {
-    id: String,
+    matrikel: String,
     groups: HashSet<i32>,
 }
 
 impl PartialEq for Student {
     fn eq(&self, other: &Student) -> bool {
-        self.id == other.id
+        self.matrikel == other.matrikel
     }
 }
 impl Hash for Student {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
+        self.matrikel.hash(state);
     }
 }
 
@@ -113,14 +113,16 @@ fn load_tasks_by_student(conn: &PgConnection) -> Result<Vec<(Student, BitVec)>> 
     Ok(db::completions::table
         .inner_join(db::group_mappings::table
             .on(db::completions::group_id.eq(db::group_mappings::group_id)))
-        .order(db::group_mappings::student_id.asc())
-        .load::<(db::Completion, db::GroupMapping)>(conn)?.into_iter()
-        .group_by(|&(_, ref mapping)| mapping.student_id.clone()).into_iter()
-        .map(|(student_id, completions)| {
+        .inner_join(db::students::table
+            .on(db::group_mappings::student_id.eq(db::students::id)))
+        .order(db::students::matrikel.asc())
+        .load::<(db::Completion, db::GroupMapping, db::Student)>(conn)?.into_iter()
+        .group_by(|&(_, _, ref student)| student.matrikel.clone()).into_iter()
+        .map(|(matrikel, completions)| {
             let mut completed_tasks = BitVec::from_elem(tasks.len(), false);
             let mut groups = HashSet::new();
 
-            for (completion, _) in completions {
+            for (completion, _, _) in completions {
                 // Can be None because of the additional tasks
                 if let Some(index) = tasks.get(&completion.task_id) {
                     completed_tasks.set(*index, true);
@@ -129,7 +131,7 @@ fn load_tasks_by_student(conn: &PgConnection) -> Result<Vec<(Student, BitVec)>> 
             }
 
             (Student {
-                id: student_id,
+                matrikel: matrikel,
                 groups: groups,
             }, completed_tasks)
         })
@@ -152,6 +154,8 @@ fn load_elaborations_by_student(rework_required: Option<bool>, accepted: Option<
     let mut query = db::elaborations::table
         .inner_join(db::group_mappings::table
             .on(db::elaborations::group_id.eq(db::group_mappings::group_id)))
+        .inner_join(db::students::table
+            .on(db::group_mappings::student_id.eq(db::students::id)))
         .into_boxed();
     if let Some(rework) = rework_required {
         query = query.filter(db::elaborations::rework_required.eq(rework));
@@ -161,14 +165,14 @@ fn load_elaborations_by_student(rework_required: Option<bool>, accepted: Option<
     }
 
     Ok(query
-        .order(db::group_mappings::student_id.asc())
-        .load::<(db::Elaboration, db::GroupMapping)>(conn)?.into_iter()
-        .group_by(|&(_, ref mapping)| mapping.student_id.clone()).into_iter()
-        .map(|(student_id, elaborations)| {
+        .order(db::students::matrikel.asc())
+        .load::<(db::Elaboration, db::GroupMapping, db::Student)>(conn)?.into_iter()
+        .group_by(|&(_, _, ref student)| student.matrikel.clone()).into_iter()
+        .map(|(matrikel, elaborations)| {
             let mut existing_elaborations = BitVec::from_elem(experiments.len(), false);
             let mut groups = HashSet::new();
 
-            for (elaboration, _) in elaborations {
+            for (elaboration, _, _) in elaborations {
                 // Cannot be none, because experiments is complete
                 let index = experiments.get(&elaboration.experiment_id).unwrap();
                 existing_elaborations.set(*index, true);
@@ -176,7 +180,7 @@ fn load_elaborations_by_student(rework_required: Option<bool>, accepted: Option<
             }
 
             (Student {
-                id: student_id,
+                matrikel: matrikel,
                 groups: groups,
             }, existing_elaborations)
         })

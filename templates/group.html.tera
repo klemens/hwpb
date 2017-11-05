@@ -36,7 +36,7 @@
     </div>
     <div class="box-wrapper"><!--
         {% for event in events %}
-        -->{{ macros::group_card(group=event.group, experiment=event.experiment) }}<!--
+        -->{{ macros::group_card(group=event.group, experiment=event.experiment, experiment_id=event.experiment_id) }}<!--
         {% endfor %}
     --></div>
 {% endblock main %}
