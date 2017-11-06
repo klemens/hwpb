@@ -34,5 +34,5 @@
         </div><!--
         {% endfor %}
     --></div>
-    <div class="version" title="{{ commit_id }}"><a href="https://git.informatik.uni-leipzig.de/hardwarepraktikum/hwpb">hwpb</a> {{ version }}</div>
+    <div class="version" title="{{ commit_id }}"><a href="https://git.informatik.uni-leipzig.de/ti/hwprak/hwpb">hwpb</a> {{ version }}</div>
 {% endblock main %}
