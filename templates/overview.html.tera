@@ -13,8 +13,8 @@
 
 {% block content %}
     <nav class="analysis">
-        <a href="/analysis/{{ year }}/missing-reworks?format=html">Fehlende Nachbesserungen</a>
-        <a href="/analysis/{{ year }}/passed?format=html">Zugelassene Studenten</a>
+        <a href="/analysis/missing-reworks/{{ year }}?format=html">Fehlende Nachbesserungen</a>
+        <a href="/analysis/passed/{{ year }}?format=html">Zugelassene Studenten</a>
     </nav>
     {{super()}}
 {% endblock content %}

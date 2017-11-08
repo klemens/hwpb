@@ -240,6 +240,7 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
     // Load all available tasks and group by experiment
     let tasks: Vec<(_, Vec<_>)> = tasks::table
         .inner_join(db::experiments::table)
+        .filter(db::experiments::year.eq(day.year))
         .order((db::experiments::name.asc(), tasks::name.asc()))
         .load::<(db::Task, db::Experiment)>(conn)?.into_iter()
         .group_by(|&(_, ref experiment)| experiment.name.clone()).into_iter()
