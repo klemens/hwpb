@@ -348,10 +348,18 @@ async function handleStudentClick(event) {
 }
 
 async function searchStudents(terms) {
+    let year = parseInt(document.body.dataset.year);
+    if(!year) {
+        throw "Invalid or no year found";
+    }
+
     let response = await myfetch("/api/student/search", {
         method: "POST",
         headers: new Headers({"Content-Type": "application/json"}),
-        body: JSON.stringify(terms)
+        body: JSON.stringify({
+            terms: terms,
+            year: year
+        })
     });
     if(!response.ok) {
         throw "API error";

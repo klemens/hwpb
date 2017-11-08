@@ -120,16 +120,22 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, _user: User) -
     Ok(NoContent)
 }
 
-#[post("/group/search", data = "<terms>")]
-fn search_groups(terms: Json<Vec<String>>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::SearchGroup>>> {
-    let groups = super::models::find_groups(&*terms, &conn)?;
+#[derive(Deserialize)]
+struct Search {
+    terms: Vec<String>,
+    year: i16,
+}
+
+#[post("/group/search", data = "<search>")]
+fn search_groups(search: Json<Search>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::SearchGroup>>> {
+    let groups = super::models::find_groups(&search.terms, search.year, &conn)?;
 
     Ok(Json(groups))
 }
 
-#[post("/student/search", data = "<terms>")]
-fn search_students(terms: Json<Vec<String>>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::Student>>> {
-    let students = super::models::find_students(&*terms, &conn)?;
+#[post("/student/search", data = "<search>")]
+fn search_students(search: Json<Search>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::Student>>> {
+    let students = super::models::find_students(&search.terms, search.year, &conn)?;
 
     Ok(Json(students))
 }

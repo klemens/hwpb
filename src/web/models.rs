@@ -301,10 +301,12 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
     })
 }
 
-pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Vec<Student>> {
+pub fn find_students<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
     use db::students;
 
-    let mut query = students::table.into_boxed();
+    let mut query = students::table
+        .filter(students::year.eq(year))
+        .into_boxed();
     for term in terms {
         query = query.filter(
             students::name.ilike(format!("%{}%", term.as_ref())).or(
@@ -323,13 +325,14 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<
     })?)
 }
 
-pub fn find_groups<T: AsRef<str>>(terms: &[T], conn: &PgConnection) -> Result<Vec<SearchGroup>> {
+pub fn find_groups<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection) -> Result<Vec<SearchGroup>> {
     use db::{groups, group_mappings, students};
 
     let group_ids = {
         let mut query = students::table
             .inner_join(group_mappings::table)
             .select(group_mappings::group_id)
+            .filter(students::year.eq(year))
             .into_boxed();
         for term in terms {
             query = query.filter(
