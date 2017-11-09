@@ -41,6 +41,7 @@ fn run() -> Result<()> {
             web::static_file,
             web::session::nologin_index,
             web::session::nologin_path,
+            web::session::login_redirect,
             web::session::get_login,
             web::session::post_login,
             web::session::logout,

@@ -14,6 +14,7 @@
         <form action="/login" method="post" accept-charset="utf-8">
             <input name="username" type="text" placeholder="Benutzername" autofocus="autofocus" />
             <input name="password" type="password" placeholder="Passwort" />
+            <input name="redirect" type="hidden" value="{{ redirect }}" />
             <button type="submit">Login</button>
         </form>
 {% endblock main %}
