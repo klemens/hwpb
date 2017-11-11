@@ -37,9 +37,9 @@ pub struct Group {
 #[derive(Debug, Deserialize, Insertable)]
 #[table_name="groups"]
 pub struct NewGroup {
-    desk: i32,
-    day_id: i32,
-    comment: String,
+    pub desk: i32,
+    pub day_id: i32,
+    pub comment: String,
 }
 
 #[derive(Debug, Clone, Queryable, Identifiable, Associations)]
@@ -76,8 +76,6 @@ pub struct Task {
 pub struct Completion {
     pub group_id: i32,
     pub task_id: i32,
-    pub tutor: Option<String>,
-    pub completed_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Queryable, Insertable, AsChangeset, Identifiable, Associations)]
@@ -90,7 +88,25 @@ pub struct Elaboration {
     pub experiment_id: i32,
     pub rework_required: bool,
     pub accepted: bool,
-    pub accepted_by: Option<String>,
+}
+
+#[derive(Debug, Queryable, Identifiable)]
+pub struct AuditLog {
+    pub id: i32,
+    pub created_at: DateTime<Utc>,
+    pub year: i16,
+    pub author: String,
+    pub affected_group: Option<i32>,
+    pub change: String,
+}
+
+#[derive(Debug, Insertable)]
+#[table_name="audit_logs"]
+pub struct NewAuditLog<'a, 'b> {
+    pub year: i16,
+    pub author: &'a str,
+    pub affected_group: Option<i32>,
+    pub change: &'b str,
 }
 
 use std::borrow::Borrow;

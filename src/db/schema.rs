@@ -1,10 +1,19 @@
 // These table definitions can be generated using `diesel print-schema`
 table! {
+    audit_logs (id) {
+        id -> Int4,
+        created_at -> Timestamptz,
+        year -> Int2,
+        author -> Text,
+        affected_group -> Nullable<Int4>,
+        change -> Text,
+    }
+}
+
+table! {
     completions (group_id, task_id) {
         group_id -> Int4,
         task_id -> Int4,
-        tutor -> Nullable<Text>,
-        completed_at -> Nullable<Timestamptz>,
     }
 }
 
@@ -22,7 +31,6 @@ table! {
         experiment_id -> Int4,
         rework_required -> Bool,
         accepted -> Bool,
-        accepted_by -> Nullable<Text>,
     }
 }
 
