@@ -46,6 +46,8 @@ fn run() -> Result<()> {
             web::session::get_login,
             web::session::post_login,
             web::session::logout,
+            web::audit::audit_index,
+            web::audit::audit_logs,
         ])
         .mount("/api", routes![
             web::api::post_group,
