@@ -91,10 +91,9 @@ pub struct SearchGroup {
 }
 
 pub fn find_years(conn: &PgConnection) -> Result<Vec<i16>> {
-    let years = db::days::table
-        .select(db::days::year)
-        .distinct()
-        .order(db::days::year.desc())
+    let years = db::years::table
+        .select(db::years::id)
+        .order(db::years::id.desc())
         .load::<i16>(conn)?;
 
     Ok(years)

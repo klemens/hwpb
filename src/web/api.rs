@@ -8,24 +8,7 @@ use rocket::response::status::{Custom, NoContent};
 use rocket_contrib::Json;
 use web::session::User;
 
-enum AuditContext {
-    Group(i32),
-    Year(i16),
-}
-
-fn add_audit_log(context: AuditContext, author: &str, conn: &PgConnection, change: &str) -> Result<()> {
-    let (year, group) = match context {
-        AuditContext::Group(group) => {
-            let year = db::groups::table
-                .inner_join(db::days::table)
-                .filter(db::groups::id.eq(group))
-                .select(db::days::year)
-                .get_result(conn)?;
-            (year, Some(group))
-        },
-        AuditContext::Year(year) => (year, None),
-    };
-
+fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnection, change: &str) -> Result<()> {
     let log = db::NewAuditLog {
         year: year,
         author: author,
@@ -44,6 +27,20 @@ fn add_audit_log(context: AuditContext, author: &str, conn: &PgConnection, chang
     }
 }
 
+fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
+    match db::groups::table
+        .inner_join(db::days::table
+        .inner_join(db::years::table))
+        .filter(db::groups::id.eq(group))
+        .filter(db::years::writable.eq(true))
+        .select(db::years::id)
+        .get_result(conn)
+        .optional()? {
+        Some(year) => Ok(year),
+        None => Err("Changing a read-only year is not allowed".into())
+    }
+}
+
 #[post("/group", data = "<group>")]
 fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> Result<NoContent> {
     conn.transaction(|| {
@@ -52,9 +49,11 @@ fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> Result<N
             .returning(db::groups::id)
             .get_result(&*conn)?;
 
+        let year = find_writable_year(id, &*conn)?;
+
         let day_name: String = db::days::table.find(group.day_id)
             .select(db::days::name).get_result(&*conn)?;
-        add_audit_log(AuditContext::Group(id), &user.name, &*conn,
+        add_audit_log(year, Some(id), &user.name, &*conn,
             &format!("Create new group at desk {} on {} (#{}) with comment '{}'",
                 group.desk, day_name, group.day_id, group.comment))?;
 
@@ -70,6 +69,8 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<N
     };
 
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         diesel::insert(&completion.on_conflict_do_nothing())
             .into(db::completions::table)
             .execute(&*conn)?;
@@ -78,7 +79,7 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<N
             .inner_join(db::experiments::table)
             .select((db::experiments::name, db::tasks::name))
             .get_result::<(String, String)>(&*conn)?;
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Mark task {} (#{}) of {} as completed",
                 task_name, task, experiment_name))?;
 
@@ -89,6 +90,8 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<N
 #[delete("/group/<group>/completed/<task>")]
 fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<NoContent> {
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         diesel::delete(db::completions::table
             .filter(db::completions::group_id.eq(group))
             .filter(db::completions::task_id.eq(task)))
@@ -98,7 +101,7 @@ fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Resul
             .inner_join(db::experiments::table)
             .select((db::experiments::name, db::tasks::name))
             .get_result::<(String, String)>(&*conn)?;
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Unmark task {} (#{}) of {} as completed",
                 task_name, task, experiment_name))?;
 
@@ -122,6 +125,8 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
     };
 
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         diesel::insert(
             &elaboration.on_conflict(
                 (db::elaborations::group_id, db::elaborations::experiment_id),
@@ -137,7 +142,7 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
         };
         let experiment_name: String = db::experiments::table.find(experiment)
             .select(db::experiments::name).get_result(&*conn)?;
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Mark elaboration of {} (#{}) as {}",
                 experiment_name, experiment, status))?;
 
@@ -148,6 +153,8 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
 #[delete("/group/<group>/elaboration/<experiment>")]
 fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -> Result<NoContent> {
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         diesel::delete(db::elaborations::table
             .filter(db::elaborations::group_id.eq(group))
             .filter(db::elaborations::experiment_id.eq(experiment)))
@@ -155,7 +162,7 @@ fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -
 
         let experiment_name: String = db::experiments::table.find(experiment)
             .select(db::experiments::name).get_result(&*conn)?;
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Mark elaboration of {} (#{}) as missing",
                 experiment_name, experiment))?;
 
@@ -166,12 +173,14 @@ fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -
 #[put("/group/<group>/comment", data = "<comment>")]
 fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: User) -> Result<NoContent> {
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         let comment = comment.into_inner();
         diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
             .set(db::groups::comment.eq(&comment))
             .execute(&*conn)?;
 
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Change comment to '{}'", comment))?;
 
         Ok(NoContent)
@@ -181,12 +190,14 @@ fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: Us
 #[put("/group/<group>/desk", data = "<desk>")]
 fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> Result<NoContent> {
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         let desk = desk.into_inner();
         diesel::update(db::groups::table.filter(db::groups::id.eq(group)))
             .set(db::groups::desk.eq(desk))
             .execute(&*conn)?;
 
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Change desk to {}", desk))?;
 
         Ok(NoContent)
@@ -201,13 +212,15 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Re
     };
 
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         diesel::insert(&mapping)
             .into(db::group_mappings::table)
             .execute(&*conn)?;
 
         let student_name: String = db::students::table.find(student)
             .select(db::students::name).get_result(&*conn)?;
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Add {} (#{}) to group", student_name, student))?;
 
         Ok(NoContent)
@@ -217,6 +230,8 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Re
 #[delete("/group/<group>/student/<student>")]
 fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Result<Custom<()>> {
     conn.transaction(|| {
+        let year = find_writable_year(group, &*conn)?;
+
         let num_completions: i64 = db::completions::table
             .filter(db::completions::group_id.eq(group))
             .count().get_result(&*conn)?;
@@ -236,7 +251,7 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
 
         let student_name: String = db::students::table.find(student)
             .select(db::students::name).get_result(&*conn)?;
-        add_audit_log(AuditContext::Group(group), &user.name, &*conn,
+        add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Remove {} (#{}) from group", student_name, student))?;
 
         Ok(Custom(Status::NoContent, ()))

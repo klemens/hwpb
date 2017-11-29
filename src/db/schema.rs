@@ -84,19 +84,30 @@ table! {
     }
 }
 
+table! {
+    years (id) {
+        id -> Int2,
+        writable -> Bool,
+    }
+}
+
+joinable!(completions -> groups (group_id));
+joinable!(completions -> tasks (task_id));
+joinable!(days -> years (year));
+joinable!(elaborations -> experiments (experiment_id));
 joinable!(elaborations -> groups (group_id));
 joinable!(events -> days (day_id));
 joinable!(events -> experiments (experiment_id));
-joinable!(groups -> days (day_id));
-joinable!(elaborations -> experiments (experiment_id));
-joinable!(tasks -> experiments (experiment_id));
-joinable!(completions -> groups (group_id));
-joinable!(completions -> tasks (task_id));
-joinable!(group_mappings -> students (student_id));
+joinable!(experiments -> years (year));
 joinable!(group_mappings -> groups (group_id));
+joinable!(group_mappings -> students (student_id));
+joinable!(groups -> days (day_id));
+joinable!(students -> years (year));
+joinable!(tasks -> experiments (experiment_id));
 
 // These often occur in the same query, although not directly related
 enable_multi_table_joins!(days, experiments);
+enable_multi_table_joins!(groups, years);
 
 // Additional non-primary-key joins, for which the on-clause must be
 // specified separately
