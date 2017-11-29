@@ -322,7 +322,16 @@ async function handleStudentClick(event) {
         let studentId = target.dataset.id;
         let studentName = target.textContent;
 
-        if(!confirm(studentName + " wirklich aus der Gruppe entfernen?")) {
+        let warningMessage =
+            studentName + " wirklich aus der Gruppe entfernen?\n" +
+            "Dies ist nur möglich, falls die Gruppe noch keine Aufgaben " +
+            "abgeschlossen oder Ausarbeitungen eingereicht hat!\n\n" +
+            "Bei Gruppenwechseln oder dem Auflösen einer Gruppe müssen für " +
+            "*ALLE* Teilnehmer der alten Gruppe neue Gruppen angelegt werden, " +
+            "damit der Bestanden-Status am Ende korrekt berechnet werden kann. " +
+            "Die alte Gruppe darf nicht weiter verwendet werden und kann mit " +
+            "\"(ENDE)\" im Kommentarfeld ausgegraut und ans Ende gestellt werden.";
+        if(!confirm(warningMessage)) {
             return;
         }
 
@@ -335,7 +344,9 @@ async function handleStudentClick(event) {
             let response = await myfetch(url, {
                 method: "DELETE"
             });
-            if(!response.ok) {
+            if(response.status == 423) {
+                throw "Es existieren bereits abgeschlossene Aufgaben oder Ausarbeitungen!";
+            } else if(!response.ok) {
                 throw "API error";
             }
 

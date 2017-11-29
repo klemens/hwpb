@@ -3,7 +3,8 @@ use diesel;
 use diesel::pg::upsert::*;
 use diesel::prelude::*;
 use errors::*;
-use rocket::response::status::NoContent;
+use rocket::http::Status;
+use rocket::response::status::{Custom, NoContent};
 use rocket_contrib::Json;
 use web::session::User;
 
@@ -214,8 +215,20 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Re
 }
 
 #[delete("/group/<group>/student/<student>")]
-fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Result<Custom<()>> {
     conn.transaction(|| {
+        let num_completions: i64 = db::completions::table
+            .filter(db::completions::group_id.eq(group))
+            .count().get_result(&*conn)?;
+        let num_elaborations: i64 = db::elaborations::table
+            .filter(db::elaborations::group_id.eq(group))
+            .count().get_result(&*conn)?;
+
+        if num_completions + num_elaborations > 0 {
+            // Return 423 Locked when deletion is not possible
+            return Ok(Custom(Status::Locked, ()));
+        }
+
         diesel::delete(db::group_mappings::table
             .filter(db::group_mappings::student_id.eq(student))
             .filter(db::group_mappings::group_id.eq(group)))
@@ -226,7 +239,7 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
         add_audit_log(AuditContext::Group(group), &user.name, &*conn,
             &format!("Remove {} (#{}) from group", student_name, student))?;
 
-        Ok(NoContent)
+        Ok(Custom(Status::NoContent, ()))
     })
 }
 
