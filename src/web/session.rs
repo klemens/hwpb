@@ -119,6 +119,7 @@ fn logout(mut cookies: Cookies) -> Redirect {
 }
 
 fn redirect_to_login(sucess_redirect: &str) -> Redirect {
-    let sucess_redirect = URI::percent_encode(sucess_redirect);
-    Redirect::to(&format!("/login?redirect={}", sucess_redirect))
+    let success_redirect = URI::percent_encode(sucess_redirect)
+        .replace("&", "%26"); // '&' is not encoded by default like '?'
+    Redirect::to(&format!("/login?redirect={}", success_redirect))
 }
