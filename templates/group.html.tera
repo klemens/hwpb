@@ -8,7 +8,7 @@
     <script src="/static/group.js"></script>
 {% endblock head %}
 
-{% block data %}data-year="{{ year }}"{% endblock data %}
+{% block data %}data-year="{{ year }}"{% if read_only %} data-read-only=""{% endif %}{% endblock data %}
 
 {% block title %}Gruppe {{ desk }}, {{ day }}{% endblock title %}
 {% block heading %}<a href="/{{ year }}">Gruppe {{ desk }}, {{ day }}</a>{% endblock heading %}

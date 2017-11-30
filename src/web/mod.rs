@@ -48,6 +48,7 @@ fn index(conn: db::Conn, _user: User) -> Result<Template> {
 fn overview(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     let context = models::Overview {
         year: year,
+        read_only: !models::is_writable_year(year, &conn)?,
         experiments: models::find_events(year, &conn)?,
     };
 

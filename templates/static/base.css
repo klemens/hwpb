@@ -12,6 +12,10 @@ body {
     background: #f9fbe7;
 }
 
+body[data-read-only] {
+    filter: sepia(.8) grayscale(1);
+}
+
 header {
     color: #eee;
     background: #33691e;

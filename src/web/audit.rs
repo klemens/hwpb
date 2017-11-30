@@ -5,6 +5,7 @@ use errors::*;
 use rocket::response::Redirect;
 use rocket_contrib::Template;
 use web::session::User;
+use web::models;
 
 #[derive(Serialize)]
 struct AuditLog {
@@ -20,7 +21,7 @@ struct AuditLog {
 struct AuditContext {
     logs: Vec<AuditLog>,
     filters: AuditFilters,
-    years: Vec<i16>,
+    years: Vec<models::Year>,
     authors: Vec<String>,
 }
 
@@ -48,7 +49,7 @@ fn audit_logs(filters: AuditFilters, conn: db::Conn, _user: User) -> Result<Temp
     let context = AuditContext {
         logs: load_audit_logs(&filters, &*conn)?,
         filters: filters,
-        years: super::models::find_years(&*conn)?,
+        years: models::find_years(&*conn)?,
         authors: authors,
     };
 

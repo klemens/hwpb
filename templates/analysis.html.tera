@@ -5,8 +5,10 @@
     <link rel="stylesheet" href="/static/analysis.css" />
 {% endblock head %}
 
-{% block title %}{{ heading }}{% endblock title %}
-{% block heading %}<a href="/">{{ heading }}</a>{% endblock heading %}
+{% block data %}{% if read_only_year %}data-read-only=""{% endif %}{% endblock data %}
+
+{% block title %}{{ heading }} ({{ year }}){% endblock title %}
+{% block heading %}<a href="/{{ year }}">{{ heading }} ({{ year }})</a>{% endblock heading %}
 
 {% block main %}
     <div class="box-wrapper">

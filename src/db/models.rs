@@ -109,6 +109,12 @@ pub struct NewAuditLog<'a, 'b> {
     pub change: &'b str,
 }
 
+#[derive(Debug, Queryable, Identifiable)]
+pub struct Year {
+    pub id: i16,
+    pub writable: bool,
+}
+
 use std::borrow::Borrow;
 
 impl Borrow<str> for Student {

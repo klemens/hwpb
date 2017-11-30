@@ -18,7 +18,7 @@
                         <select name="year" required="required">
                             <option value="">Praktikum filtern</option>
                             {% for year in years %}
-                            <option value="{{ year }}" {% if filters.year == year %}selected="selected"{% endif %}>HWP {{ year }}</option>
+                            <option value="{{ year.name }}" {% if filters.year == year.name %}selected="selected"{% endif %}>HWP {{ year.name }}</option>
                             {% endfor %}
                         </select>
                     </th>

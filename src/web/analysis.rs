@@ -9,11 +9,14 @@ use rocket_contrib::Template;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 use web::session::User;
+use web::models::is_writable_year;
 
 #[derive(Serialize)]
 struct Analysis {
     heading: &'static str,
     students: Vec<Student>,
+    year: i16,
+    read_only_year: bool,
 }
 
 #[derive(FromForm)]
@@ -33,6 +36,8 @@ fn passed(year: i16, export: Export, conn: db::Conn, _user: User) -> Result<Temp
     let context = Analysis {
         heading: "Zugelassene Studenten",
         students: students,
+        year: year,
+        read_only_year: !is_writable_year(year, &conn)?,
     };
 
     match export.format.as_str() {
@@ -71,6 +76,8 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, _user: User) -> Re
     let context = Analysis {
         heading: "Fehlende Nachbesserungen",
         students: students,
+        year: year,
+        read_only_year: !is_writable_year(year, &conn)?,
     };
 
     match export.format.as_str() {

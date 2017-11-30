@@ -11,7 +11,7 @@
 {% block content %}
     <nav class="years">
         {% for year in years %}
-        <a href="/{{ year }}">Hardwarepraktikum {{ year }}</a>
+        <a href="/{{ year.name }}"{% if year.read_only %} data-read-only=""{% endif %}>Hardwarepraktikum {{ year.name }}</a>
         {% endfor %}
     </nav>
     {{super()}}

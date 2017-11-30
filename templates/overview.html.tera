@@ -6,7 +6,7 @@
     <script src="/static/overview.js"></script>
 {% endblock head %}
 
-{% block data %}data-year="{{ year }}"{% endblock data %}
+{% block data %}data-year="{{ year }}"{% if read_only %} data-read-only=""{% endif %}{% endblock data %}
 
 {% block title %}Hardwarepraktikum {{ year }}{% endblock title %}
 {% block heading %}<a href="/">Hardwarepraktikum {{ year }}</a>{% endblock heading %}

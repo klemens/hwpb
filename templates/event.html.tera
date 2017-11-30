@@ -8,7 +8,7 @@
     <script src="/static/event.js"></script>
 {% endblock head %}
 
-{% block data %}data-year="{{ year }}"{% endblock data %}
+{% block data %}data-year="{{ year }}"{% if read_only %} data-read-only=""{% endif %}{% endblock data %}
 
 {% block title %}{{ experiment }}, {{ day }}, {{ date }}{% endblock title %}
 {% block heading %}<a href="/{{ year }}">{{ experiment }}, {{ day }}, {{ date }}</a>{% endblock heading %}

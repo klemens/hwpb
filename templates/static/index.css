@@ -11,14 +11,15 @@ nav.years a {
     font-weight: bold;
     padding: .3rem .5rem;
     margin: .6rem .3rem;
-    background: #cddc39;
-    color: #999999;
-    box-shadow: 1px 1px 3px -1px #444;
+    background: #33691e;
+    color: #ffffff;
+    box-shadow: 1px 1px 3px -1px black;
+}
+
+nav.years a[data-read-only] {
+    filter: sepia(.8) grayscale(1);
 }
 
 nav.years a:first-of-type {
     margin-bottom: 1.5rem;
-    background: #33691e;
-    color: #ffffff;
-    box-shadow: 1px 1px 3px -1px black;
 }

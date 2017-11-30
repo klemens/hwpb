@@ -7,8 +7,14 @@ use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
+pub struct Year {
+    name: i16,
+    read_only: bool,
+}
+
+#[derive(Serialize)]
 pub struct Index {
-    pub years: Vec<i16>,
+    pub years: Vec<Year>,
     pub version: &'static str,
     pub commit_id: &'static str,
 }
@@ -16,6 +22,7 @@ pub struct Index {
 #[derive(Serialize)]
 pub struct Overview {
     pub year: i16,
+    pub read_only: bool,
     pub experiments: Vec<Experiment>,
 }
 
@@ -29,6 +36,7 @@ pub struct Experiment {
 #[derive(Serialize)]
 pub struct Event {
     pub year: i16,
+    pub read_only: bool,
     pub date: String,
     pub day_id: i32,
     pub day: String,
@@ -55,6 +63,7 @@ pub struct GroupOverview {
     pub id: i32,
     pub desk: i32,
     pub year: i16,
+    pub read_only: bool,
     pub day: String,
     pub comment: String,
     pub students: Vec<Student>,
@@ -90,11 +99,16 @@ pub struct SearchGroup {
     pub students: Vec<Student>,
 }
 
-pub fn find_years(conn: &PgConnection) -> Result<Vec<i16>> {
+pub fn find_years(conn: &PgConnection) -> Result<Vec<Year>> {
     let years = db::years::table
-        .select(db::years::id)
         .order(db::years::id.desc())
-        .load::<i16>(conn)?;
+        .load::<db::Year>(conn)?
+        .into_iter()
+        .map(|year| Year {
+            name: year.id,
+            read_only: !year.writable
+        })
+        .collect();
 
     Ok(years)
 }
@@ -113,7 +127,18 @@ pub fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
     }
 }
 
+pub fn is_writable_year(year: i16, conn: &PgConnection) -> Result<bool> {
+    let count: i64 = db::years::table
+        .filter(db::years::id.eq(year))
+        .filter(db::years::writable.eq(true))
+        .count()
+        .get_result(conn)?;
+
+    Ok(count > 0)
+}
+
 pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
+    let writable_year = is_writable_year(year, conn)?;
     let days_this_year = db::days::table
         .filter(db::days::year.eq(year))
         .select(db::days::id)
@@ -127,6 +152,7 @@ pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
         .load::<(db::Event, db::Day, db::Experiment)>(conn)?
         .into_iter().map(|(event, day, experiment)| Event {
             year: year,
+            read_only: !writable_year,
             date: format!("{}", event.date),
             day_id: day.id,
             day: day.name,
@@ -230,6 +256,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
 
     Ok(Event {
         year: day.year,
+        read_only: !is_writable_year(day.year, conn)?,
         date: format!("{}", date),
         day_id: day.id,
         day: day.name,
@@ -308,6 +335,7 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
         id: group.id,
         desk: group.desk,
         year: day.year,
+        read_only: !is_writable_year(day.year, conn)?,
         day: day.name,
         comment: group.comment,
         students: students,
