@@ -99,6 +99,20 @@ pub fn find_years(conn: &PgConnection) -> Result<Vec<i16>> {
     Ok(years)
 }
 
+pub fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
+    match db::groups::table
+        .inner_join(db::days::table
+        .inner_join(db::years::table))
+        .filter(db::groups::id.eq(group))
+        .filter(db::years::writable.eq(true))
+        .select(db::years::id)
+        .get_result(conn)
+        .optional()? {
+        Some(year) => Ok(year),
+        None => Err("Changing a read-only year is not allowed".into())
+    }
+}
+
 pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
     let days_this_year = db::days::table
         .filter(db::days::year.eq(year))

@@ -5,6 +5,7 @@ use errors::*;
 use rocket::http::Status;
 use rocket::response::status::{Custom, NoContent};
 use rocket_contrib::Json;
+use web::models::find_writable_year;
 use web::session::User;
 
 fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnection, change: &str) -> Result<()> {
@@ -23,20 +24,6 @@ fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnectio
         Err("Could not insert audit log".into())
     } else {
         Ok(())
-    }
-}
-
-fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
-    match db::groups::table
-        .inner_join(db::days::table
-        .inner_join(db::years::table))
-        .filter(db::groups::id.eq(group))
-        .filter(db::years::writable.eq(true))
-        .select(db::years::id)
-        .get_result(conn)
-        .optional()? {
-        Some(year) => Ok(year),
-        None => Err("Changing a read-only year is not allowed".into())
     }
 }
 
