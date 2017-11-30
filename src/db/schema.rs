@@ -105,13 +105,16 @@ joinable!(groups -> days (day_id));
 joinable!(students -> years (year));
 joinable!(tasks -> experiments (experiment_id));
 
-// These often occur in the same query, although not directly related
-enable_multi_table_joins!(days, experiments);
-enable_multi_table_joins!(groups, years);
-
-// Additional non-primary-key joins, for which the on-clause must be
-// specified separately
-enable_multi_table_joins!(completions, group_mappings); // group_id
-enable_multi_table_joins!(elaborations, group_mappings); // group_id
-enable_multi_table_joins!(completions, students); // student_id
-enable_multi_table_joins!(elaborations, students); // student_id
+allow_tables_to_appear_in_same_query!(
+    audit_logs,
+    completions,
+    days,
+    elaborations,
+    events,
+    experiments,
+    group_mappings,
+    groups,
+    students,
+    tasks,
+    years,
+);

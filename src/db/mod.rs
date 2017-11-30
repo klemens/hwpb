@@ -26,9 +26,8 @@ pub fn run_migrations(database_url: &str) -> Result<()> {
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool(database_url: &str) -> Result<Pool> {
-    let config = r2d2::Config::default();
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    r2d2::Pool::new(config, manager).chain_err(|| "Could not init DB pool")
+    r2d2::Pool::new(manager).chain_err(|| "Could not init DB pool")
 }
 
 pub struct Conn(r2d2::PooledConnection<ConnectionManager<PgConnection>>);

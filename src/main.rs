@@ -4,7 +4,7 @@
 extern crate bit_vec;
 extern crate chrono;
 #[macro_use] extern crate diesel;
-#[macro_use] extern crate diesel_codegen;
+#[macro_use] extern crate diesel_migrations;
 #[macro_use] extern crate error_chain;
 extern crate itertools;
 extern crate pam_auth;

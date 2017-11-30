@@ -1,6 +1,5 @@
 use db;
 use diesel;
-use diesel::pg::upsert::*;
 use diesel::prelude::*;
 use errors::*;
 use rocket::http::Status;
@@ -16,8 +15,8 @@ fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnectio
         change: change,
     };
 
-    let inserted = diesel::insert(&log)
-        .into(db::audit_logs::table)
+    let inserted = diesel::insert_into(db::audit_logs::table)
+        .values(&log)
         .execute(conn)?;
 
     if inserted != 1 {
@@ -44,8 +43,8 @@ fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
 #[post("/group", data = "<group>")]
 fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> Result<NoContent> {
     conn.transaction(|| {
-        let id: i32 = diesel::insert(&*group)
-            .into(db::groups::table)
+        let id: i32 = diesel::insert_into(db::groups::table)
+            .values(&*group)
             .returning(db::groups::id)
             .get_result(&*conn)?;
 
@@ -71,8 +70,9 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<N
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
-        diesel::insert(&completion.on_conflict_do_nothing())
-            .into(db::completions::table)
+        diesel::insert_into(db::completions::table)
+            .values(&completion)
+            .on_conflict_do_nothing()
             .execute(&*conn)?;
 
         let (experiment_name, task_name) = db::tasks::table.find(task)
@@ -127,12 +127,12 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
-        diesel::insert(
-            &elaboration.on_conflict(
-                (db::elaborations::group_id, db::elaborations::experiment_id),
-                do_update().set(&elaboration)
-            )
-        ).into(db::elaborations::table).execute(&*conn)?;
+        diesel::insert_into(db::elaborations::table)
+            .values(&elaboration)
+            .on_conflict((db::elaborations::group_id, db::elaborations::experiment_id))
+                .do_update()
+                .set(&elaboration)
+            .execute(&*conn)?;
 
         let status = match (elaboration.rework_required, elaboration.accepted) {
             (false, false) => "submitted",
@@ -214,8 +214,8 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Re
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
-        diesel::insert(&mapping)
-            .into(db::group_mappings::table)
+        diesel::insert_into(db::group_mappings::table)
+            .values(&mapping)
             .execute(&*conn)?;
 
         let student_name: String = db::students::table.find(student)

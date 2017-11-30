@@ -1,6 +1,6 @@
 use bit_vec::BitVec;
 use db;
-use diesel::expression::not;
+use diesel::dsl::not;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use errors::*;
