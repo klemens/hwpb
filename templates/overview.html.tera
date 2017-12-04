@@ -15,6 +15,7 @@
     <nav class="analysis">
         <a href="/analysis/missing-reworks/{{ year }}?format=html">Fehlende Nachbesserungen</a>
         <a href="/analysis/passed/{{ year }}?format=html">Zugelassene Studenten</a>
+        <a class="admin" href="/admin/{{ year }}">Verwaltung</a>
     </nav>
     {{super()}}
 {% endblock content %}

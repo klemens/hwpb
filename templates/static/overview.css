@@ -21,6 +21,11 @@ nav.analysis a {
     box-shadow: 1px 1px 3px -1px black;
 }
 
+nav.analysis a.admin {
+    flex: 0;
+    background: #BF360C;
+}
+
 .search {
     position: absolute;
     left: 0;

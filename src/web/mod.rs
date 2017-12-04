@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod analysis;
 pub mod audit;
 pub mod api;

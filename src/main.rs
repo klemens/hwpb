@@ -66,6 +66,10 @@ fn run() -> Result<()> {
             web::analysis::passed,
             web::analysis::missing_reworks,
         ])
+        .mount("/admin", routes![
+            web::admin::index,
+            web::admin::events,
+        ])
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {
             let allowed_users = {

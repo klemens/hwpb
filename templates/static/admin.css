@@ -1,0 +1,68 @@
+header {
+    background-color: #BF360C;
+}
+
+header > div.wrapper {
+    display: flex;
+    overflow: auto;
+    max-width: 71.8rem;
+    margin: 0 auto;
+}
+
+header a.back {
+    padding: 0 .5rem;
+    font-size: 1rem;
+}
+
+header a.back > img {
+    height: 1.2em !important;
+    vertical-align: -1rem;
+}
+
+header select {
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-right: .5rem;
+    padding-right: 1.1rem;
+    background: linear-gradient(to top left, #BF360C 51%, transparent 51%),
+                linear-gradient(to top right, transparent 51%, #ffffff 51%);
+    background-size: 12px 12px;
+    background-position: 100% 62%;
+    background-repeat: no-repeat;
+    min-width: 7.5rem;
+    text-align: right;
+}
+
+header ul.tabs {
+    list-style: none;
+    display: flex;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0 auto;
+    padding: 0;
+    flex: auto;
+}
+
+header ul.tabs > li {
+    flex: 1 auto;
+    text-align: center;
+    max-width: 11rem;
+}
+
+header ul.tabs > li.active {
+    border-bottom: 3px solid #F9F043;
+}
+
+header ul.tabs > li > a {
+    display: block;
+    padding: .8rem 1rem .6rem;
+    text-decoration: none;
+    color: #ffffff;
+}
