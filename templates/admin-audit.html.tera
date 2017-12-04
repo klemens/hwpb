@@ -1,0 +1,46 @@
+{% extends "admin-base" %}
+
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/admin-audit.css" />
+    <script src="/static/admin-audit.js"></script>
+{% endblock head %}
+
+{% block title %}Audit-Log {{super()}}{% endblock title %}
+
+{% block main %}
+    <div class="box-wrapper">
+            <form class="filter" method="GET" action="/admin/{{ year }}/audit" novalidate="novalidate" autocomplete="off">
+                <table>
+                    <thead>
+                        <th>
+                            <input disabled="disabled" placeholder="Zeitpunkt" size="1">
+                        </th>
+                        <th>
+                            <input name="search" {% if filters.search %}value="{{ filters.search }}"{% endif %} placeholder="Suchen" />
+                            <input type="submit" hidden="hidden" />
+                        </th>
+                        <th>
+                            <input name="group" {% if filters.group %}value="{{ filters.group }}"{% endif %} placeholder="Gruppe" size="6" />
+                        </th>
+                        <th>
+                            <select name="author" required="required">
+                                <option value="">Autor filtern</option>
+                                {% for author in authors %}
+                                <option value="{{ author }}" {% if filters.author == author %}selected="selected"{% endif %}>{{ author }}</option>
+                                {% endfor %}
+                            </select>
+                        </th>
+                    </thead>
+                    {% for log in logs %}
+                    <tr>
+                        <td title="{{ log.time }}">{{ log.time_short }}</td>
+                        <td>{{ log.change }}</td>
+                        <td>{% if log.group %}<a href="/group/{{ log.group }}">{{ log.group }}</a>{% endif %}</td>
+                        <td>{{ log.author }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </form>
+        </div>
+{% endblock main %}

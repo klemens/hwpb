@@ -2,13 +2,10 @@ use db;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use errors::*;
-use rocket::response::Redirect;
-use rocket_contrib::Template;
-use web::session::User;
 use web::models;
 
 #[derive(Serialize)]
-struct AuditLog {
+pub struct Log {
     year: i16,
     time: String,
     time_short: String,
@@ -18,50 +15,35 @@ struct AuditLog {
 }
 
 #[derive(Serialize)]
-struct AuditContext {
-    logs: Vec<AuditLog>,
-    filters: AuditFilters,
-    years: Vec<models::Year>,
-    authors: Vec<String>,
+pub struct Context {
+    pub site: &'static str,
+    pub year: i16,
+    pub logs: Vec<Log>,
+    pub filters: Filters,
+    pub years: Vec<models::Year>,
+    pub authors: Vec<String>,
 }
 
 #[derive(FromForm, Serialize)]
-struct AuditFilters {
-    year: Option<i16>,
+pub struct Filters {
     search: Option<String>,
     group: Option<i32>,
     author: Option<String>,
 }
 
-#[get("/audit")]
-fn audit_index(_user: User) -> Redirect {
-    Redirect::to("/audit?")
-}
-
-#[get("/audit?<filters>")]
-fn audit_logs(filters: AuditFilters, conn: db::Conn, _user: User) -> Result<Template> {
-    let authors = db::audit_logs::table
+pub fn load_authors(conn: &PgConnection) -> Result<Vec<String>> {
+    Ok(db::audit_logs::table
         .select(db::audit_logs::author)
         .distinct()
         .order(db::audit_logs::author.asc())
-        .load(&*conn)?;
-
-    let context = AuditContext {
-        logs: load_audit_logs(&filters, &*conn)?,
-        filters: filters,
-        years: models::find_years(&*conn)?,
-        authors: authors,
-    };
-
-    Ok(Template::render("audit", context))
+        .load(&*conn)?)
 }
 
-fn load_audit_logs(filters: &AuditFilters, conn: &PgConnection) -> Result<Vec<AuditLog>> {
-    let mut query = db::audit_logs::table.into_boxed();
+pub fn load_logs(year: i16, filters: &Filters, conn: &PgConnection) -> Result<Vec<Log>> {
+    let mut query = db::audit_logs::table
+        .filter(db::audit_logs::year.eq(year))
+        .into_boxed();
 
-    if let Some(year) = filters.year {
-        query = query.filter(db::audit_logs::year.eq(year));
-    }
     if let Some(search) = filters.search.as_ref() {
         for term in search.split_whitespace() {
             query = query.filter(db::audit_logs::change.ilike(
@@ -82,7 +64,7 @@ fn load_audit_logs(filters: &AuditFilters, conn: &PgConnection) -> Result<Vec<Au
         .load::<db::AuditLog>(conn)?
         .into_iter()
         .map(|log| {
-            AuditLog {
+            Log {
                 year: log.year,
                 time: log.created_at.to_rfc3339(),
                 time_short: log.created_at.format("%Y-%m-%d %H:%M:%S").to_string(),

@@ -46,8 +46,6 @@ fn run() -> Result<()> {
             web::session::get_login,
             web::session::post_login,
             web::session::logout,
-            web::audit::audit_index,
-            web::audit::audit_logs,
         ])
         .mount("/api", routes![
             web::api::post_group,
@@ -69,6 +67,8 @@ fn run() -> Result<()> {
         .mount("/admin", routes![
             web::admin::index,
             web::admin::events,
+            web::admin::audit_index,
+            web::admin::audit,
         ])
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {

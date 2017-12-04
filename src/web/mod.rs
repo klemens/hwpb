@@ -1,6 +1,5 @@
 pub mod admin;
 pub mod analysis;
-pub mod audit;
 pub mod api;
 mod models;
 pub mod session;
