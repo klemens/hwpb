@@ -16,6 +16,13 @@ pub struct Experiment {
     pub year: i16,
 }
 
+#[derive(Debug, Deserialize, Insertable)]
+#[table_name="experiments"]
+pub struct NewExperiment {
+    pub name: String,
+    pub year: i16,
+}
+
 #[derive(Debug, Queryable, Identifiable, Associations)]
 #[belongs_to(Day)]
 #[belongs_to(Experiment)]

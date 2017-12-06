@@ -265,3 +265,87 @@ fn search_students(search: Json<Search>, conn: db::Conn, _user: User) -> Result<
 
     Ok(Json(students))
 }
+
+#[post("/experiment", data = "<experiment>")]
+fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+    conn.transaction(|| {
+        let id: i32 = diesel::insert_into(db::experiments::table)
+            .values(&*experiment)
+            .returning(db::experiments::id)
+            .get_result(&*conn)?;
+
+        add_audit_log(experiment.year, None, &user.name, &conn,
+            &format!("Create new experiment {} (#{})", experiment.name, id))?;
+
+        Ok(Json(id))
+    })
+}
+
+#[delete("/experiment/<experiment>")]
+fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+    conn.transaction(|| {
+        let full_experiment = db::experiments::table
+            .find(experiment)
+            .get_result::<db::Experiment>(&*conn)?;
+
+        diesel::delete(
+            db::experiments::table.find(experiment))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(full_experiment.year, None, &user.name, &conn,
+            &format!("Remove experiment {} (#{})", full_experiment.name, experiment))?;
+
+        Ok(NoContent)
+    })
+}
+
+#[post("/experiment/<experiment>/task", data = "<task>")]
+fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+    conn.transaction(|| {
+        let full_experiment = db::experiments::table
+            .find(experiment)
+            .get_result::<db::Experiment>(&*conn)?;
+
+        let id: i32 = diesel::insert_into(db::tasks::table)
+            .values((
+                db::tasks::experiment_id.eq(experiment),
+                db::tasks::name.eq(&*task),
+            ))
+            .returning(db::tasks::id)
+            .get_result(&*conn)?;
+
+        add_audit_log(full_experiment.year, None, &user.name, &conn,
+            &format!("Create task {} (#{}) for experiment {} (#{})",
+                *task, id, full_experiment.name, experiment))?;
+
+        Ok(Json(id))
+    })
+}
+
+#[delete("/experiment/<experiment>/task/<task>")]
+fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+    conn.transaction(|| {
+        let (task_name, experiment_name, year) = db::tasks::table
+            .inner_join(db::experiments::table)
+            .filter(db::tasks::id.eq(task))
+            .filter(db::experiments::id.eq(experiment))
+            .select((
+                db::tasks::name,
+                db::experiments::name,
+                db::experiments::year,
+            ))
+            .get_result::<(String, String, i16)>(&*conn)?;
+
+        diesel::delete(
+            db::tasks::table.find(task))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(year, None, &user.name, &conn,
+            &format!("Remove task {} (#{}) from experiment {} (#{})",
+                task_name, task, experiment_name, experiment))?;
+
+        Ok(NoContent)
+    })
+}
