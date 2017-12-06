@@ -22,8 +22,8 @@
 
 {% block main %}
     <div id="group" class="group box" data-id="{{ id }}">
-        <ul class="students">
-            <li class="add button round">+</li>
+        <ul class="students comma-separated">
+            <li class="add button round hide-comma">+</li>
             {% for student in students %}
             <li data-id="{{ student.id }}">{{ student.name }}</li>
             {% endfor %}

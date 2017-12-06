@@ -12,8 +12,8 @@
             <h2>{{ experiment }}</h2>
         {% else %}
             <h2><a href="/group/{{ group.id }}">Gruppe {{ group.desk }}</a> <a href=""><img alt="Tischnummer ändern" src="/static/icons/edit.svg" /></a></h2>
-            <ul class="students">
-                <li class="add button round">+</li>
+            <ul class="students comma-separated">
+                <li class="add button round hide-comma">+</li>
                 {% for student in group.students %}
                 <li data-id="{{ student.id }}">{{ student.name }}</li>
                 {% endfor %}
