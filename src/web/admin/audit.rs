@@ -18,9 +18,9 @@ pub struct Log {
 pub struct Context {
     pub site: &'static str,
     pub year: i16,
+    pub years: Vec<models::Year>,
     pub logs: Vec<Log>,
     pub filters: Filters,
-    pub years: Vec<models::Year>,
     pub authors: Vec<String>,
 }
 
