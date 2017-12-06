@@ -116,7 +116,8 @@ pub struct NewAuditLog<'a, 'b> {
     pub change: &'b str,
 }
 
-#[derive(Debug, Queryable, Identifiable)]
+#[derive(Debug, Queryable, Insertable, Identifiable)]
+#[table_name="years"]
 pub struct Year {
     pub id: i16,
     pub writable: bool,

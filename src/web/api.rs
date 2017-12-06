@@ -266,6 +266,39 @@ fn search_students(search: Json<Search>, conn: db::Conn, _user: User) -> Result<
     Ok(Json(students))
 }
 
+#[put("/year/<year>")]
+fn put_year(year: i16, conn: db::Conn, user: User) -> Result<NoContent> {
+    let db_year = db::Year {
+        id: year,
+        writable: true,
+    };
+
+    conn.transaction(|| {
+        diesel::insert_into(db::years::table)
+            .values(&db_year)
+            .execute(&*conn)?;
+
+        add_audit_log(year, None, &user.name, &conn,
+            &format!("Create new year {}", year))?;
+
+        Ok(NoContent)
+    })
+}
+
+#[put("/year/<year>/closed")]
+fn put_year_writable(year: i16, conn: db::Conn, user: User) -> Result<NoContent> {
+    conn.transaction(|| {
+        diesel::update(db::years::table.filter(db::years::id.eq(year)))
+            .set(db::years::writable.eq(false))
+            .execute(&*conn)?;
+
+        add_audit_log(year, None, &user.name, &conn,
+            &format!("Close year {} (no longer modifiable)", year))?;
+
+        Ok(NoContent)
+    })
+}
+
 #[post("/experiment", data = "<experiment>")]
 fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: User) -> Result<Json<i32>> {
     conn.transaction(|| {

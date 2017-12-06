@@ -59,6 +59,8 @@ fn run() -> Result<()> {
             web::api::delete_group_student,
             web::api::search_groups,
             web::api::search_students,
+            web::api::put_year,
+            web::api::put_year_writable,
             web::api::post_experiment,
             web::api::delete_experiment,
             web::api::post_experiment_task,
