@@ -37,8 +37,11 @@ header select {
     background-size: 12px 12px;
     background-position: 100% 62%;
     background-repeat: no-repeat;
-    min-width: 7.5rem;
-    text-align: right;
+}
+
+header select > option {
+    color: black;
+    background: white;
 }
 
 header ul.tabs {
