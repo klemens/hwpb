@@ -11,23 +11,21 @@
 {% block data %}data-year="{{ year }}" data-site="{{ site }}"{% endblock data %}
 
 {% block header %}
-    <header>
-        <div class="wrapper">
-            <a href="/{{ year }}" class="back">
-                <img src="/static/back.svg" />
-            </a>
-            <ul class="tabs">
-                <li {% if site == "experiments" %}class="active"{% endif %}><a href="/admin/{{ year }}/experiments">Versuche</a></li>
-                <li {% if site == "events" %}class="active"{% endif %}><a href="/admin/{{ year }}/events">Termine</a></li>
-                <li {% if site == "attendees" %}class="active"{% endif %}><a href="/admin/{{ year }}/attendees">Teilnehmer</a></li>
-                <li {% if site == "tutors" %}class="active"{% endif %}><a href="/admin/{{ year }}/tutors">Betreuer</a></li>
-                <li {% if site == "audit" %}class="active"{% endif %}><a href="/admin/{{ year }}/audit">Audit-Log</a></li>
-            </ul>
-            <select autocomplete="off">
-                {% for y in years %}
-                <option value="{{ y.name }}" {% if year == y.name %}selected="selected"{% endif %}>HWP {{ y.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </header>
+    <div class="wrapper">
+        <a href="/{{ year }}" class="back">
+            <img src="/static/back.svg" />
+        </a>
+        <ul class="tabs">
+            <li {% if site == "experiments" %}class="active"{% endif %}><a href="/admin/{{ year }}/experiments">Versuche</a></li>
+            <li {% if site == "events" %}class="active"{% endif %}><a href="/admin/{{ year }}/events">Termine</a></li>
+            <li {% if site == "attendees" %}class="active"{% endif %}><a href="/admin/{{ year }}/attendees">Teilnehmer</a></li>
+            <li {% if site == "tutors" %}class="active"{% endif %}><a href="/admin/{{ year }}/tutors">Betreuer</a></li>
+            <li {% if site == "audit" %}class="active"{% endif %}><a href="/admin/{{ year }}/audit">Audit-Log</a></li>
+        </ul>
+        <select autocomplete="off">
+            {% for y in years %}
+            <option value="{{ y.name }}" {% if year == y.name %}selected="selected"{% endif %}>HWP {{ y.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
 {% endblock header %}
