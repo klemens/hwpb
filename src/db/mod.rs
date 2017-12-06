@@ -4,8 +4,8 @@ mod schema;
 pub use self::models::*;
 pub use self::schema::*;
 
-use diesel::Connection;
-use diesel::pg::PgConnection;
+use diesel;
+use diesel::prelude::*;
 use errors::*;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
@@ -54,5 +54,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for Conn {
             Ok(conn) => Outcome::Success(Conn(conn)),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
         }
+    }
+}
+
+pub fn expect1(count: usize) -> QueryResult<usize> {
+    match count {
+        1 => Ok(count),
+        _ => Err(diesel::NotFound),
     }
 }

@@ -234,7 +234,8 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
         diesel::delete(db::group_mappings::table
             .filter(db::group_mappings::student_id.eq(student))
             .filter(db::group_mappings::group_id.eq(group)))
-            .execute(&*conn)?;
+            .execute(&*conn)
+            .and_then(db::expect1)?;
 
         let student_name: String = db::students::table.find(student)
             .select(db::students::name).get_result(&*conn)?;
