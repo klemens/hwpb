@@ -136,6 +136,17 @@ input {
     cursor: pointer;
 }
 
+.button.floating-add {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    height: 2rem;
+    width: 2rem;
+    font-size: 1.3rem;
+    line-height: 2rem;
+    z-index: 10;
+}
+
 .version {
     position: fixed;
     bottom: 0;
