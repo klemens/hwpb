@@ -14,6 +14,7 @@ use web::models;
 pub struct BaseContext {
     pub site: &'static str,
     pub year: i16,
+    pub read_only_year: bool,
     pub years: Vec<models::Year>,
 }
 
@@ -22,6 +23,7 @@ impl BaseContext {
         Ok(BaseContext {
             site: site,
             year: year,
+            read_only_year: !models::is_writable_year(year, &conn)?,
             years: models::find_years(&*conn)?,
         })
     }

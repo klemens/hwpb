@@ -8,7 +8,7 @@
 
 {% block title %}– Verwaltung{% endblock title %}
 
-{% block data %}data-year="{{ base.year }}" data-site="{{ base.site }}"{% endblock data %}
+{% block data %}data-year="{{ base.year }}" data-site="{{ base.site }}" {% if base.read_only_year %}data-read-only=""{% endif %}{% endblock data %}
 
 {% block header %}
     <div class="wrapper">
@@ -22,6 +22,11 @@
             <li {% if base.site == "tutors" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/tutors">Betreuer</a></li>
             <li {% if base.site == "audit" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/audit">Audit‑Log</a></li>
         </ul>
+        {% if base.read_only_year %}
+        <img class="padlock" src="/static/icons/locked.svg" title="Dieses Jahr wurde bereits abgeschlossen und kann nicht mehr verändert werden." />
+        {% else %}
+        <img id="close-year" class="padlock" src="/static/icons/unlocked.svg" title="Dieses Jahr abschließen" />
+        {% endif %}
         <select autocomplete="off">
             {% for y in base.years %}
             <option value="{{ y.name }}" {% if base.year == y.name %}selected="selected"{% endif %}>HWP {{ y.name }}</option>
