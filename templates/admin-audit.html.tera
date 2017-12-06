@@ -10,7 +10,7 @@
 
 {% block main %}
     <div class="box-wrapper">
-            <form class="filter" method="GET" action="/admin/{{ year }}/audit" novalidate="novalidate" autocomplete="off">
+            <form class="filter" method="GET" action="/admin/{{ base.year }}/audit" novalidate="novalidate" autocomplete="off">
                 <table>
                     <thead>
                         <th>

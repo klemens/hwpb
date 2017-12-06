@@ -3,11 +3,29 @@ mod event;
 mod experiment;
 
 use db;
+use diesel::PgConnection;
 use errors::*;
 use rocket::response::Redirect;
 use rocket_contrib::Template;
 use web::session::User;
 use web::models;
+
+#[derive(Serialize)]
+pub struct BaseContext {
+    pub site: &'static str,
+    pub year: i16,
+    pub years: Vec<models::Year>,
+}
+
+impl BaseContext {
+    fn new(site: &'static str, year: i16, conn: &PgConnection) -> Result<BaseContext> {
+        Ok(BaseContext {
+            site: site,
+            year: year,
+            years: models::find_years(&*conn)?,
+        })
+    }
+}
 
 #[get("/<year>")]
 fn index(year: i16, _user: User) -> Redirect {
@@ -17,9 +35,7 @@ fn index(year: i16, _user: User) -> Redirect {
 #[get("/<year>/events")]
 fn events(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     let context = event::Context {
-        site: "events",
-        year: year,
-        years: models::find_years(&*conn)?,
+        base: BaseContext::new("events", year, &conn)?,
     };
 
     Ok(Template::render("admin-events", context))
@@ -28,9 +44,7 @@ fn events(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
 #[get("/<year>/experiments")]
 fn experiments(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     let context = experiment::Context {
-        site: "experiments",
-        year: year,
-        years: models::find_years(&*conn)?,
+        base: BaseContext::new("experiments", year, &conn)?,
         experiments: experiment::load_experiments(year, &conn)?,
     };
 
@@ -45,11 +59,9 @@ fn audit_index(year: i16, _user: User) -> Redirect {
 #[get("/<year>/audit?<filters>")]
 fn audit(year: i16, filters: audit::Filters, conn: db::Conn, _user: User) -> Result<Template> {
     let context = audit::Context {
-        site: "audit",
-        year: year,
+        base: BaseContext::new("audit", year, &conn)?,
         logs: audit::load_logs(year, &filters, &conn)?,
         filters: filters,
-        years: models::find_years(&conn)?,
         authors: audit::load_authors(&conn)?,
     };
 

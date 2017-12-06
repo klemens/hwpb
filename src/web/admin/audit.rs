@@ -2,7 +2,6 @@ use db;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use errors::*;
-use web::models;
 
 #[derive(Serialize)]
 pub struct Log {
@@ -16,9 +15,7 @@ pub struct Log {
 
 #[derive(Serialize)]
 pub struct Context {
-    pub site: &'static str,
-    pub year: i16,
-    pub years: Vec<models::Year>,
+    pub base: super::BaseContext,
     pub logs: Vec<Log>,
     pub filters: Filters,
     pub authors: Vec<String>,
