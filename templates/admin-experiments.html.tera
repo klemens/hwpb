@@ -1,0 +1,26 @@
+{% extends "admin-base" %}
+
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/admin-experiments.css" />
+    <script src="/static/admin-experiments.js"></script>
+{% endblock head %}
+
+{% block title %}Versuche {{super()}}{% endblock title %}
+
+{% block main %}
+    <div id="add-experiment" class="button round floating-add" title="Versuch hinzufügen">+</div>
+    <div class="box-wrapper"><!--
+        {% for experiment in experiments %}
+        --><div class="experiment box" data-id="{{ experiment.id }}">
+            <h2>{{ experiment.name }}</h2>
+            <ol class="tasks comma-separated">
+                <li class="button round add hide-comma">+</li>
+                {% for task in experiment.tasks %}
+                <li data-id="{{ task.id }}">{{ task.name }}</li>
+                {% endfor %}
+            </ol>
+        </div><!--
+        {% endfor %}
+    --></div>
+{% endblock main %}

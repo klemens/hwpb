@@ -1,5 +1,6 @@
 mod audit;
 mod event;
+mod experiment;
 
 use db;
 use errors::*;
@@ -22,6 +23,18 @@ fn events(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     };
 
     Ok(Template::render("admin-events", context))
+}
+
+#[get("/<year>/experiments")]
+fn experiments(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
+    let context = experiment::Context {
+        site: "experiments",
+        year: year,
+        years: models::find_years(&*conn)?,
+        experiments: experiment::load_experiments(year, &conn)?,
+    };
+
+    Ok(Template::render("admin-experiments", context))
 }
 
 #[get("/<year>/audit")]

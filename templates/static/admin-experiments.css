@@ -1,0 +1,11 @@
+.experiment h2 {
+    margin: 0;
+    display: inline;
+}
+
+.experiment h2:hover,
+.experiment ol.tasks > li:not(.add):hover {
+    text-decoration: line-through;
+    cursor: pointer;
+    color: #666666;
+}

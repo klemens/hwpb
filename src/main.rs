@@ -70,6 +70,7 @@ fn run() -> Result<()> {
         ])
         .mount("/admin", routes![
             web::admin::index,
+            web::admin::experiments,
             web::admin::events,
             web::admin::audit_index,
             web::admin::audit,
