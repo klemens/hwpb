@@ -13,7 +13,7 @@
 {% block header %}
     <div class="wrapper">
         <a href="/{{ year }}" class="back">
-            <img src="/static/back.svg" />
+            <img src="/static/icons/back.svg" />
         </a>
         <ul class="tabs">
             <li {% if site == "experiments" %}class="active"{% endif %}><a href="/admin/{{ year }}/experiments">Versuche</a></li>
