@@ -26,6 +26,7 @@
             {% for y in base.years %}
             <option value="{{ y.name }}" {% if base.year == y.name %}selected="selected"{% endif %}>HWP {{ y.name }}</option>
             {% endfor %}
+            <option value="new-year">Neues Jahr</option>
         </select>
     </div>
 {% endblock header %}
