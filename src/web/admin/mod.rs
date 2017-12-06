@@ -11,7 +11,7 @@ use web::models;
 
 #[get("/<year>")]
 fn index(year: i16, _user: User) -> Redirect {
-    Redirect::to(&format!("/admin/{}/events", year))
+    Redirect::to(&format!("/admin/{}/experiments", year))
 }
 
 #[get("/<year>/events")]
