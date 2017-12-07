@@ -33,6 +33,7 @@ ol.experiments > li.experiment:focus-within > label {
 ol.experiments > li.experiment > input.date {
     padding: .3rem;
     min-width: 6rem;
+    text-align: right;
     background: transparent;
     border: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
@@ -40,4 +41,8 @@ ol.experiments > li.experiment > input.date {
 
 ol.experiments > li.experiment > input.date:focus {
     border-bottom-color: rgba(0, 0, 0, 0.4)
+}
+
+ol.experiments > li.experiment > input.date.dirty {
+    font-style: italic;
 }

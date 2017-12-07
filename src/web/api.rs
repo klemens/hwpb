@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use db;
 use diesel;
 use diesel::prelude::*;
@@ -378,6 +379,67 @@ fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User
         add_audit_log(year, None, &user.name, &conn,
             &format!("Remove task {} (#{}) from experiment {} (#{})",
                 task_name, task, experiment_name, experiment))?;
+
+        Ok(NoContent)
+    })
+}
+
+#[put("/experiment/<experiment>/day/<day>/event", data = "<date>")]
+fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user: User) -> Result<NoContent> {
+    let date: NaiveDate = date.parse().chain_err(|| "Invalid date")?;
+
+    conn.transaction(|| {
+        let record = db::Event {
+            day_id: day,
+            experiment_id: experiment,
+            date: date,
+        };
+
+        diesel::insert_into(db::events::table)
+            .values(&record)
+            .on_conflict((db::events::day_id, db::events::experiment_id))
+                .do_update()
+                .set(&record)
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        let experiment_name = db::experiments::table
+            .find(experiment)
+            .select(db::experiments::name)
+            .get_result::<String>(&*conn)?;
+        let (year, day_name) = db::days::table
+            .find(day)
+            .select((db::days::year, db::days::name))
+            .get_result::<(i16, String)>(&*conn)?;
+
+        add_audit_log(year, None, &user.name, &conn,
+            &format!("Set event date to {} for day {} (#{}) and experiment {} (#{})",
+                date, day_name, day, experiment_name, experiment))?;
+
+        Ok(NoContent)
+    })
+}
+
+#[delete("/experiment/<experiment>/day/<day>/event")]
+fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+    conn.transaction(|| {
+        diesel::delete(db::events::table
+            .find((day, experiment))) // beware the order of the columns!
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        let experiment_name = db::experiments::table
+            .find(experiment)
+            .select(db::experiments::name)
+            .get_result::<String>(&*conn)?;
+        let (year, day_name) = db::days::table
+            .find(day)
+            .select((db::days::year, db::days::name))
+            .get_result::<(i16, String)>(&*conn)?;
+
+        add_audit_log(year, None, &user.name, &conn,
+            &format!("Remove event date for day {} (#{}) and experiment {} (#{})",
+                day_name, day, experiment_name, experiment))?;
 
         Ok(NoContent)
     })

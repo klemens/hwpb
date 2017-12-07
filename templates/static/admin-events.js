@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+    for(let input of document.querySelectorAll(".experiment input.date")) {
+        input.dataset.prev_value = input.value;
+        input.addEventListener("input", onInputDate);
+        input.addEventListener("change", onChangeDate);
+    }
+
     for(let day of document.querySelectorAll(".day h2")) {
         day.addEventListener("click", onDeleteDay);
     }
@@ -7,6 +13,49 @@ document.addEventListener("DOMContentLoaded", () => {
         .addEventListener("click", onNewDay);
 });
 
+function onInputDate(event) {
+    let target = event.target;
+
+    if(target.dataset.prev_value === target.value) {
+        target.classList.remove("dirty");
+    } else {
+        target.classList.add("dirty");
+    }
+}
+
+async function onChangeDate(event) {
+    let target = event.target;
+    let date = target.value;
+
+    let experiment = target.closest(".experiment").dataset.id;
+    let day = target.closest(".day").dataset.id;
+
+    try {
+        let url = "/api/experiment/" + experiment + "/day/" + day + "/event";
+
+        let request = {
+            headers: new Headers({"Content-Type": "application/json"})
+        };
+        if(date) {
+            request.method = "PUT";
+            request.body = JSON.stringify(date);
+        } else {
+            request.method = "DELETE";
+        }
+
+        let response = await myfetch(url, request);
+        if(!response.ok) {
+            throw "API error";
+        }
+
+        target.dataset.prev_value = target.value;
+    } catch(e) {
+        toast("error", e);
+        target.value = target.dataset.prev_value;
+    }
+
+    target.classList.remove("dirty");
+}
 
 async function onDeleteDay(event) {
     let target = event.target;

@@ -30,7 +30,8 @@ pub struct NewExperiment {
     pub year: i16,
 }
 
-#[derive(Debug, Queryable, Identifiable, Associations)]
+#[derive(Debug, Queryable, Insertable, AsChangeset, Identifiable, Associations)]
+#[table_name="events"]
 #[primary_key(day_id, experiment_id)]
 #[belongs_to(Day)]
 #[belongs_to(Experiment)]

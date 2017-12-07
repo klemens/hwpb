@@ -65,6 +65,8 @@ fn run() -> Result<()> {
             web::api::delete_experiment,
             web::api::post_experiment_task,
             web::api::delete_experiment_task,
+            web::api::put_event,
+            web::api::delete_event,
             web::api::post_day,
             web::api::delete_day,
         ])
