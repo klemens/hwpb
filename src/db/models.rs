@@ -31,10 +31,10 @@ pub struct NewExperiment {
 }
 
 #[derive(Debug, Queryable, Identifiable, Associations)]
+#[primary_key(day_id, experiment_id)]
 #[belongs_to(Day)]
 #[belongs_to(Experiment)]
 pub struct Event {
-    pub id: i32,
     pub day_id: i32,
     pub experiment_id: i32,
     pub date: NaiveDate,

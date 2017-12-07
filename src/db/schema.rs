@@ -35,8 +35,7 @@ table! {
 }
 
 table! {
-    events (id) {
-        id -> Int4,
+    events (day_id, experiment_id) {
         day_id -> Int4,
         experiment_id -> Int4,
         date -> Date,
