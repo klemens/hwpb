@@ -1,0 +1,43 @@
+.day > h2 {
+    margin: 0;
+    display: inline;
+}
+
+.day h2:hover {
+    text-decoration: line-through;
+    cursor: pointer;
+    color: #666666;
+}
+
+ol.experiments {
+    list-style: none;
+    padding: 0;
+    margin: .6rem 0 .1rem;
+}
+
+ol.experiments > li.experiment {
+    display: flex;
+    align-items: stretch;
+}
+
+ol.experiments > li.experiment > label {
+    flex: auto;
+    padding: .3rem;
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.05);
+}
+
+ol.experiments > li.experiment:focus-within > label {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+ol.experiments > li.experiment > input.date {
+    padding: .3rem;
+    min-width: 6rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+ol.experiments > li.experiment > input.date:focus {
+    border-bottom-color: rgba(0, 0, 0, 0.4)
+}

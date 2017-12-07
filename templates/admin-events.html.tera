@@ -2,12 +2,29 @@
 
 {% block head %}
     {{super()}}
+    <link rel="stylesheet" href="/static/admin-events.css" />
+    <script src="/static/admin-events.js"></script>
 {% endblock head %}
 
 {% block title %}Termine {{super()}}{% endblock title %}
 
 {% block main %}
-    <div class="box-wrapper">
-        <div>TODO</div>
-    </div>
+    <div id="add-day" class="button round floating-add" title="Versuchstag hinzufügen">+</div>
+    <div class="box-wrapper"><!--
+        {% for day in days %}
+        --><div class="day box" data-id="{{ day.id }}">
+            <h2>{{ day.name }}</h2>
+            <ol class="experiments">
+                {% for experiment in day.experiments %}
+                <li class="experiment" data-id="{{ experiment.id }}">
+                    <label for="date-{{ day.id }}-{{ experiment.id }}">{{ experiment.name }}</label>
+                    <input id="date-{{ day.id }}-{{ experiment.id }}" class="date" autocomplete="off"
+                        type="date" size="1" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="yyyy-mm-dd"
+                        {% if experiment.date %}value="{{ experiment.date }}"{% endif %} />
+                </li>
+                {% endfor %}
+            </ol>
+        </div><!--
+        {% endfor %}
+    --></div>
 {% endblock main %}

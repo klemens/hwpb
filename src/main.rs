@@ -65,6 +65,8 @@ fn run() -> Result<()> {
             web::api::delete_experiment,
             web::api::post_experiment_task,
             web::api::delete_experiment_task,
+            web::api::post_day,
+            web::api::delete_day,
         ])
         .mount("/analysis", routes![
             web::analysis::passed,

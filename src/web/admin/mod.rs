@@ -34,15 +34,6 @@ fn index(year: i16, _user: User) -> Redirect {
     Redirect::to(&format!("/admin/{}/experiments", year))
 }
 
-#[get("/<year>/events")]
-fn events(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
-    let context = event::Context {
-        base: BaseContext::new("events", year, &conn)?,
-    };
-
-    Ok(Template::render("admin-events", context))
-}
-
 #[get("/<year>/experiments")]
 fn experiments(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     let context = experiment::Context {
@@ -51,6 +42,16 @@ fn experiments(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     };
 
     Ok(Template::render("admin-experiments", context))
+}
+
+#[get("/<year>/events")]
+fn events(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
+    let context = event::Context {
+        base: BaseContext::new("events", year, &conn)?,
+        days: event::load_days(year, &conn)?,
+    };
+
+    Ok(Template::render("admin-events", context))
 }
 
 #[get("/<year>/audit")]

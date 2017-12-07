@@ -382,3 +382,37 @@ fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User
         Ok(NoContent)
     })
 }
+
+#[post("/day", data = "<day>")]
+fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+    conn.transaction(|| {
+        let id: i32 = diesel::insert_into(db::days::table)
+            .values(&*day)
+            .returning(db::days::id)
+            .get_result(&*conn)?;
+
+        add_audit_log(day.year, None, &user.name, &conn,
+            &format!("Create new day {} (#{})", day.name, id))?;
+
+        Ok(Json(id))
+    })
+}
+
+#[delete("/day/<day>")]
+fn delete_day(day: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+    conn.transaction(|| {
+        let full_day = db::days::table
+            .find(day)
+            .get_result::<db::Day>(&*conn)?;
+
+        diesel::delete(
+            db::days::table.find(day))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(full_day.year, None, &user.name, &conn,
+            &format!("Remove day {} (#{})", full_day.name, day))?;
+
+        Ok(NoContent)
+    })
+}
