@@ -41,6 +41,7 @@ header img.padlock {
 }
 
 header select {
+    flex: 0 0 auto;
     box-sizing: border-box;
     -webkit-appearance: none;
     -moz-appearance: none;
