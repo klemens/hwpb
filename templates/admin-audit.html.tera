@@ -13,24 +13,26 @@
             <form class="filter" method="GET" action="/admin/{{ base.year }}/audit" novalidate="novalidate" autocomplete="off">
                 <table>
                     <thead>
-                        <th>
-                            <input disabled="disabled" placeholder="Zeitpunkt" size="1">
-                        </th>
-                        <th>
-                            <input name="search" {% if filters.search %}value="{{ filters.search }}"{% endif %} placeholder="Suchen" />
-                            <input type="submit" hidden="hidden" />
-                        </th>
-                        <th>
-                            <input name="group" {% if filters.group %}value="{{ filters.group }}"{% endif %} placeholder="Gruppe" size="6" />
-                        </th>
-                        <th>
-                            <select name="author" required="required">
-                                <option value="">Autor filtern</option>
-                                {% for author in authors %}
-                                <option value="{{ author }}" {% if filters.author == author %}selected="selected"{% endif %}>{{ author }}</option>
-                                {% endfor %}
-                            </select>
-                        </th>
+                        <tr>
+                            <th>
+                                <input disabled="disabled" placeholder="Zeitpunkt" size="1">
+                            </th>
+                            <th>
+                                <input name="search" {% if filters.search %}value="{{ filters.search }}"{% endif %} placeholder="Suchen" />
+                                <input type="submit" hidden="hidden" />
+                            </th>
+                            <th>
+                                <input name="group" {% if filters.group %}value="{{ filters.group }}"{% endif %} placeholder="Gruppe" size="6" />
+                            </th>
+                            <th>
+                                <select name="author" required="required">
+                                    <option value="">Autor filtern</option>
+                                    {% for author in authors %}
+                                    <option value="{{ author }}" {% if filters.author == author %}selected="selected"{% endif %}>{{ author }}</option>
+                                    {% endfor %}
+                                </select>
+                            </th>
+                        </tr>
                     </thead>
                     {% for log in logs %}
                     <tr>
