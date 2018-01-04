@@ -48,9 +48,7 @@ async function importStudents(event) {
             headers: new Headers({"Content-Type": "text/csv"}),
             body: files[0]
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         // reload to avoid rendering on the client
         location.reload(true);
@@ -86,9 +84,7 @@ async function onNewStudent(event) {
                 year: year
             })
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         // reload to avoid rendering on the client
         location.reload(true);
@@ -113,9 +109,7 @@ async function onDeleteStudent(event) {
         let response = await myfetch(url, {
             method: "DELETE"
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         targetRow.parentNode.removeChild(targetRow);
     } catch(e) {

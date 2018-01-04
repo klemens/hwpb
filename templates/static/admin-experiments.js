@@ -35,9 +35,7 @@ async function onTaskClick(event) {
                 headers: new Headers({"Content-Type": "application/json"}),
                 body: JSON.stringify(task.trim())
             });
-            if(!response.ok) {
-                throw "API error";
-            }
+            handleResponse(response);
 
             let id = await response.json();
 
@@ -64,9 +62,7 @@ async function onTaskClick(event) {
             let response = await myfetch(url, {
                 method: "DELETE"
             });
-            if(!response.ok) {
-                throw "API error";
-            }
+            handleResponse(response);
         } catch(e) {
             toast("error", e);
             insertSorted(parent, target, document.createTextNode("\n"));
@@ -91,9 +87,7 @@ async function onDeleteExperiment(event) {
         let response = await myfetch(url, {
             method: "DELETE"
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         experiment.parentNode.removeChild(experiment);
     } catch(e) {
@@ -120,9 +114,7 @@ async function onNewExperiment() {
                 year: year
             })
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         // reload to avoid rendering complex structures on the client
         location.reload(true);

@@ -37,6 +37,28 @@ function toast(type, message) {
     }, 7500);
 }
 
+
+function handleResponse(response, customErrors) {
+    if(response.ok) {
+        return;
+    }
+
+    const errors = {
+        422: "Die Änderung konnte aufgrund von bestehenden Abhängigkeiten nicht durchgeführt werden.",
+        423: "Die Änderung konnte nicht durchgeführt werden, da die Daten schreibgeschützt sind.",
+        500: "Unbekannter Serverfehler"
+    };
+
+    let status = response.status;
+    if(customErrors && customErrors[status]) {
+        throw customErrors[status];
+    } else if(errors[status]) {
+        throw errors[status];
+    } else {
+        throw "Unbekannter Fehler: " + status;
+    }
+}
+
 class SearchBox {
     constructor(element, searchCallback, successCallback) {
         this.box = element;
@@ -200,9 +222,7 @@ async function handleTaskChange(event) {
         };
 
         let response = await myfetch(url, options);
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
     } catch(e) {
         toast("error", e);
         event.target.checked = !checked;
@@ -237,9 +257,7 @@ async function handleElaborationChange(event) {
                 method: "DELETE"
             });
         }
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         event.target.dataset.prev_selected = event.target.selectedIndex;
     } catch(e) {
@@ -260,9 +278,7 @@ async function handleCommentSave(event) {
             headers: new Headers({"Content-Type": "application/json"}),
             body: JSON.stringify(comment)
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         event.target.closest(".comment").classList.remove("unsaved");
     } catch(e) {
@@ -308,9 +324,7 @@ async function handleStudentClick(event) {
                 let response = await myfetch(url, {
                     method: "PUT"
                 });
-                if(!response.ok) {
-                    throw "API error";
-                }
+                handleResponse(response);
 
                 searchBox.deactivate();
             } catch(e) {
@@ -344,11 +358,9 @@ async function handleStudentClick(event) {
             let response = await myfetch(url, {
                 method: "DELETE"
             });
-            if(response.status == 423) {
-                throw "Es existieren bereits abgeschlossene Aufgaben oder Ausarbeitungen!";
-            } else if(!response.ok) {
-                throw "API error";
-            }
+            handleResponse(response, {
+                422: "Es existieren bereits abgeschlossene Aufgaben oder Ausarbeitungen!"
+            });
 
             searchBox.deactivate();
         } catch(e) {
@@ -372,9 +384,7 @@ async function searchStudents(terms) {
             year: year
         })
     });
-    if(!response.ok) {
-        throw "API error";
-    }
+    handleResponse(response);
 
     return response.json();
 }

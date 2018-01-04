@@ -3,15 +3,14 @@ use csv::ReaderBuilder;
 use db;
 use diesel;
 use diesel::prelude::*;
-use errors::*;
+use errors::{ApiError, ApiResult, ResultExt};
 use rocket::Data;
-use rocket::http::Status;
-use rocket::response::status::{Custom, NoContent};
+use rocket::response::status::NoContent;
 use rocket_contrib::Json;
 use web::models::find_writable_year;
 use web::session::User;
 
-fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnection, change: &str) -> Result<()> {
+fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnection, change: &str) -> ApiResult<()> {
     let log = db::NewAuditLog {
         year: year,
         author: author,
@@ -19,19 +18,16 @@ fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnectio
         change: change,
     };
 
-    let inserted = diesel::insert_into(db::audit_logs::table)
+    diesel::insert_into(db::audit_logs::table)
         .values(&log)
-        .execute(conn)?;
+        .execute(conn)
+        .and_then(db::expect1)?;
 
-    if inserted != 1 {
-        Err("Could not insert audit log".into())
-    } else {
-        Ok(())
-    }
+    Ok(())
 }
 
 #[post("/group", data = "<group>")]
-fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let id: i32 = diesel::insert_into(db::groups::table)
             .values(&*group)
@@ -51,7 +47,7 @@ fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> Result<N
 }
 
 #[put("/group/<group>/completed/<task>")]
-fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     let completion = db::Completion {
         group_id: group,
         task_id: task,
@@ -78,7 +74,7 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<N
 }
 
 #[delete("/group/<group>/completed/<task>")]
-fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
@@ -106,7 +102,7 @@ struct Elaboration {
 }
 
 #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
-fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     let elaboration = db::Elaboration {
         group_id: group,
         experiment_id: experiment,
@@ -141,7 +137,7 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
 }
 
 #[delete("/group/<group>/elaboration/<experiment>")]
-fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
@@ -161,7 +157,7 @@ fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -
 }
 
 #[put("/group/<group>/comment", data = "<comment>")]
-fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
@@ -178,7 +174,7 @@ fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: Us
 }
 
 #[put("/group/<group>/desk", data = "<desk>")]
-fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
@@ -195,7 +191,7 @@ fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> Re
 }
 
 #[put("/group/<group>/student/<student>")]
-fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     let mapping = db::GroupMapping {
         student_id: student,
         group_id: group,
@@ -218,7 +214,7 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Re
 }
 
 #[delete("/group/<group>/student/<student>")]
-fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Result<Custom<()>> {
+fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
 
@@ -230,8 +226,7 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
             .count().get_result(&*conn)?;
 
         if num_completions + num_elaborations > 0 {
-            // Return 423 Locked when deletion is not possible
-            return Ok(Custom(Status::Locked, ()));
+            return Err(ApiError::ConstraintViolation);
         }
 
         diesel::delete(db::group_mappings::table
@@ -245,7 +240,7 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
         add_audit_log(year, Some(group), &user.name, &*conn,
             &format!("Remove {} (#{}) from group", student_name, student))?;
 
-        Ok(Custom(Status::NoContent, ()))
+        Ok(NoContent)
     })
 }
 
@@ -256,21 +251,21 @@ struct Search {
 }
 
 #[post("/group/search", data = "<search>")]
-fn search_groups(search: Json<Search>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::SearchGroup>>> {
+fn search_groups(search: Json<Search>, conn: db::Conn, _user: User) -> ApiResult<Json<Vec<super::models::SearchGroup>>> {
     let groups = super::models::find_groups(&search.terms, search.year, &conn)?;
 
     Ok(Json(groups))
 }
 
 #[post("/student/search", data = "<search>")]
-fn search_students(search: Json<Search>, conn: db::Conn, _user: User) -> Result<Json<Vec<super::models::Student>>> {
+fn search_students(search: Json<Search>, conn: db::Conn, _user: User) -> ApiResult<Json<Vec<super::models::Student>>> {
     let students = super::models::find_students(&search.terms, search.year, &conn)?;
 
     Ok(Json(students))
 }
 
 #[put("/year/<year>")]
-fn put_year(year: i16, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_year(year: i16, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     let db_year = db::Year {
         id: year,
         writable: true,
@@ -289,7 +284,7 @@ fn put_year(year: i16, conn: db::Conn, user: User) -> Result<NoContent> {
 }
 
 #[put("/year/<year>/closed")]
-fn put_year_writable(year: i16, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_year_writable(year: i16, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         diesel::update(db::years::table.filter(db::years::id.eq(year)))
             .set(db::years::writable.eq(false))
@@ -303,7 +298,7 @@ fn put_year_writable(year: i16, conn: db::Conn, user: User) -> Result<NoContent>
 }
 
 #[post("/experiment", data = "<experiment>")]
-fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         let id: i32 = diesel::insert_into(db::experiments::table)
             .values(&*experiment)
@@ -318,7 +313,7 @@ fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: Us
 }
 
 #[delete("/experiment/<experiment>")]
-fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let full_experiment = db::experiments::table
             .find(experiment)
@@ -337,7 +332,7 @@ fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> Result<NoCo
 }
 
 #[post("/experiment/<experiment>/task", data = "<task>")]
-fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         let full_experiment = db::experiments::table
             .find(experiment)
@@ -360,7 +355,7 @@ fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, use
 }
 
 #[delete("/experiment/<experiment>/task/<task>")]
-fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let (task_name, experiment_name, year) = db::tasks::table
             .inner_join(db::experiments::table)
@@ -387,7 +382,7 @@ fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User
 }
 
 #[put("/experiment/<experiment>/day/<day>/event", data = "<date>")]
-fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user: User) -> Result<NoContent> {
+fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     let date: NaiveDate = date.parse().chain_err(|| "Invalid date")?;
 
     conn.transaction(|| {
@@ -423,7 +418,7 @@ fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user
 }
 
 #[delete("/experiment/<experiment>/day/<day>/event")]
-fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         diesel::delete(db::events::table
             .find((day, experiment))) // beware the order of the columns!
@@ -448,7 +443,7 @@ fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> Result
 }
 
 #[post("/day", data = "<day>")]
-fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         let id: i32 = diesel::insert_into(db::days::table)
             .values(&*day)
@@ -463,7 +458,7 @@ fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> Result<Json<i3
 }
 
 #[delete("/day/<day>")]
-fn delete_day(day: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_day(day: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let full_day = db::days::table
             .find(day)
@@ -482,7 +477,7 @@ fn delete_day(day: i32, conn: db::Conn, user: User) -> Result<NoContent> {
 }
 
 // Insert single student and audit log without a transaction
-fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> Result<i32> {
+fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> ApiResult<i32> {
     let id = diesel::insert_into(db::students::table)
         .values(student)
         .returning(db::students::id)
@@ -496,14 +491,14 @@ fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> 
 }
 
 #[post("/student", data = "<student>")]
-fn post_student(student: Json<db::NewStudent>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+fn post_student(student: Json<db::NewStudent>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         Ok(Json(insert_student(&*student, &conn, &user.name)?))
     })
 }
 
 #[post("/students/<year>", format = "text/csv", data = "<students>")]
-fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> Result<NoContent> {
+fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     #[derive(Debug, Deserialize)]
     struct Student {
         matrikel: String,
@@ -531,7 +526,7 @@ fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> R
 }
 
 #[delete("/student/<student>")]
-fn delete_student(student: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
     conn.transaction(|| {
         let full_student = db::students::table
             .find(student)

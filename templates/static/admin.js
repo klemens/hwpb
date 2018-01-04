@@ -23,9 +23,7 @@ async function onYearChange(event) {
             let response = await myfetch(url, {
                 method: "PUT"
             });
-            if(!response.ok) {
-                throw "API error";
-            }
+            handleResponse(response);
 
             location = "/admin/" + year;
         } catch(e) {
@@ -57,9 +55,7 @@ async function onCloseYear() {
         let response = await myfetch(url, {
             method: "PUT"
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         location.reload();
     } catch(e) {

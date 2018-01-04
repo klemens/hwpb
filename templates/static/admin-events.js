@@ -44,9 +44,7 @@ async function onChangeDate(event) {
         }
 
         let response = await myfetch(url, request);
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         target.dataset.prev_value = target.value;
     } catch(e) {
@@ -74,9 +72,7 @@ async function onDeleteDay(event) {
         let response = await myfetch(url, {
             method: "DELETE"
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         day.parentNode.removeChild(day);
     } catch(e) {
@@ -103,9 +99,7 @@ async function onNewDay() {
                 year: year
             })
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         // reload to avoid rendering complex structures on the client
         location.reload(true);

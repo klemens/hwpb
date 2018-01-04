@@ -16,9 +16,7 @@ async function searchGroups(terms) {
             year: year
         })
     });
-    if(!response.ok) {
-        throw "API error";
-    }
+    handleResponse(response);
 
     let groups = await response.json();
     let elements = groups.map(group => {

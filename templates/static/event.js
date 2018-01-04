@@ -74,9 +74,7 @@ async function onNewGroup(event) {
                 comment: ""
             })
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         toast("info", "Die neue Gruppe wurde hinzugefügt. Seite neuladen um sie anzuzeigen!")
     } catch(e) {
@@ -103,9 +101,7 @@ async function onGroupDeskChange(event) {
             headers: new Headers({"Content-Type": "application/json"}),
             body: JSON.stringify(desk)
         });
-        if(!response.ok) {
-            throw "API error";
-        }
+        handleResponse(response);
 
         toast("info", "Die Tischnummer der Gruppe wurde geändert. Seite neuladen um sie anzuzeigen!")
     } catch(e) {

@@ -113,7 +113,7 @@ pub fn find_years(conn: &PgConnection) -> Result<Vec<Year>> {
     Ok(years)
 }
 
-pub fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
+pub fn find_writable_year(group: i32, conn: &PgConnection) -> ApiResult<i16> {
     match db::groups::table
         .inner_join(db::days::table
         .inner_join(db::years::table))
@@ -123,7 +123,7 @@ pub fn find_writable_year(group: i32, conn: &PgConnection) -> Result<i16> {
         .get_result(conn)
         .optional()? {
         Some(year) => Ok(year),
-        None => Err("Changing a read-only year is not allowed".into())
+        None => Err(ApiError::Locked),
     }
 }
 
