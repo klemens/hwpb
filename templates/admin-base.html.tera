@@ -18,7 +18,7 @@
         <ul class="tabs">
             <li {% if base.site == "experiments" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/experiments">Versuche</a></li>
             <li {% if base.site == "events" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/events">Termine</a></li>
-            <li {% if base.site == "attendees" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/attendees">Teilnehmer</a></li>
+            <li {% if base.site == "students" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/students">Teilnehmer</a></li>
             <li {% if base.site == "tutors" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/tutors">Betreuer</a></li>
             <li {% if base.site == "audit" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/audit">Audit‑Log</a></li>
         </ul>

@@ -65,6 +65,14 @@ pub struct Student {
     pub year: i16,
 }
 
+#[derive(Debug, Deserialize, Insertable)]
+#[table_name="students"]
+pub struct NewStudent {
+    pub matrikel: String,
+    pub name: String,
+    pub year: i16,
+}
+
 #[derive(Debug, Queryable, Insertable, Identifiable, Associations)]
 #[table_name="group_mappings"]
 #[primary_key(student_id, group_id)]

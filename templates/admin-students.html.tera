@@ -1,0 +1,52 @@
+{% extends "admin-base" %}
+
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/admin-students.css" />
+    <script src="/static/admin-students.js"></script>
+{% endblock head %}
+
+{% block title %}Teilnehmer {{super()}}{% endblock title %}
+
+{% block overlay %}
+    <div class="upload">
+        <input id="students-csv" type="file" autocomplete="off" />
+        <dl>
+            <dt>Format</dt>
+            <dd>UTF-8-codierte <a href="https://tools.ietf.org/html/rfc4180">CSV</a>-Datei
+                ohne Header mit den Spalten Matrikelnummer und Name.</dd>
+            <dt>Beispiel</dt>
+            <dd><pre>ms18gwhd,Maria Schneider<br />fm41abdf,"Franz Maier, MdL"</pre></dd>
+        </dl>
+    </div>
+{% endblock overlay %}
+
+{% block main %}
+    <div id="import-students" class="button round floating-add" title="Teilnehmer als CSV-Datei importieren">+</div>
+    <div class="box-wrapper">
+        <form id="add-student" autocomplete="off">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input name="matrikel" required="required" placeholder="Matrikel" size="1"/></th>
+                        <th><input name="name" required="required" placeholder="Name" size="70"/></th>
+                        <th><input disabled="disabled" placeholder="Gruppen" size="1"/></th>
+                        <th><button type="submit" title="Teilnehmer hinzufügen (Batch-Import über den roten Button unten)"><div class="button round add">+</div></button></th>
+                    </tr>
+                </thead>
+                {% for student in students %}
+                <tr data-id="{{ student.id }}">
+                    <td>{{ student.matrikel }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>
+                        {% for group in student.groups %}
+                        <a href="/group/{{ group }}">{{ group }}</a>{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{% if student.groups | length == 0 %}<div class="button round remove" title="Teilnehmer entfernen">–</div>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </form>
+    </div>
+{% endblock main %}

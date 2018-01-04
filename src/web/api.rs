@@ -1,8 +1,10 @@
 use chrono::NaiveDate;
+use csv::ReaderBuilder;
 use db;
 use diesel;
 use diesel::prelude::*;
 use errors::*;
+use rocket::Data;
 use rocket::http::Status;
 use rocket::response::status::{Custom, NoContent};
 use rocket_contrib::Json;
@@ -474,6 +476,75 @@ fn delete_day(day: i32, conn: db::Conn, user: User) -> Result<NoContent> {
 
         add_audit_log(full_day.year, None, &user.name, &conn,
             &format!("Remove day {} (#{})", full_day.name, day))?;
+
+        Ok(NoContent)
+    })
+}
+
+// Insert single student and audit log without a transaction
+fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> Result<i32> {
+    let id = diesel::insert_into(db::students::table)
+        .values(student)
+        .returning(db::students::id)
+        .get_result(&*conn)?;
+
+    add_audit_log(student.year, None, user, conn,
+        &format!("Create new student {} ({}, #{})",
+            student.name, student.matrikel, id))?;
+
+    Ok(id)
+}
+
+#[post("/student", data = "<student>")]
+fn post_student(student: Json<db::NewStudent>, conn: db::Conn, user: User) -> Result<Json<i32>> {
+    conn.transaction(|| {
+        Ok(Json(insert_student(&*student, &conn, &user.name)?))
+    })
+}
+
+#[post("/students/<year>", format = "text/csv", data = "<students>")]
+fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> Result<NoContent> {
+    #[derive(Debug, Deserialize)]
+    struct Student {
+        matrikel: String,
+        name: String,
+    }
+
+    let mut csv_reader = ReaderBuilder::new()
+        .has_headers(false)
+        .from_reader(students.open());
+
+    conn.transaction(|| {
+        for student in csv_reader.deserialize() {
+            let student: Student = student?;
+            let student = db::NewStudent {
+                matrikel: student.matrikel,
+                name: student.name,
+                year: year,
+            };
+
+            insert_student(&student, &conn, &user.name)?;
+        }
+
+        Ok(NoContent)
+    })
+}
+
+#[delete("/student/<student>")]
+fn delete_student(student: i32, conn: db::Conn, user: User) -> Result<NoContent> {
+    conn.transaction(|| {
+        let full_student = db::students::table
+            .find(student)
+            .get_result::<db::Student>(&*conn)?;
+
+        diesel::delete(
+            db::students::table.find(student))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(full_student.year, None, &user.name, &conn,
+            &format!("Remove student {} ({}, #{})",
+                full_student.name, full_student.matrikel, student))?;
 
         Ok(NoContent)
     })

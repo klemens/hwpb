@@ -3,6 +3,7 @@
 
 extern crate bit_vec;
 extern crate chrono;
+extern crate csv;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_migrations;
 #[macro_use] extern crate error_chain;
@@ -69,6 +70,9 @@ fn run() -> Result<()> {
             web::api::delete_event,
             web::api::post_day,
             web::api::delete_day,
+            web::api::post_student,
+            web::api::post_students_csv,
+            web::api::delete_student,
         ])
         .mount("/analysis", routes![
             web::analysis::passed,
@@ -78,6 +82,7 @@ fn run() -> Result<()> {
             web::admin::index,
             web::admin::experiments,
             web::admin::events,
+            web::admin::students,
             web::admin::audit_index,
             web::admin::audit,
         ])

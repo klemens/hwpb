@@ -1,6 +1,7 @@
 mod audit;
 mod event;
 mod experiment;
+mod student;
 
 use db;
 use diesel::PgConnection;
@@ -52,6 +53,16 @@ fn events(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
     };
 
     Ok(Template::render("admin-events", context))
+}
+
+#[get("/<year>/students")]
+fn students(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
+    let context = student::Context {
+        base: BaseContext::new("students", year, &conn)?,
+        students: student::load_students(year, &conn)?,
+    };
+
+    Ok(Template::render("admin-students", context))
 }
 
 #[get("/<year>/audit")]

@@ -1,0 +1,69 @@
+table {
+    width: 100%;
+    border-collapse: separate;
+}
+
+thead input::placeholder {
+    color: grey;
+    opacity: 1;
+}
+
+thead input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 1.8rem;
+    padding: 0 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    background: transparent;
+}
+
+thead input[disabled] {
+    cursor: not-allowed;
+}
+
+thead button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: block;
+    cursor: pointer;
+}
+
+thead button::-moz-focus-inner{
+    padding: 0;
+    border: 0;
+}
+
+.button.add,
+.button.remove {
+    width: 1.2rem;
+    height: 1.2rem;
+    line-height: 1.2rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.button.add {
+    background-color: #33691e;
+}
+
+#overlay .upload {
+    padding: .7rem;
+}
+
+#overlay .upload > dl {
+    margin-bottom: .5rem;
+}
+
+#overlay .upload > dl > dt {
+    margin: .5rem 0 .2rem;
+    font-weight: bold;
+}
+#overlay .upload > dl pre {
+    margin: 0;
+}
