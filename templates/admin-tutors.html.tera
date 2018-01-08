@@ -1,0 +1,32 @@
+{% extends "admin-base" %}
+
+{% block head %}
+    {{super()}}
+    <link rel="stylesheet" href="/static/admin-tutors.css" />
+    <script src="/static/admin-tutors.js"></script>
+{% endblock head %}
+
+{% block title %}Betreuer {{super()}}{% endblock title %}
+
+{% block main %}
+    <div class="box-wrapper">
+        <form id="add-tutor" autocomplete="off">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input required="required" name="username" placeholder="Benutzername" size="100"/></th>
+                        <th><input disabled="disabled" placeholder="Verwalter" size="7"/></th>
+                        <th><button type="submit" title="Betreuer hinzufügen"><div class="button round add">+</div></button></th>
+                    </tr>
+                </thead>
+                {% for tutor in tutors %}
+                <tr data-id="{{ tutor.id }}">
+                    <td>{{ tutor.username }}</td>
+                    <td><input class="admin" type="checkbox" title="Kann Versuche, Termine und Teilnehmer verwalten" {% if tutor.is_admin %}checked="checked"{% endif %} /></td>
+                    <td><div class="button round remove" title="Betreuer entfernen">–</div></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </form>
+    </div>
+{% endblock main %}

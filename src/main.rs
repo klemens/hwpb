@@ -73,6 +73,9 @@ fn run() -> Result<()> {
             web::api::post_student,
             web::api::post_students_csv,
             web::api::delete_student,
+            web::api::post_tutor,
+            web::api::delete_tutor,
+            web::api::put_tutor_admin,
         ])
         .mount("/analysis", routes![
             web::analysis::passed,
@@ -83,6 +86,7 @@ fn run() -> Result<()> {
             web::admin::experiments,
             web::admin::events,
             web::admin::students,
+            web::admin::tutors,
             web::admin::audit_index,
             web::admin::audit,
         ])

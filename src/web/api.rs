@@ -548,3 +548,59 @@ fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoConte
         Ok(NoContent)
     })
 }
+
+#[post("/tutor", data = "<tutor>")]
+fn post_tutor(tutor: Json<db::NewTutor>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
+    conn.transaction(|| {
+        let id = diesel::insert_into(db::tutors::table)
+            .values(&*tutor)
+            .returning(db::tutors::id)
+            .get_result(&*conn)?;
+
+        add_audit_log(tutor.year, None, &user.name, &conn,
+            &format!("Create new tutor {} (#{}, {})", tutor.username,
+            id, if tutor.is_admin { "admin" } else { "no admin" }))?;
+
+        Ok(Json(id))
+    })
+}
+
+#[delete("/tutor/<tutor>")]
+fn delete_tutor(tutor: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+    conn.transaction(|| {
+        let full_tutor = db::tutors::table
+            .find(tutor)
+            .get_result::<db::Tutor>(&*conn)?;
+
+        diesel::delete(
+            db::tutors::table.find(tutor))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(full_tutor.year, None, &user.name, &conn,
+            &format!("Remove tutor {} (#{}, {})", full_tutor.username,
+            tutor, if full_tutor.is_admin { "admin" } else { "no admin" }))?;
+
+        Ok(NoContent)
+    })
+}
+
+#[put("/tutor/<tutor>/is_admin", data = "<is_admin>")]
+fn put_tutor_admin(tutor: i32, is_admin: Json<bool>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+    conn.transaction(|| {
+        let full_tutor = db::tutors::table
+            .find(tutor)
+            .get_result::<db::Tutor>(&*conn)?;
+
+        diesel::update(db::tutors::table.find(tutor))
+            .set(db::tutors::is_admin.eq(*is_admin))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(full_tutor.year, None, &user.name, &conn,
+            &format!("Tutor {} (#{}) is {} admin", full_tutor.username,
+            tutor, if *is_admin { "now" } else { "no longer" }))?;
+
+        Ok(NoContent)
+    })
+}

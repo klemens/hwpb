@@ -85,6 +85,15 @@ table! {
 }
 
 table! {
+    tutors (id) {
+        id -> Int4,
+        username -> Text,
+        year -> Int2,
+        is_admin -> Bool,
+    }
+}
+
+table! {
     years (id) {
         id -> Int2,
         writable -> Bool,
@@ -116,5 +125,6 @@ allow_tables_to_appear_in_same_query!(
     groups,
     students,
     tasks,
+    tutors,
     years,
 );

@@ -141,6 +141,22 @@ pub struct Year {
     pub writable: bool,
 }
 
+#[derive(Debug, Queryable, Identifiable)]
+pub struct Tutor {
+    pub id: i32,
+    pub username: String,
+    pub year: i16,
+    pub is_admin: bool,
+}
+
+#[derive(Debug, Deserialize, Insertable)]
+#[table_name="tutors"]
+pub struct NewTutor {
+    pub username: String,
+    pub year: i16,
+    pub is_admin: bool,
+}
+
 use std::borrow::Borrow;
 
 impl Borrow<str> for Student {
