@@ -43,6 +43,13 @@
                     </tr>
                     {% endfor %}
                 </table>
+                <input name="limit" type="hidden" {% if filters.limit %}value="{{ filters.limit }}"{% else %}disabled="disabled"{% endif %} />
+                {% if filters.limit %}
+                <p class="limit">
+                    Zeige die ersten {{ filters.limit }} Einträge.
+                    <a href="/admin/{{ base.year }}/audit?">Alle anzeigen</a>
+                </p>
+                {% endif %}
             </form>
         </div>
 {% endblock main %}

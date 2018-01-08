@@ -26,6 +26,7 @@ pub struct Filters {
     search: Option<String>,
     group: Option<i32>,
     author: Option<String>,
+    limit: Option<i64>,
 }
 
 pub fn load_authors(conn: &PgConnection) -> Result<Vec<String>> {
@@ -54,6 +55,9 @@ pub fn load_logs(year: i16, filters: &Filters, conn: &PgConnection) -> Result<Ve
         if !author.is_empty() {
             query = query.filter(db::audit_logs::author.eq(author));
         }
+    }
+    if let Some(limit) = filters.limit {
+        query = query.limit(limit);
     }
 
     Ok(query

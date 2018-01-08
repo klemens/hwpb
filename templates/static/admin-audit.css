@@ -33,3 +33,7 @@ thead select {
 table tr > td:nth-of-type(2) {
     white-space: pre-line;
 }
+
+p.limit {
+    text-align: center;
+}

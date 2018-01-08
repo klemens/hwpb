@@ -67,7 +67,7 @@ fn students(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
 
 #[get("/<year>/audit")]
 fn audit_index(year: i16, _user: User) -> Redirect {
-    Redirect::to(&format!("/admin/{}/audit?", year))
+    Redirect::to(&format!("/admin/{}/audit?limit=100", year))
 }
 
 #[get("/<year>/audit?<filters>")]
