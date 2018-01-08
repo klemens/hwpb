@@ -6,8 +6,8 @@ use diesel::pg::PgConnection;
 use errors::*;
 use itertools::Itertools;
 use rocket_contrib::Template;
-use std::collections::{HashMap, HashSet};
-use std::hash::{Hash, Hasher};
+use std::cmp::Ordering;
+use std::collections::{HashMap, BTreeSet};
 use web::session::User;
 use web::models::is_writable_year;
 
@@ -57,7 +57,7 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, _user: User) -> Re
         })
         .collect();
 
-    let students_with_unaccepted_reworks: HashSet<_> =
+    let students_with_unaccepted_reworks: BTreeSet<_> =
         load_elaborations_by_student(year, Some(true), Some(false), &*conn)?
         .into_iter()
         .filter_map(|(student, elaboration)| {
@@ -71,7 +71,12 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, _user: User) -> Re
         .cloned()
         .collect();
 
-    students.sort_by(|left, right| left.matrikel.cmp(&right.matrikel));
+    // try to sort students from the same group together
+    students.sort_by(|left, right| {
+        // iter is always sorted, so next_back is the max element
+        left.groups.iter().next_back().cmp(
+            &right.groups.iter().next_back())
+    });
 
     let context = Analysis {
         heading: "Fehlende Nachbesserungen",
@@ -90,18 +95,25 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, _user: User) -> Re
 
 #[derive(Clone, Debug, Eq, Serialize)]
 struct Student {
+    id: i32,
     matrikel: String,
-    groups: HashSet<i32>,
+    name: String,
+    groups: BTreeSet<i32>,
 }
 
-impl PartialEq for Student {
-    fn eq(&self, other: &Student) -> bool {
-        self.matrikel == other.matrikel
+impl Ord for Student {
+    fn cmp(&self, other: &Student) -> Ordering {
+        self.id.cmp(&other.id)
     }
 }
-impl Hash for Student {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.matrikel.hash(state);
+impl PartialOrd for Student {
+    fn partial_cmp(&self, other: &Student) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl PartialEq for Student {
+    fn eq(&self, other: &Student) -> bool {
+        self.id == other.id
     }
 }
 
@@ -128,23 +140,32 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<Vec<(Student,
         .inner_join(db::students::table
             .on(db::group_mappings::student_id.eq(db::students::id)))
         .filter(db::students::year.eq(year))
-        .order(db::students::matrikel.asc())
-        .load::<(db::Completion, db::GroupMapping, db::Student)>(conn)?.into_iter()
-        .group_by(|&(_, _, ref student)| student.matrikel.clone()).into_iter()
-        .map(|(matrikel, completions)| {
+        .order(db::students::id)
+        .select((db::completions::all_columns, db::students::all_columns))
+        .load::<(db::Completion, db::Student)>(conn)?.into_iter()
+        .group_by(|&(_, ref student)| student.id).into_iter()
+        .map(|(_, completions)| {
             let mut completed_tasks = BitVec::from_elem(tasks.len(), false);
-            let mut groups = HashSet::new();
+            let mut groups = BTreeSet::new();
 
-            for (completion, _, _) in completions {
+            let mut student = None;
+
+            for (completion, db_student) in completions {
                 // Can be None because of the additional tasks
                 if let Some(index) = tasks.get(&completion.task_id) {
                     completed_tasks.set(*index, true);
                     groups.insert(completion.group_id);
                 }
+
+                student.get_or_insert(db_student);
             }
 
+            let student = student.expect("empty group (itertools)");
+
             (Student {
-                matrikel: matrikel,
+                id: student.id,
+                matrikel: student.matrikel,
+                name: student.name,
                 groups: groups,
             }, completed_tasks)
         })
@@ -180,22 +201,31 @@ fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accept
     }
 
     Ok(query
-        .order(db::students::matrikel.asc())
-        .load::<(db::Elaboration, db::GroupMapping, db::Student)>(conn)?.into_iter()
-        .group_by(|&(_, _, ref student)| student.matrikel.clone()).into_iter()
-        .map(|(matrikel, elaborations)| {
+        .order(db::students::id)
+        .select((db::elaborations::all_columns, db::students::all_columns))
+        .load::<(db::Elaboration, db::Student)>(conn)?.into_iter()
+        .group_by(|&(_, ref student)| student.id).into_iter()
+        .map(|(_, elaborations)| {
             let mut existing_elaborations = BitVec::from_elem(experiments.len(), false);
-            let mut groups = HashSet::new();
+            let mut groups = BTreeSet::new();
 
-            for (elaboration, _, _) in elaborations {
+            let mut student = None;
+
+            for (elaboration, db_student) in elaborations {
                 // Cannot be none, because experiments is complete
                 let index = experiments.get(&elaboration.experiment_id).unwrap();
                 existing_elaborations.set(*index, true);
                 groups.insert(elaboration.group_id);
+
+                student.get_or_insert(db_student);
             }
 
+            let student = student.expect("empty group (itertools)");
+
             (Student {
-                matrikel: matrikel,
+                id: student.id,
+                matrikel: student.matrikel,
+                name: student.name,
                 groups: groups,
             }, existing_elaborations)
         })
