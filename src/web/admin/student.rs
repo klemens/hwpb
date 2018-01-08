@@ -37,7 +37,7 @@ pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
             Student {
                 id: student.id,
                 matrikel: student.matrikel,
-                username: None,
+                username: student.username,
                 name: student.name,
                 groups: groups,
             }

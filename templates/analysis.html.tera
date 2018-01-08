@@ -17,6 +17,7 @@
             <tr>
                 <td>{{ student.matrikel }}</td>
                 <td>{{ student.name }}</td>
+                <td>{{ student.username }}</td>
                 <td>
                     {% for group in student.groups %}
                     <a href="/group/{{ group }}">Gruppe {{ group }}</a>{% if not loop.last %},{% endif %}

@@ -352,7 +352,10 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection)
     for term in terms {
         query = query.filter(
             students::name.ilike(format!("%{}%", term.as_ref())).or(
-                students::matrikel.ilike(format!("%{}%", term.as_ref()))
+                students::matrikel.ilike(format!("%{}%", term.as_ref())).or(
+                    // TODO: ilike is currently not implemented for nullable types
+                    students::username.like(format!("%{}%", term.as_ref()))
+                )
             )
         );
     }
@@ -379,7 +382,10 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection) -
         for term in terms {
             query = query.filter(
                 students::name.ilike(format!("%{}%", term.as_ref())).or(
-                    students::matrikel.ilike(format!("%{}%", term.as_ref()))
+                    students::matrikel.ilike(format!("%{}%", term.as_ref())).or(
+                        // TODO: ilike is currently not implemented for nullable types
+                        students::username.like(format!("%{}%", term.as_ref()))
+                    )
                 )
             );
         }

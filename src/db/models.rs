@@ -63,6 +63,7 @@ pub struct Student {
     pub matrikel: String,
     pub name: String,
     pub year: i16,
+    pub username: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Insertable)]
@@ -71,6 +72,7 @@ pub struct NewStudent {
     pub matrikel: String,
     pub name: String,
     pub year: i16,
+    pub username: Option<String>,
 }
 
 #[derive(Debug, Queryable, Insertable, Identifiable, Associations)]

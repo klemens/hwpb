@@ -63,6 +63,7 @@ async function onNewStudent(event) {
 
     let matrikel = document.querySelector("#add-student input[name='matrikel']").value;
     let name = document.querySelector("#add-student input[name='name']").value;
+    let username = document.querySelector("#add-student input[name='username']").value;
     let year = parseInt(document.body.dataset.year);
 
     matrikel = matrikel.trim();
@@ -70,6 +71,11 @@ async function onNewStudent(event) {
     if(matrikel.length == 0 || name.length == 0) {
         toast("error", "Ungültige Eingabe");
         return;
+    }
+
+    username = username.trim();
+    if(username.length == 0) {
+        username = null;
     }
 
     try {
@@ -81,7 +87,8 @@ async function onNewStudent(event) {
             body: JSON.stringify({
                 matrikel: matrikel,
                 name: name,
-                year: year
+                year: year,
+                username: username
             })
         });
         handleResponse(response);

@@ -98,6 +98,7 @@ struct Student {
     id: i32,
     matrikel: String,
     name: String,
+    username: Option<String>,
     groups: BTreeSet<i32>,
 }
 
@@ -166,6 +167,7 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<Vec<(Student,
                 id: student.id,
                 matrikel: student.matrikel,
                 name: student.name,
+                username: student.username,
                 groups: groups,
             }, completed_tasks)
         })
@@ -226,6 +228,7 @@ fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accept
                 id: student.id,
                 matrikel: student.matrikel,
                 name: student.name,
+                username: student.username,
                 groups: groups,
             }, existing_elaborations)
         })

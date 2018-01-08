@@ -484,8 +484,9 @@ fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> 
         .get_result(&*conn)?;
 
     add_audit_log(student.year, None, user, conn,
-        &format!("Create new student {} ({}, #{})",
-            student.name, student.matrikel, id))?;
+        &format!("Create new student {} ({}, {}, #{})",
+            student.name, student.matrikel,
+            student.username.as_ref().map_or("-", |s| s), id))?;
 
     Ok(id)
 }
@@ -503,6 +504,7 @@ fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> A
     struct Student {
         matrikel: String,
         name: String,
+        username: Option<String>,
     }
 
     let mut csv_reader = ReaderBuilder::new()
@@ -516,6 +518,7 @@ fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> A
                 matrikel: student.matrikel,
                 name: student.name,
                 year: year,
+                username: student.username,
             };
 
             insert_student(&student, &conn, &user.name)?;
@@ -538,8 +541,9 @@ fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoConte
             .and_then(db::expect1)?;
 
         add_audit_log(full_student.year, None, &user.name, &conn,
-            &format!("Remove student {} ({}, #{})",
-                full_student.name, full_student.matrikel, student))?;
+            &format!("Remove student {} ({}, {}, #{})",
+                full_student.name, full_student.matrikel,
+                full_student.username.as_ref().map_or("-", |s| s), student))?;
 
         Ok(NoContent)
     })

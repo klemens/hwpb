@@ -72,6 +72,7 @@ table! {
         matrikel -> Text,
         name -> Text,
         year -> Int2,
+        username -> Nullable<Text>,
     }
 }
 
