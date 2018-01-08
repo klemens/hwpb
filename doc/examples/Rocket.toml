@@ -8,7 +8,7 @@ secret_key = "*"
 
 [global]
 database = "postgres://user:password@host/database"
-allowed_users = [
+site_admins = [
     "user1",
     "user2",
 ]

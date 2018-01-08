@@ -11,13 +11,13 @@ much faster.
 
 Before running hwpb, you need to set up a PostgreSQL database and user and
 add its credentials to a `Rocket.toml` configuration file in the top directory
-of the project. You also need to add your username to the list of allowed
-users to be able to log in.
+of the project. You should also add your username to the `site_admins` list
+to be able to log in (initially there are no others users in the database).
 
 ```toml
 [global]
 database = "postgres://user:password@host/database"
-allowed_users = [ "username" ]
+site_admins = [ "username" ]
 ```
 
 You can optionally add a `secret_key` like described in [`DEPLOY.md`], if you
@@ -74,7 +74,9 @@ trait.
 A similar trait (`FromRequest`) is used in `web::session` to access the cookies
 of a request. Our implementation of this trait for the `User` struct only
 succeeds if the user is logged in, so `User` can be used as a request guard to
-restrict access of a route to logged in users. Similarly, this mechanism can
+restrict access of a route to logged in users (note that you must additionally
+check if the user is allowed to view the current site or execute the current
+action using for example `User::is_tutor_for()`). Similarly, this mechanism can
 be used to request access to local resources like a database connection using
 the `db::Conn` struct.
 

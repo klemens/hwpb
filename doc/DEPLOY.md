@@ -34,10 +34,10 @@ Other possible values are `staging` and the default `development`. See the
 The `secret_key` is used to authenticate and encrypt cookies and must be kept
 private. It can be generated using `openssl rand -base64 32`.
 
-The `global` section contains setting that apply to all environments. The
+The `global` section contains settings that apply to all environments. The
 `database` key specifies the URI that is used to connect to a PostgreSQL
-database and `allowed_users` contains a list of users that are allowed to
-log in and use the application.
+database and `site_admins` contains a list of administrators that can create
+new years and add other tutors and year-specific administrators.
 
 The database is initialised automatically when running hwpb for the first time.
 

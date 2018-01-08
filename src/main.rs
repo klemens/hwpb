@@ -14,6 +14,7 @@ extern crate r2d2_diesel;
 extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
+extern crate serde_json;
 
 mod db;
 mod errors;
@@ -92,13 +93,13 @@ fn run() -> Result<()> {
         ])
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {
-            let allowed_users = {
-                let default = vec![];
-                let users = rocket.config().get_slice("allowed_users").unwrap_or(&default);
-                let users = users.iter().filter_map(|u| u.as_str());
-                web::session::AllowedUsers::new(users)
-            };
-            Ok(rocket.manage(allowed_users))
+            match web::session::load_site_admins(rocket.config()) {
+                Ok(site_admins) => Ok(rocket.manage(site_admins)),
+                Err(error) => {
+                    eprintln!("{}", error);
+                    Err(rocket)
+                }
+            }
         }))
         .launch();
 

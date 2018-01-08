@@ -18,7 +18,7 @@ Use [`rustup`] on windows or if the packages of your distribution are too old.
 
 hwpb expects a PostgreSQL database and a `Rocket.toml` configuration file in
 the current working directory, which includes the database connection URI and
-a list of users that are allowed to log in. Authentication is done using PAM,
+a list of initial site administrators. Authentication is done using PAM,
 so make sure `/etc/shadow` is readable for your user or PAM is using a remote
 authentication mechanism.
 

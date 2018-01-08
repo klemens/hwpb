@@ -1,38 +1,124 @@
-use rocket::{Outcome, State};
-use rocket::http::{Cookie, Cookies};
+use db;
+use diesel::prelude::*;
+use errors::{self, ResultExt};
+use rocket::{Config, Outcome, State};
+use rocket::http::{Cookie, Cookies, Status};
 use rocket::http::uri::URI;
 use rocket::request::{self, FlashMessage, Form, FromRequest, Request};
 use rocket::response::{Flash, Redirect};
 use rocket_contrib::Template;
+use serde_json;
 use std::collections::{HashMap, HashSet};
+use std::ops::Deref;
 use std::path::PathBuf;
 use user;
 
-pub struct AllowedUsers(HashSet<String>);
+pub struct SiteAdmins(HashSet<String>);
 
-impl AllowedUsers {
+impl SiteAdmins {
     pub fn new<'a, I: IntoIterator<Item = &'a str>>(users: I) -> Self {
-        AllowedUsers(users.into_iter().map(|s| s.to_string()).collect())
+        SiteAdmins(users.into_iter().map(|s| s.to_string()).collect())
     }
 }
 
+pub fn load_site_admins(config: &Config) -> errors::Result<SiteAdmins> {
+    let site_admins = config
+        .get_slice("site_admins")
+        .chain_err(|| "No site_admins configured.")?
+        .iter()
+        .filter_map(|u| u.as_str());
+    let site_admins = SiteAdmins::new(site_admins);
+
+    if site_admins.0.is_empty() {
+        return Err("You must configure at least one site_admin.".into())
+    }
+
+    Ok(site_admins)
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct User {
-    pub name: String
+    name: String,
+    site_admin: bool,
+    tutor_years: HashSet<i16>,
+    admin_years: HashSet<i16>,
+}
+
+impl User {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn is_tutor_for(&self, year: i16) -> bool {
+        self.site_admin || self.tutor_years.contains(&year)
+    }
+
+    pub fn is_admin_for(&self, year: i16) -> bool {
+        self.site_admin || self.admin_years.contains(&year)
+    }
+
+    pub fn is_site_admin(&self) -> bool {
+        self.site_admin
+    }
+
+    pub fn ensure_tutor_for(&self, year: i16) -> errors::Result<()> {
+        match self.is_tutor_for(year) {
+            true => Ok(()),
+            false => Err(format!("User {} is not a tutor for {}",
+                self.name(), year).into()),
+        }
+    }
+
+    pub fn ensure_admin_for(&self, year: i16) -> errors::Result<()> {
+        match self.is_admin_for(year) {
+            true => Ok(()),
+            false => Err(format!("User {} is not an admin for {}",
+                self.name(), year).into()),
+        }
+    }
+}
+
+fn load_user(cookies: &mut Cookies) -> request::Outcome<User, ()> {
+    let user = cookies
+        .get_private("user")
+        .and_then(|cookie| {
+            serde_json::from_str(cookie.value()).ok()
+        });
+
+    match user {
+        Some(user) => Outcome::Success(user),
+        None => Outcome::Forward(())
+    }
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for User {
     type Error = ();
-
     fn from_request(request: &'a Request<'r>) -> request::Outcome<User, ()> {
-        let user = request.cookies()
-            .get_private("username")
-            .map(|cookie| User {
-                name: cookie.value().into()
-            });
+        load_user(&mut request.cookies())
+    }
+}
 
-        match user {
-            Some(user) => Outcome::Success(user),
-            None => Outcome::Forward(())
+pub struct SiteAdmin(User);
+
+impl Deref for SiteAdmin {
+    type Target = User;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl<'a, 'r> FromRequest<'a, 'r> for SiteAdmin {
+    type Error = ();
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<SiteAdmin, ()> {
+        match load_user(&mut request.cookies()) {
+            Outcome::Success(user) => {
+                if user.site_admin {
+                    Outcome::Success(SiteAdmin(user))
+                } else {
+                    Outcome::Failure((Status::Forbidden, ()))
+                }
+            }
+            Outcome::Forward(()) => Outcome::Forward(()),
+            Outcome::Failure(error) => Outcome::Failure(error),
         }
     }
 }
@@ -44,7 +130,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for NotLoggedIn {
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<NotLoggedIn, ()> {
         let user = request.cookies()
-            .get_private("username");
+            .get_private("user");
 
         if user.is_none() {
             Outcome::Success(NotLoggedIn)
@@ -93,28 +179,49 @@ struct LoginForm {
 }
 
 #[post("/login", data = "<login>")]
-fn post_login(mut cookies: Cookies, login: Form<LoginForm>, allowed_users: State<AllowedUsers>) -> Result<Redirect, Flash<Redirect>> {
+fn post_login(mut cookies: Cookies, login: Form<LoginForm>, site_admins: State<SiteAdmins>, conn: db::Conn) -> errors::Result<Result<Redirect, Flash<Redirect>>> {
     let login = login.into_inner();
     let redirect = URI::percent_decode_lossy(login.redirect.as_bytes());
 
-    if !allowed_users.0.contains(&login.username) {
-        let msg = "Ungültiger Benutzername!";
-        return Err(Flash::error(redirect_to_login(&redirect), msg))
+    let mut user = User {
+        site_admin: site_admins.0.contains(&login.username),
+        name: login.username,
+        tutor_years: HashSet::new(),
+        admin_years: HashSet::new(),
+    };
+
+    if !user.site_admin {
+        db::tutors::table
+            .filter(db::tutors::username.eq(&user.name))
+            .load::<db::Tutor>(&*conn)?
+            .iter()
+            .for_each(|tutor| {
+                user.tutor_years.insert(tutor.year);
+                if tutor.is_admin {
+                    user.admin_years.insert(tutor.year);
+                }
+            });
     }
 
-    let result = user::authenticate(&login.username, &login.password);
+    if !user.site_admin && user.tutor_years.is_empty() {
+        let msg = "Ungültiger Benutzername!";
+        return Ok(Err(Flash::error(redirect_to_login(&redirect), msg)))
+    }
+
+    let result = user::authenticate(&user.name, &login.password);
     if result == Ok(true) {
-        cookies.add_private(Cookie::new("username", login.username));
-        Ok(Redirect::to(&redirect))
+        let user = serde_json::to_string(&user)?;
+        cookies.add_private(Cookie::new("user", user));
+        Ok(Ok(Redirect::to(&redirect)))
     } else {
         let msg = "Ungültiger Benutzername oder Passwort!";
-        Err(Flash::error(redirect_to_login(&redirect), msg))
+        Ok(Err(Flash::error(redirect_to_login(&redirect), msg)))
     }
 }
 
 #[get("/logout")]
 fn logout(mut cookies: Cookies) -> Redirect {
-    cookies.remove_private(Cookie::named("username"));
+    cookies.remove_private(Cookie::named("user"));
     Redirect::to("/")
 }
 
