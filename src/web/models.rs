@@ -8,8 +8,8 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize)]
 pub struct Year {
-    name: i16,
-    read_only: bool,
+    pub name: i16,
+    pub read_only: bool,
 }
 
 #[derive(Serialize)]
@@ -23,6 +23,7 @@ pub struct Index {
 pub struct Overview {
     pub year: i16,
     pub read_only: bool,
+    pub is_admin: bool,
     pub experiments: Vec<Experiment>,
 }
 

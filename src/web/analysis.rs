@@ -25,7 +25,9 @@ struct Export {
 }
 
 #[get("/passed/<year>?<export>")]
-fn passed(year: i16, export: Export, conn: db::Conn, _user: User) -> Result<Template> {
+fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
+    user.ensure_tutor_for(year)?;
+
     let students = load_elaborations_by_student(year, None, Some(true), &*conn)?
         .into_iter()
         .filter_map(|(student, elaboration)| {
@@ -48,7 +50,9 @@ fn passed(year: i16, export: Export, conn: db::Conn, _user: User) -> Result<Temp
 }
 
 #[get("/missing-reworks/<year>?<export>")]
-fn missing_reworks(year: i16, export: Export, conn: db::Conn, _user: User) -> Result<Template> {
+fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
+    user.ensure_tutor_for(year)?;
+
     let students_with_all_tasks = load_tasks_by_student(year, &*conn)?
         .into_iter()
         .filter_map(|(student, tasks)| {

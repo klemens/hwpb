@@ -19,19 +19,25 @@
             <li {% if base.site == "experiments" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/experiments">Versuche</a></li>
             <li {% if base.site == "events" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/events">Termine</a></li>
             <li {% if base.site == "students" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/students">Teilnehmer</a></li>
+            {% if base.site_admin %}
             <li {% if base.site == "tutors" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/tutors">Betreuer</a></li>
             <li {% if base.site == "audit" %}class="active"{% endif %}><a href="/admin/{{ base.year }}/audit">Audit‑Log</a></li>
+            {% endif %}
         </ul>
-        {% if base.read_only_year %}
-        <img class="padlock" src="/static/icons/locked.svg" title="Dieses Jahr wurde bereits abgeschlossen und kann nicht mehr verändert werden." />
-        {% else %}
-        <img id="close-year" class="padlock" src="/static/icons/unlocked.svg" title="Dieses Jahr abschließen" />
+        {% if base.site_admin %}
+            {% if base.read_only_year %}
+            <img class="padlock" src="/static/icons/locked.svg" title="Dieses Jahr wurde bereits abgeschlossen und kann nicht mehr verändert werden." />
+            {% else %}
+            <img id="close-year" class="padlock" src="/static/icons/unlocked.svg" title="Dieses Jahr abschließen" />
+            {% endif %}
         {% endif %}
         <select autocomplete="off">
             {% for y in base.years %}
             <option value="{{ y.name }}" {% if base.year == y.name %}selected="selected"{% endif %}>HWP {{ y.name }}</option>
             {% endfor %}
+            {% if base.site_admin %}
             <option value="new-year">Neues Jahr</option>
+            {% endif %}
         </select>
     </div>
 {% endblock header %}

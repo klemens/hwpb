@@ -34,9 +34,14 @@ impl Deref for Date {
 }
 
 #[get("/")]
-fn index(conn: db::Conn, _user: User) -> Result<Template> {
+fn index(conn: db::Conn, user: User) -> Result<Template> {
+    let filtered_years = models::find_years(&conn)?
+        .into_iter()
+        .filter(|year| user.is_tutor_for(year.name))
+        .collect();
+
     let context = models::Index {
-        years: models::find_years(&conn)?,
+        years: filtered_years,
         version: env!("CARGO_PKG_VERSION"),
         commit_id: include_str!(concat!(env!("OUT_DIR"), "/commit-id")),
     };
@@ -45,10 +50,13 @@ fn index(conn: db::Conn, _user: User) -> Result<Template> {
 }
 
 #[get("/<year>", rank = 2)]
-fn overview(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
+fn overview(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+    user.ensure_tutor_for(year)?;
+
     let context = models::Overview {
         year: year,
         read_only: !models::is_writable_year(year, &conn)?,
+        is_admin: user.is_admin_for(year),
         experiments: models::find_events(year, &conn)?,
     };
 
@@ -56,15 +64,19 @@ fn overview(year: i16, conn: db::Conn, _user: User) -> Result<Template> {
 }
 
 #[get("/<date>")]
-fn event(date: Date, conn: db::Conn, _user: User) -> Result<Template> {
+fn event(date: Date, conn: db::Conn, user: User) -> Result<Template> {
     let context = models::load_event(&date, &conn)?;
+
+    user.ensure_tutor_for(context.year)?;
 
     Ok(Template::render("event", &context))
 }
 
 #[get("/group/<group>")]
-fn group(group: i32, conn: db::Conn, _user: User) -> Result<Template> {
+fn group(group: i32, conn: db::Conn, user: User) -> Result<Template> {
     let context = models::load_group(group, &conn)?;
+
+    user.ensure_tutor_for(context.year)?;
 
     Ok(Template::render("group", &context))
 }
