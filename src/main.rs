@@ -34,6 +34,9 @@ fn run() -> Result<()> {
     // run any pending database migrations
     db::run_migrations(&database_url)?;
 
+    // add current year on first run
+    db::init_year(&database_url)?;
+
     rocket::ignite()
         .manage(db::init_pool(&database_url)?)
         .mount("/", routes![

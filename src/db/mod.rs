@@ -4,6 +4,7 @@ mod schema;
 pub use self::models::*;
 pub use self::schema::*;
 
+use chrono::{Datelike, Utc};
 use diesel;
 use diesel::prelude::*;
 use errors::*;
@@ -21,6 +22,30 @@ pub fn run_migrations(database_url: &str) -> Result<()> {
         .chain_err(|| "Could not connect to DB to run migrations")?;
     embedded_migrations::run(&connection)
         .chain_err(|| "Could not run pending migrations.")
+}
+
+pub fn init_year(database_url: &str) -> Result<()> {
+    let conn = PgConnection::establish(database_url)
+        .chain_err(|| "Could not connect to DB to init year")?;
+
+    conn.transaction(|| {
+        let count: i64 = years::table
+            .count()
+            .get_result(&conn)?;
+
+        if count == 0 {
+            let year = Year {
+                id: Utc::today().year() as i16,
+                writable: true,
+            };
+
+            diesel::insert_into(years::table)
+                .values(&year)
+                .execute(&conn)?;
+        }
+
+        Ok(())
+    })
 }
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
