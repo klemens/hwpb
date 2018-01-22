@@ -12,8 +12,18 @@ async function onYearChange(event) {
     let target = event.target;
 
     if(target.value === "new-year") {
-        let year = parseInt(prompt("Neues Jahr:"));
+        let year = prompt("Neues Jahr:");
         if(year === null) {
+            // reset select to currently loaded year
+            target.value = document.body.dataset.year;
+            return;
+        }
+
+        year = parseInt(year);
+        if(isNaN(year)) {
+            toast("error", "Ungültiges Jahr");
+            // reset select to currently loaded year
+            target.value = document.body.dataset.year;
             return;
         }
 

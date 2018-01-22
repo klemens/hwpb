@@ -23,7 +23,7 @@ async function onTaskClick(event) {
 
     if(target.classList.contains("add")) {
         let task = prompt("Name der neuen Aufgabe (z. B. 2b oder Z1 bei Zusatzaufgaben):");
-        if(task === null) {
+        if(task === null || task.trim() === "") {
             return;
         }
 
@@ -97,7 +97,7 @@ async function onDeleteExperiment(event) {
 
 async function onNewExperiment() {
     let experiment = prompt("Name des neuen Versuches (z. B. Versuch 3):");
-    if(experiment === null) {
+    if(experiment === null || experiment.trim() === "") {
         return;
     }
 

@@ -90,7 +90,7 @@ async function onDeleteDay(event) {
 
 async function onNewDay() {
     let day = prompt("Name des neuen Versuchstages (z. B. Di-A):");
-    if(day === null) {
+    if(day === null || day.trim() === "") {
         return;
     }
 
