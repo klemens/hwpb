@@ -16,6 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
 function onInputDate(event) {
     let target = event.target;
 
+    // the change event is not fired when clearing date in recent firefox
+    // without setting it beforehand, so always save when the date was cleared;
+    // this leads to multiple calls to onChangeDate on browsers that behave
+    // correctly, which is not a huge problem, because the api is idempotent
+    if(target.value === "") {
+        onChangeDate(event);
+    }
+
     if(target.dataset.prev_value === target.value) {
         target.classList.remove("dirty");
     } else {

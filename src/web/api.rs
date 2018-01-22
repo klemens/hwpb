@@ -441,8 +441,7 @@ fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> ApiRes
     conn.transaction(|| {
         diesel::delete(db::events::table
             .find((day, experiment))) // beware the order of the columns!
-            .execute(&*conn)
-            .and_then(db::expect1)?;
+            .execute(&*conn)?;
 
         let experiment_name = db::experiments::table
             .find(experiment)
