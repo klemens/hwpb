@@ -9,8 +9,6 @@ extern crate csv;
 #[macro_use] extern crate error_chain;
 extern crate itertools;
 extern crate pam_auth;
-extern crate r2d2;
-extern crate r2d2_diesel;
 extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
