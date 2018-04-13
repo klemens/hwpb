@@ -1,6 +1,11 @@
 table {
     width: 100%;
-    border-collapse: separate;
+    border-collapse: collapse;
+}
+
+table td,
+table th {
+    padding: 2px;
 }
 
 thead input::placeholder {
@@ -37,6 +42,10 @@ thead button {
 thead button::-moz-focus-inner{
     padding: 0;
     border: 0;
+}
+
+tbody > tr:hover > td:nth-of-type(-n+4) {
+    background: rgba(151, 151, 151, 0.2);
 }
 
 .button.add,
