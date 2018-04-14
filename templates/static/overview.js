@@ -22,7 +22,7 @@ async function searchGroups(terms) {
     let elements = groups.map(group => {
         let students = " (" + group.students.map(s => s.name).join(", ") + ")";
         return {
-            name: "Gruppe " + group.desk + ", " + group.day + students,
+            text: "Gruppe " + group.desk + ", " + group.day + students,
             href: "/group/" + group.id
         };
     });

@@ -89,14 +89,15 @@ class SearchBox {
             if(element.href) {
                 let link = document.createElement("a");
                 link.href = element.href;
-                link.textContent = element.name;
+                link.textContent = element.text;
                 node.appendChild(link);
             } else {
-                node.textContent = element.name;
+                node.textContent = element.text;
+            }
 
-                if(element.id) {
-                    node.dataset.id = element.id;
-                    node.dataset.name = element.name;
+            if(element.data) {
+                for(const key of Object.keys(element.data)) {
+                    node.dataset[key] = element.data[key];
                 }
             }
 
@@ -174,7 +175,7 @@ class SearchBox {
 
         if(this.successCallback !== null) {
             let data = selected.closest("li").dataset;
-            this.successCallback(data.id, data.name);
+            this.successCallback(data);
         }
 
         let link = selected.querySelector("a");
@@ -312,14 +313,14 @@ async function handleStudentClick(event) {
     }
 
     if(target.classList.contains("add")) {
-        searchBox.activate(async (studentId, studentName) => {
+        searchBox.activate(async student => {
             let node = document.createElement("li");
-            node.textContent = studentName;
-            node.dataset.id = studentId;
+            node.textContent = student.name;
+            node.dataset.id = student.id;
             event.target.closest("ul").appendChild(node);
 
             try {
-                let url = "/api/group/" + group + "/student/" + studentId;
+                let url = "/api/group/" + group + "/student/" + student.id;
 
                 let response = await myfetch(url, {
                     method: "PUT"
@@ -386,5 +387,16 @@ async function searchStudents(terms) {
     });
     handleResponse(response);
 
-    return response.json();
+    let students = await response.json();
+    let elements = students.map(student => {
+        return {
+            text: student.name,
+            data: {
+                id: student.id,
+                name: student.name,
+            }
+        }
+    });
+
+    return Promise.resolve(elements);
 }
