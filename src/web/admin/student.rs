@@ -16,6 +16,7 @@ pub struct Student {
     pub username: Option<String>,
     pub name: String,
     pub groups: Vec<i32>,
+    pub instructed: bool,
 }
 
 pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
@@ -40,6 +41,7 @@ pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
                 username: student.username,
                 name: student.name,
                 groups: groups,
+                instructed: student.instructed,
             }
         })
         .collect();

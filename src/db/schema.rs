@@ -73,6 +73,7 @@ table! {
         name -> Text,
         year -> Int2,
         username -> Nullable<Text>,
+        instructed -> Bool,
     }
 }
 

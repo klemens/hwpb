@@ -15,6 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
     for(let removeButton of document.querySelectorAll("table .button.remove")) {
         removeButton.addEventListener("click", onDeleteStudent)
     }
+
+    for(let instructedCheckbox of document.querySelectorAll("td.instructed input")) {
+        instructedCheckbox.addEventListener("change", onChangeInstructed);
+    }
 });
 
 function hideOverlay(event) {
@@ -122,4 +126,26 @@ async function onDeleteStudent(event) {
     } catch(e) {
         toast("error", e);
     }
+}
+
+async function onChangeInstructed(event) {
+    let target = event.target;
+
+    let id = target.closest("tr").dataset.id;
+    let instructed = target.checked;
+
+    try {
+        let url = "/api/student/" + id + "/instructed";
+
+        let response = await myfetch(url, {
+            method: "PUT",
+            headers: new Headers({"Content-Type": "application/json"}),
+            body: JSON.stringify(instructed)
+        });
+        handleResponse(response);
+    } catch(e) {
+        toast("error", e);
+        target.checked = !instructed;
+    }
+
 }

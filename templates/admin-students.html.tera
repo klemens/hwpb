@@ -30,6 +30,7 @@
                     <tr>
                         <th><input name="matrikel" required="required" placeholder="Matrikel" size="1"/></th>
                         <th><input name="name" required="required" placeholder="Name des neuen Teilnehmers" size="70"/></th>
+                        <th class="instructed"><input disabled="disabled" placeholder="Belehrt"/></th>
                         <th><input name="username" placeholder="Benutzername" size="10"/></th>
                         <th><input disabled="disabled" placeholder="Gruppen" size="4"/></th>
                         <th><button type="submit" title="Teilnehmer hinzufügen (Batch-Import über den roten Button unten)"><div class="button round add">+</div></button></th>
@@ -39,6 +40,9 @@
                 <tr data-id="{{ student.id }}">
                     <td>{{ student.matrikel }}</td>
                     <td>{{ student.name }}</td>
+                    <td class="instructed">
+                        <label><input type="checkbox" {% if student.instructed %}checked="checked"{% endif %}/></label>
+                    </td>
                     <td>{{ student.username }}</td>
                     <td>
                         {% for group in student.groups %}

@@ -64,6 +64,7 @@ pub struct Student {
     pub name: String,
     pub year: i16,
     pub username: Option<String>,
+    pub instructed: bool,
 }
 
 #[derive(Debug, Deserialize, Insertable)]

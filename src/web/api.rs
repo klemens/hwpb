@@ -576,6 +576,27 @@ fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoConte
     })
 }
 
+#[put("/student/<student>/instructed", data = "<instructed>")]
+fn put_student_instucted(student: i32, instructed: Json<bool>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+    conn.transaction(|| {
+        let full_student = db::students::table
+            .find(student)
+            .get_result::<db::Student>(&*conn)?;
+        user.ensure_admin_for(full_student.year)?;
+
+        diesel::update(db::students::table.find(student))
+            .set(db::students::instructed.eq(*instructed))
+            .execute(&*conn)
+            .and_then(db::expect1)?;
+
+        add_audit_log(full_student.year, None, user.name(), &conn,
+            &format!("Student {} (#{}) is {} instructed", full_student.name,
+            student, if *instructed { "now" } else { "no longer" }))?;
+
+        Ok(NoContent)
+    })
+}
+
 #[post("/tutor", data = "<tutor>")]
 fn post_tutor(tutor: Json<db::NewTutor>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Json<i32>> {
     conn.transaction(|| {

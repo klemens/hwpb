@@ -44,8 +44,20 @@ thead button::-moz-focus-inner{
     border: 0;
 }
 
-tbody > tr:hover > td:nth-of-type(-n+4) {
+tbody > tr:hover > td:nth-of-type(-n+5) {
     background: rgba(151, 151, 151, 0.2);
+}
+
+th.instructed {
+    width: 4rem;
+}
+td.instructed {
+    padding: 0;
+}
+td.instructed label {
+    display: block;
+    text-align: center;
+    padding: 0.15rem;
 }
 
 .button.add,
