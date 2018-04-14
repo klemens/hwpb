@@ -317,6 +317,7 @@ async function handleStudentClick(event) {
             let node = document.createElement("li");
             node.textContent = student.name;
             node.dataset.id = student.id;
+            node.dataset.instructed = student.instructed;
             event.target.closest("ul").appendChild(node);
 
             try {
@@ -394,6 +395,7 @@ async function searchStudents(terms) {
             data: {
                 id: student.id,
                 name: student.name,
+                instructed: student.instructed
             }
         }
     });

@@ -90,6 +90,7 @@ pub struct GroupOverviewGroup {
 pub struct Student {
     pub id: i32,
     pub name: String,
+    pub instructed: bool,
 }
 
 #[derive(Serialize)]
@@ -228,6 +229,7 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
             students: students.into_iter().map(|s| Student {
                 id: s.id,
                 name: s.name,
+                instructed: s.instructed,
             }).collect(),
             tasks: Vec::with_capacity(tasks.len()),
             elaboration: elaborations.get(&group.id).cloned(),
@@ -329,6 +331,7 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
         .map(|student| Student {
             id: student.id,
             name: student.name,
+            instructed: student.instructed,
         })
         .collect();
 
@@ -366,6 +369,7 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection)
             Student {
                 id: student.id,
                 name: student.name,
+                instructed: student.instructed,
             }
         }).collect()
     })?)
@@ -405,6 +409,7 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection) -
                 Student {
                     id: student.id,
                     name: student.name,
+                    instructed: student.instructed,
                 }
             }).collect();
 

@@ -222,6 +222,15 @@ ol.comma-separated > li.hide-comma::after {
     color: #666666;
 }
 
+.group ul.students li[data-instructed="false"] {
+    color: #666666;
+    font-style: italic;
+}
+.group ul.students li[data-instructed="false"]:before {
+    content: "Fehlende Belehrung: ";
+    font-weight: bold;
+}
+
 .group .task {
     display: inline-flex;
     flex-direction: column;
@@ -248,7 +257,6 @@ ol.comma-separated > li.hide-comma::after {
     margin: 0;
     border: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-    sborder-top: 1px solid rgba(0, 0, 0, 0.2);
     background-color: transparent;
 }
 
