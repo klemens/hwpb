@@ -18,6 +18,7 @@
         {% if is_admin %}
         <a class="admin" href="/admin/{{ year }}">Verwaltung</a>
         {% endif %}
+        <a class="logout" href="/logout">Logout</a>
     </nav>
     {{super()}}
 {% endblock content %}

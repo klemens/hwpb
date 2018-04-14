@@ -26,6 +26,11 @@ nav.analysis a.admin {
     background: #BF360C;
 }
 
+nav.analysis a.logout {
+    flex: 0;
+    background: #E65100;
+}
+
 .search {
     position: absolute;
     left: 0;
