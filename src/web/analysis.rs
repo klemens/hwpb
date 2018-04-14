@@ -28,8 +28,10 @@ struct Export {
 fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
-    let students = load_elaborations_by_student(year, None, Some(true), &*conn)?
-        .into_iter()
+    let (elaborations_by_student, _) =
+        load_elaborations_by_student(year, None, Some(true), &*conn)?;
+
+    let students = elaborations_by_student.into_iter()
         .filter_map(|(student, elaboration)| {
             if elaboration.all() { Some(student) } else { None }
         })
@@ -53,22 +55,23 @@ fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Templ
 fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
-    let students_with_all_tasks = load_tasks_by_student(year, &*conn)?
-        .into_iter()
+    let (tasks_by_student, _) = load_tasks_by_student(year, &*conn)?;
+    let (elaborations_by_student, _) =
+        load_elaborations_by_student(year, Some(true), Some(false), &*conn)?;
+
+    let students_with_all_tasks = tasks_by_student.into_iter()
         .filter_map(|(student, tasks)| {
             // Only consider students that have completed all tasks
             if tasks.all() { Some(student) } else { None }
         })
         .collect();
 
-    let students_with_unaccepted_reworks: BTreeSet<_> =
-        load_elaborations_by_student(year, Some(true), Some(false), &*conn)?
-        .into_iter()
+    let students_with_unaccepted_reworks = elaborations_by_student.into_iter()
         .filter_map(|(student, elaboration)| {
             // Consider all students with at least one unaccepted rework
             if elaboration.any() { Some(student) } else { None }
         })
-        .collect();
+        .collect::<BTreeSet<_>>();
 
     let mut students: Vec<_> = students_with_unaccepted_reworks
         .intersection(&students_with_all_tasks)
@@ -123,10 +126,9 @@ impl PartialEq for Student {
 }
 
 // Load all students with their completed tasks
-fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<Vec<(Student, BitVec)>> {
-    // Load map (task_id, index) where the indices start at 0 and are
-    // contiguous. Tasks that start with [Zz] (Zusatzaufgabe) are ignored
-    let tasks: HashMap<_,_> = db::tasks::table
+fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<(Vec<(Student, BitVec)>, Vec<db::Task>)> {
+    // Tasks that start with [Zz] (Zusatzaufgabe) are ignored
+    let tasks = db::tasks::table
         .filter(db::tasks::experiment_id.eq_any(
             db::experiments::table
                 .filter(db::experiments::year.eq(year))
@@ -134,12 +136,16 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<Vec<(Student,
         ))
         .filter(not(db::tasks::name.ilike("Z%")))
         .order((db::tasks::experiment_id.asc(), db::tasks::name.asc()))
-        .load::<db::Task>(conn)?.into_iter()
+        .load::<db::Task>(conn)?;
+
+    // Load map (task_id, index) where the indices start at 0 and are
+    // contiguous, used as a lookup table for filling a bit vector
+    let task_map: HashMap<_,_> = tasks.iter()
         .enumerate()
         .map(|(i, task)| (task.id, i))
         .collect();
 
-    Ok(db::completions::table
+    let tasks_by_student = db::completions::table
         .inner_join(db::group_mappings::table
             .on(db::completions::group_id.eq(db::group_mappings::group_id)))
         .inner_join(db::students::table
@@ -150,14 +156,14 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<Vec<(Student,
         .load::<(db::Completion, db::Student)>(conn)?.into_iter()
         .group_by(|&(_, ref student)| student.id).into_iter()
         .map(|(_, completions)| {
-            let mut completed_tasks = BitVec::from_elem(tasks.len(), false);
+            let mut completed_tasks = BitVec::from_elem(task_map.len(), false);
             let mut groups = BTreeSet::new();
 
             let mut student = None;
 
             for (completion, db_student) in completions {
                 // Can be None because of the additional tasks
-                if let Some(index) = tasks.get(&completion.task_id) {
+                if let Some(index) = task_map.get(&completion.task_id) {
                     completed_tasks.set(*index, true);
                     groups.insert(completion.group_id);
                 }
@@ -175,19 +181,23 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<Vec<(Student,
                 groups: groups,
             }, completed_tasks)
         })
-        .collect())
+        .collect();
+
+    Ok((tasks_by_student, tasks))
 }
 
 // Load all students with their handed in elaborations, optionally filtered by
 // the rework_required and accepted states
 fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accepted: Option<bool>,
-                                conn: &PgConnection) -> Result<Vec<(Student, BitVec)>> {
-    // Load map (experiment_id, index) where the indices start at 0 and are
-    // contiguous
-    let experiments: HashMap<_,_> = db::experiments::table
+                                conn: &PgConnection) -> Result<(Vec<(Student, BitVec)>, Vec<db::Experiment>)> {
+    let experiments = db::experiments::table
         .filter(db::experiments::year.eq(year))
         .order(db::experiments::id.asc())
-        .load::<db::Experiment>(conn)?.into_iter()
+        .load::<db::Experiment>(conn)?;
+
+    // Generate map (experiment_id, index) where the indices start at 0 and are
+    // contiguous, used as a lookup table for filling a bit vector
+    let experiment_map: HashMap<_,_> = experiments.iter()
         .enumerate()
         .map(|(i, experiment)| (experiment.id, i))
         .collect();
@@ -206,20 +216,20 @@ fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accept
         query = query.filter(db::elaborations::accepted.eq(accepted));
     }
 
-    Ok(query
+    let elaborations_by_student = query
         .order(db::students::id)
         .select((db::elaborations::all_columns, db::students::all_columns))
         .load::<(db::Elaboration, db::Student)>(conn)?.into_iter()
         .group_by(|&(_, ref student)| student.id).into_iter()
         .map(|(_, elaborations)| {
-            let mut existing_elaborations = BitVec::from_elem(experiments.len(), false);
+            let mut existing_elaborations = BitVec::from_elem(experiment_map.len(), false);
             let mut groups = BTreeSet::new();
 
             let mut student = None;
 
             for (elaboration, db_student) in elaborations {
                 // Cannot be none, because experiments is complete
-                let index = experiments.get(&elaboration.experiment_id).unwrap();
+                let index = experiment_map.get(&elaboration.experiment_id).unwrap();
                 existing_elaborations.set(*index, true);
                 groups.insert(elaboration.group_id);
 
@@ -236,5 +246,7 @@ fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accept
                 groups: groups,
             }, existing_elaborations)
         })
-        .collect())
+        .collect();
+
+    Ok((elaborations_by_student, experiments))
 }
