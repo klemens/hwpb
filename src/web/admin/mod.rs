@@ -1,9 +1,11 @@
 mod audit;
 mod event;
 mod experiment;
+mod export;
 mod student;
 mod tutor;
 
+use chrono::Local;
 use db;
 use diesel::PgConnection;
 use errors::*;
@@ -106,4 +108,15 @@ fn audit(year: i16, filters: audit::Filters, conn: db::Conn, user: SiteAdmin) ->
     };
 
     Ok(Template::render("admin-audit", context))
+}
+
+#[get("/<year>/export")]
+fn export(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<export::CsvResponse> {
+    let name = format!("hwpb-export-{}.csv", Local::today().format("%Y-%m-%d"));
+    let csv = export::create_csv(year, &conn)?;
+
+    Ok(export::CsvResponse {
+        filename: name,
+        content: csv
+    })
 }

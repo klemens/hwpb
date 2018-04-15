@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg version="1.0" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-<g transform="translate(-2.9648 2.5)" fill-rule="evenodd">
-<path d="m112.5 4.1909c-20.072 0-36.231 16.159-36.231 36.231v40.256h10.064v-40.256c0-14.497 11.671-26.167 26.167-26.167 14.5 0 26.17 11.67 26.17 26.167v27.756h10.06v-27.756c0-20.072-16.16-36.231-36.23-36.231z" fill="#282828"/>
-<rect x="7.1987" y="74.55" width="85.603" height="66.259" rx=".5" ry=".5"/>
-</g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1" viewBox="0 0 150 150">
+  <path fill="#282828" fill-rule="evenodd" d="M109.535 6.682c-20.072 0-36.23 16.159-36.23 36.23V83.17h10.063V42.913a26.11 26.11 0 0 1 26.167-26.167 26.11 26.11 0 0 1 26.17 26.167v27.756h10.06V42.913c0-20.072-16.16-36.231-36.23-36.231z"/>
+  <rect width="85.603" height="66.259" x="4.234" y="77.041" fill-rule="evenodd" rx=".5" ry=".5"/>
 </svg>

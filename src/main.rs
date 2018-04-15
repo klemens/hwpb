@@ -92,6 +92,7 @@ fn run() -> Result<()> {
             web::admin::tutors,
             web::admin::audit_index,
             web::admin::audit,
+            web::admin::export,
         ])
         .attach(rocket_contrib::Template::fairing())
         .attach(rocket::fairing::AdHoc::on_attach(|rocket| {

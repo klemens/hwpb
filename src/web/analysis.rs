@@ -55,7 +55,7 @@ fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Templ
 fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
-    let (tasks_by_student, _) = load_tasks_by_student(year, &*conn)?;
+    let (tasks_by_student, _) = load_tasks_by_student(year, false, &*conn)?;
     let (elaborations_by_student, _) =
         load_elaborations_by_student(year, Some(true), Some(false), &*conn)?;
 
@@ -101,12 +101,13 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Res
 
 
 #[derive(Clone, Debug, Eq, Serialize)]
-struct Student {
-    id: i32,
+pub struct Student {
+    pub id: i32,
     matrikel: String,
     name: String,
     username: Option<String>,
     groups: BTreeSet<i32>,
+    instructed: bool,
 }
 
 impl Ord for Student {
@@ -126,15 +127,22 @@ impl PartialEq for Student {
 }
 
 // Load all students with their completed tasks
-fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<(Vec<(Student, BitVec)>, Vec<db::Task>)> {
-    // Tasks that start with [Zz] (Zusatzaufgabe) are ignored
-    let tasks = db::tasks::table
+pub fn load_tasks_by_student(year: i16, include_extra_tasks: bool, conn: &PgConnection)
+                             -> Result<(Vec<(Student, BitVec)>, Vec<db::Task>)> {
+    let mut tasks_query = db::tasks::table
         .filter(db::tasks::experiment_id.eq_any(
             db::experiments::table
                 .filter(db::experiments::year.eq(year))
                 .select(db::experiments::id)
         ))
-        .filter(not(db::tasks::name.ilike("Z%")))
+        .into_boxed();
+
+    // Ignore tasks that start with [Zz] (Zusatzaufgabe) if requested
+    if !include_extra_tasks {
+        tasks_query = tasks_query.filter(not(db::tasks::name.ilike("Z%")));
+    }
+
+    let tasks = tasks_query
         .order((db::tasks::experiment_id.asc(), db::tasks::name.asc()))
         .load::<db::Task>(conn)?;
 
@@ -179,6 +187,7 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<(Vec<(Student
                 name: student.name,
                 username: student.username,
                 groups: groups,
+                instructed: student.instructed,
             }, completed_tasks)
         })
         .collect();
@@ -188,8 +197,9 @@ fn load_tasks_by_student(year: i16, conn: &PgConnection) -> Result<(Vec<(Student
 
 // Load all students with their handed in elaborations, optionally filtered by
 // the rework_required and accepted states
-fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accepted: Option<bool>,
-                                conn: &PgConnection) -> Result<(Vec<(Student, BitVec)>, Vec<db::Experiment>)> {
+pub fn load_elaborations_by_student(year: i16, rework_required: Option<bool>,
+                                    accepted: Option<bool>, conn: &PgConnection)
+                                    -> Result<(Vec<(Student, BitVec)>, Vec<db::Experiment>)> {
     let experiments = db::experiments::table
         .filter(db::experiments::year.eq(year))
         .order(db::experiments::id.asc())
@@ -244,6 +254,7 @@ fn load_elaborations_by_student(year: i16, rework_required: Option<bool>, accept
                 name: student.name,
                 username: student.username,
                 groups: groups,
+                instructed: student.instructed,
             }, existing_elaborations)
         })
         .collect();

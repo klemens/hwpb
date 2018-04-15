@@ -25,6 +25,7 @@
             {% endif %}
         </ul>
         {% if base.site_admin %}
+            <a class="export" href="/admin/{{ base.year }}/export"><img src="/static/icons/export-csv.svg"></a>
             {% if base.read_only_year %}
             <img class="padlock" src="/static/icons/locked.svg" title="Dieses Jahr wurde bereits abgeschlossen und kann nicht mehr verändert werden." />
             {% else %}

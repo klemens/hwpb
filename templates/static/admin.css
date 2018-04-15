@@ -28,8 +28,19 @@ header a.back > img {
     filter: invert(1);
 }
 
-header img.padlock {
+header a.export {
     margin-left: 1rem;
+    display: flex;
+}
+
+header a.export > img {
+    height: 1.5rem;
+    align-self: center;
+    filter: invert(1);
+}
+
+header img.padlock {
+    margin-left: .7rem;
     margin-right: .4rem;
     height: 1.5rem;
     align-self: center;
