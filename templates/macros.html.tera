@@ -15,7 +15,7 @@
             <ul class="students comma-separated">
                 <li class="add button round hide-comma">+</li>
                 {% for student in group.students %}
-                <li data-id="{{ student.id }}" data-instructed="{{ student.instructed }}">{{ student.name }}</li>
+                <li data-id="{{ student.id }}" data-instructed="{{ student.instructed }}" {% if not student.instructed %}title="Fehlende Sicherheitsbelehrung!"{% endif %}>{{ student.name }}</li>
                 {% endfor %}
             </ul>
         {% endif %}

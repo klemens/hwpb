@@ -227,7 +227,7 @@ ol.comma-separated > li.hide-comma::after {
     font-style: italic;
 }
 .group ul.students li[data-instructed="false"]:before {
-    content: "Fehlende Belehrung: ";
+    content: "❗ ";
     font-weight: bold;
 }
 
