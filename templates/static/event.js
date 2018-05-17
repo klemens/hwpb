@@ -37,6 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
     for(let editButton of document.querySelectorAll(".group h2 img")) {
         editButton.addEventListener("click", onGroupDeskChange);
     }
+
+    document.addEventListener("keypress", handleKeyPress);
+
+    restoreSessionState();
 });
 
 function promptInt(message) {
@@ -106,5 +110,27 @@ async function onGroupDeskChange(event) {
         toast("info", "Die Tischnummer der Gruppe wurde geändert. Seite neuladen um sie anzuzeigen!")
     } catch(e) {
         toast("error", e);
+    }
+}
+
+function handleKeyPress(event) {
+    if(event.ctrlKey && event.key === "#") {
+        let experiment = document.querySelector("#main > .experiment");
+        let compactActive = experiment.classList.contains("compact");
+
+        if(compactActive) {
+            experiment.classList.remove("compact");
+            sessionStorage.removeItem("compact");
+        } else {
+            experiment.classList.add("compact");
+            sessionStorage.setItem("compact", "yes");
+            toast("info", "Kompaktmodus aktiv, STRG+# zum Deaktivieren")
+        }
+    }
+}
+
+function restoreSessionState() {
+    if(sessionStorage.getItem("compact") === "yes") {
+        document.querySelector("#main > .experiment").classList.add("compact");
     }
 }
