@@ -402,3 +402,6 @@ async function searchStudents(terms) {
 
     return Promise.resolve(elements);
 }
+
+// Register service worker for progressive web app
+navigator.serviceWorker.register("/service-worker.js");

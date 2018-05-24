@@ -85,3 +85,13 @@ fn group(group: i32, conn: db::Conn, user: User) -> Result<Template> {
 fn static_file(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("templates/static/").join(path)).ok()
 }
+
+#[get("/manifest.json")]
+fn manifest() -> Option<NamedFile> {
+    NamedFile::open(Path::new("templates/manifest.json")).ok()
+}
+
+#[get("/service-worker.js")]
+fn service_worker() -> Option<NamedFile> {
+    NamedFile::open(Path::new("templates/static/service-worker.js")).ok()
+}

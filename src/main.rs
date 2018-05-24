@@ -43,6 +43,8 @@ fn run() -> Result<()> {
             web::event,
             web::group,
             web::static_file,
+            web::manifest,
+            web::service_worker,
             web::session::nologin_index,
             web::session::nologin_path,
             web::session::login_redirect,
