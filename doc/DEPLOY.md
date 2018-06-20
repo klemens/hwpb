@@ -17,9 +17,9 @@ If you are using `rustup` to manage your Rust installation, you can override
 the used compiler version only for this project (i.e. the current directory):
 
 ```sh
-$ rustup override set nightly-2018-04-07
+$ rustup override set nightly-2018-06-13
 $ rustc --version
-rustc 1.27.0-nightly (eeea94c11 2018-04-06)
+rustc 1.28.0-nightly (b68432d56 2018-06-12)
 ```
 
 ## Configure

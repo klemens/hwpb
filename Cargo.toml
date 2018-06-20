@@ -6,9 +6,9 @@ authors = ["Klemens Schölhorn <klemens@schoelhorn.eu>"]
 build = "src/build.rs"
 
 [dependencies]
-bit-vec = "0.4"
+bit-vec = "0.5"
 chrono = "0.4"
-csv = "1.0.0-beta.5"
+csv = "1.0"
 diesel = { version = "1.0", features = ["postgres", "chrono", "r2d2"] }
 diesel_migrations = { version = "1.0", features = ["postgres"] }
 error-chain = "0.11"

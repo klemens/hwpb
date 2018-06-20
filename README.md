@@ -11,7 +11,7 @@ The project can be built using cargo.
 cargo build --release
 ```
 
-Note that you currently need at least rust 1.25.0-nightly 2018-04-06.
+Note that you currently need at least rust 1.28.0-nightly 2018-06-12.
 Use [`rustup`] on windows or if the packages of your distribution are too old.
 
 ## Usage
