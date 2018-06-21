@@ -1,4 +1,4 @@
-#![feature(plugin, custom_derive)]
+#![feature(plugin, custom_derive, nll)]
 #![plugin(rocket_codegen)]
 
 extern crate bit_vec;
@@ -27,7 +27,8 @@ fn run() -> Result<()> {
     let rocket = rocket::ignite();
 
     let database_url = rocket.config().get_str("database")
-        .chain_err(|| "DATABASE_URL not set")?;
+        .chain_err(|| "DATABASE_URL not set")?
+        .to_owned();
 
     // run any pending database migrations
     db::run_migrations(&database_url)?;
@@ -35,7 +36,7 @@ fn run() -> Result<()> {
     // add current year on first run
     db::init_year(&database_url)?;
 
-    rocket::ignite()
+    rocket
         .manage(db::init_pool(&database_url)?)
         .mount("/", routes![
             web::index,
