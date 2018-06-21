@@ -2,11 +2,13 @@ pub mod admin;
 pub mod analysis;
 pub mod api;
 mod models;
+pub mod push;
 pub mod session;
 
 use chrono;
 use db;
 use errors::*;
+use rocket::State;
 use rocket::http::RawStr;
 use rocket::request::FromParam;
 use rocket::response::NamedFile;
@@ -64,8 +66,8 @@ fn overview(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<date>")]
-fn event(date: Date, conn: db::Conn, user: User) -> Result<Template> {
-    let context = models::load_event(&date, &conn)?;
+fn event(date: Date, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
+    let context = models::load_event(&date, &push_url.0, &conn)?;
 
     user.ensure_tutor_for(context.year)?;
 
@@ -73,8 +75,8 @@ fn event(date: Date, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/group/<group>")]
-fn group(group: i32, conn: db::Conn, user: User) -> Result<Template> {
-    let context = models::load_group(group, &conn)?;
+fn group(group: i32, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
+    let context = models::load_group(group, &push_url.0, &conn)?;
 
     user.ensure_tutor_for(context.year)?;
 

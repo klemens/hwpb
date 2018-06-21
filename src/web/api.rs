@@ -8,6 +8,7 @@ use rocket::Data;
 use rocket::response::status::NoContent;
 use rocket_contrib::Json;
 use web::models::find_writable_year;
+use web::push;
 use web::session::{SiteAdmin, User};
 
 fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnection, change: &str) -> ApiResult<()> {
@@ -71,6 +72,11 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResul
             &format!("Mark task {} (#{}) of {} as completed",
                 task_name, task, experiment_name))?;
 
+        push::SERVER.push(year, "completion", &push::Completion {
+            group, task,
+            completed: true,
+        }).ok();
+
         Ok(NoContent)
     })
 }
@@ -93,6 +99,11 @@ fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiRe
         add_audit_log(year, Some(group), user.name(), &*conn,
             &format!("Unmark task {} (#{}) of {} as completed",
                 task_name, task, experiment_name))?;
+
+        push::SERVER.push(year, "completion", &push::Completion {
+            group, task,
+            completed: false,
+        }).ok();
 
         Ok(NoContent)
     })
@@ -136,6 +147,13 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
             &format!("Mark elaboration of {} (#{}) as {}",
                 experiment_name, experiment, status))?;
 
+        push::SERVER.push(year, "elaboration", &push::Elaboration {
+            group, experiment,
+            handed_in: true,
+            rework: elaboration.rework_required,
+            accepted: elaboration.accepted,
+        }).ok();
+
         Ok(NoContent)
     })
 }
@@ -157,6 +175,13 @@ fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -
             &format!("Mark elaboration of {} (#{}) as missing",
                 experiment_name, experiment))?;
 
+        push::SERVER.push(year, "elaboration", &push::Elaboration {
+            group, experiment,
+            handed_in: false,
+            rework: false,
+            accepted: false,
+        }).ok();
+
         Ok(NoContent)
     })
 }
@@ -174,6 +199,12 @@ fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: Us
 
         add_audit_log(year, Some(group), user.name(), &*conn,
             &format!("Change comment to '{}'", comment))?;
+
+        push::SERVER.push(year, "comment", &push::Comment {
+            group: group,
+            author: user.name(),
+            comment: &comment,
+        }).ok();
 
         Ok(NoContent)
     })

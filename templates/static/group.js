@@ -1,4 +1,12 @@
+let pushServer = null;
+
 document.addEventListener("DOMContentLoaded", () => {
+    // Setup push messages
+    pushServer = new EventSource(document.body.dataset.pushEndpoint);
+    pushServer.addEventListener("comment", handleCommentPush);
+    pushServer.addEventListener("completion", handleTaskPush);
+    pushServer.addEventListener("elaboration", handleExperimentPush);
+
     for(input of document.querySelectorAll(".task input")) {
         input.addEventListener("change", handleTaskChange);
     }

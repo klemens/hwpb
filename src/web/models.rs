@@ -5,6 +5,7 @@ use diesel::pg::PgConnection;
 use errors::*;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
+use super::push;
 
 #[derive(Serialize)]
 pub struct Year {
@@ -46,6 +47,7 @@ pub struct Event {
     pub groups: Vec<EventGroup>,
     pub prev_event: Option<String>,
     pub next_event: Option<String>,
+    pub push: PushEndpoint,
 }
 
 #[derive(Serialize)]
@@ -59,6 +61,12 @@ pub struct EventGroup {
     pub comment: String,
 }
 
+#[derive(Default, Serialize)]
+pub struct PushEndpoint {
+    pub url: String,
+    pub auth_token: String,
+}
+
 #[derive(Serialize)]
 pub struct GroupOverview {
     pub id: i32,
@@ -69,6 +77,7 @@ pub struct GroupOverview {
     pub comment: String,
     pub students: Vec<Student>,
     pub events: Vec<GroupOverviewEvent>,
+    pub push: PushEndpoint,
 }
 
 #[derive(Serialize)]
@@ -163,6 +172,7 @@ pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
             groups: vec![],
             prev_event: None,
             next_event: None,
+            push: PushEndpoint::default(),
         });
 
     // group the events by experiment
@@ -185,7 +195,7 @@ pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
     Ok(result)
 }
 
-pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
+pub fn load_event(date: &NaiveDate, push_url: &str, conn: &PgConnection) -> Result<Event> {
     use db::{completions, elaborations, events, groups, tasks};
 
     let (event, day, experiment) = events::table
@@ -268,10 +278,14 @@ pub fn load_event(date: &NaiveDate, conn: &PgConnection) -> Result<Event> {
         groups: web_groups,
         prev_event: prev_event.map(|e| format!("{}", e.date)),
         next_event: next_event.map(|e| format!("{}", e.date)),
+        push: PushEndpoint {
+            url: push_url.into(),
+            auth_token: push::SERVER.generate_auth_token(Some(day.year))?,
+        }
     })
 }
 
-pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
+pub fn load_group(group: i32, push_url: &str, conn: &PgConnection) -> Result<GroupOverview> {
     use db::{completions, elaborations, groups, tasks};
 
     let (group, day) = groups::table
@@ -344,6 +358,11 @@ pub fn load_group(group: i32, conn: &PgConnection) -> Result<GroupOverview> {
         comment: group.comment,
         students: students,
         events: events,
+        push: PushEndpoint {
+            url: push_url.into(),
+            auth_token: push::SERVER.generate_auth_token(Some(day.year))?,
+        }
+
     })
 }
 

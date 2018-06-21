@@ -210,6 +210,67 @@ class OverlaySearchBox extends SearchBox {
     }
 }
 
+function handleCommentPush(event) {
+    let data = JSON.parse(event.data);
+
+    let selector = `.group[data-id="${data.group}"] > div.comment`;
+    let comment = document.querySelector(selector);
+    if(select) {
+        let textarea = comment.querySelector("textarea");
+        let oldValue = textarea.value;
+
+        // Check if comment is already up to date (happens if the
+        // push is faster than the API call finishes)
+        if(oldValue === data.comment) {
+            return;
+        }
+
+        if(comment.classList.contains("unsaved")) {
+            let start = textarea.selectionStart;
+            let end = textarea.selectionEnd;
+
+            textarea.value = oldValue
+                + `\n\nParallele Änderung von ${data.author}:\n${data.comment}`;
+
+            textarea.setSelectionRange(start, end);
+        } else {
+            textarea.value = data.comment;
+        }
+    }
+}
+
+function handleExperimentPush(event) {
+    let data = JSON.parse(event.data);
+
+    let selector = `.group[data-id="${data.group}"]`
+        + `[data-experiment="${data.experiment}"] `
+        + `> select.elaboration`;
+    let select = document.querySelector(selector);
+    if(select) {
+        if(data["handed_in"]) {
+            let selector = `option[data-rework="${data.rework ? 1 : 0}"]`
+                + `[data-accepted="${data.accepted ? 1 : 0}"]`;
+            let option = select.querySelector(selector);
+            if(option) {
+                select.selectedIndex = option.index;
+            }
+        } else {
+            select.selectedIndex = 0;
+        }
+    }
+}
+
+function handleTaskPush(event) {
+    let data = JSON.parse(event.data);
+
+    let selector = `.group[data-id="${data.group}"] > `
+         + `.task[data-id="${data.task}"] > input`;
+    let input = document.querySelector(selector);
+    if(input) {
+        input.checked = data.completed;
+    }
+}
+
 async function handleTaskChange(event) {
     let checked = event.target.checked;
 

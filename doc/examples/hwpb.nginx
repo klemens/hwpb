@@ -21,4 +21,9 @@ server {
         proxy_redirect off;
         proxy_http_version 1.1;
     }
+    location /push {
+        proxy_pass http://localhost:8081;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+    }
 }

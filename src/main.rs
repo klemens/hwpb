@@ -7,7 +7,9 @@ extern crate csv;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_migrations;
 #[macro_use] extern crate error_chain;
+extern crate hyper_sse;
 extern crate itertools;
+#[macro_use] extern crate lazy_static;
 extern crate pam_auth;
 extern crate rocket;
 extern crate rocket_contrib;
@@ -20,6 +22,7 @@ mod user;
 mod web;
 
 use errors::*;
+use web::push;
 
 quick_main!(run);
 
@@ -36,8 +39,13 @@ fn run() -> Result<()> {
     // add current year on first run
     db::init_year(&database_url)?;
 
+    // start push server
+    let (push_url, listen_addr) = push::parameters(rocket.config())?;
+    push::SERVER.spawn(listen_addr);
+
     rocket
         .manage(db::init_pool(&database_url)?)
+        .manage(push_url)
         .mount("/", routes![
             web::index,
             web::overview,
