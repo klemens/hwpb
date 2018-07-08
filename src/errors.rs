@@ -1,6 +1,3 @@
-// Remove when fix released: https://github.com/rust-lang-nursery/error-chain/commit/1d7157cb480
-#![allow(renamed_and_removed_lints)]
-
 error_chain!{
     foreign_links {
         Csv(::csv::Error);
