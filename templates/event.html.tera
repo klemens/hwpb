@@ -32,7 +32,7 @@
     <div id="add-group" class="button round floating-add" title="Gruppe hinzufügen">+</div>
     <div class="experiment box-wrapper" data-id="{{ experiment_id }}" data-day="{{ day_id }}"><!--
         {% for group in groups %}
-        -->{{ macros::group_card(group=group, experiment=false, experiment_id=false) }}<!--
+        -->{{ macros::group_card(group=group, experiment=false, experiment_id=experiment_id) }}<!--
         {% endfor %}
     --></div>
 {% endblock main %}
