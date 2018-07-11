@@ -28,5 +28,23 @@
                 {% endfor %}
             </table>
         </form>
+        {% if ip_whitelist is iterable %}
+        <form id="add-ip-whitelist" autocomplete="off">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input required="required" name="ipnet" placeholder="Erlaubte IPs (zB: 10.0.0.42 oder fd00::/8)" size="100"></th>
+                        <th><button type="submit" title="IP-Adresse/Netz zur Whitelist hinzufügen"><div class="button round add">+</div></button></th>
+                    </tr>
+                </thead>
+                {% for entry in ip_whitelist %}
+                <tr data-id="{{ entry.id }}">
+                    <td>{{ entry.ipnet }}</td>
+                    <td><div class="button round remove" title="Betreuer entfernen">–</div></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </form>
+        {% endif %}
     </div>
 {% endblock main %}

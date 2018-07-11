@@ -9,7 +9,7 @@ build = "src/build.rs"
 bit-vec = "0.5"
 chrono = "0.4"
 csv = "1.0"
-diesel = { version = "1.0", features = ["postgres", "chrono", "r2d2"] }
+diesel = { version = "1.0", features = ["postgres", "chrono", "network-address", "r2d2"] }
 diesel_migrations = { version = "1.0", features = ["postgres"] }
 error-chain = "0.12"
 hyper-sse = "0.1.0"

@@ -22,6 +22,7 @@ mod user;
 mod web;
 
 use errors::*;
+use web::session::IpWhitelisting;
 use web::push;
 
 quick_main!(run);
@@ -39,12 +40,17 @@ fn run() -> Result<()> {
     // add current year on first run
     db::init_year(&database_url)?;
 
+    // check if ip whitelisting is enabled (default is disabled)
+    let ip_whitelisting = rocket.config().get_bool("ip_whitelisting")
+        .unwrap_or(false);
+
     // start push server
     let (push_url, listen_addr) = push::parameters(rocket.config())?;
     push::SERVER.spawn(listen_addr);
 
     rocket
         .manage(db::init_pool(&database_url)?)
+        .manage(IpWhitelisting(ip_whitelisting))
         .manage(push_url)
         .mount("/", routes![
             web::index,
@@ -90,6 +96,8 @@ fn run() -> Result<()> {
             web::api::post_tutor,
             web::api::delete_tutor,
             web::api::put_tutor_admin,
+            web::api::post_ip_whitelist,
+            web::api::delete_ip_whitelist,
         ])
         .mount("/analysis", routes![
             web::analysis::passed,

@@ -67,6 +67,14 @@ table! {
 }
 
 table! {
+    ip_whitelist (id) {
+        id -> Int4,
+        ipnet -> Inet,
+        year -> Int2,
+    }
+}
+
+table! {
     students (id) {
         id -> Int4,
         matrikel -> Text,
@@ -124,6 +132,7 @@ allow_tables_to_appear_in_same_query!(
     experiments,
     group_mappings,
     groups,
+    ip_whitelist,
     students,
     tasks,
     tutors,

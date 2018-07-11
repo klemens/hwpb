@@ -1,6 +1,8 @@
+mod inet;
 mod models;
 mod schema;
 
+pub use self::inet::{inet as to_inet, PgInetExpressionMethods};
 pub use self::models::*;
 pub use self::schema::*;
 

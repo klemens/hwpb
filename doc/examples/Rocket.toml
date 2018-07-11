@@ -12,4 +12,5 @@ site_admins = [
     "user1",
     "user2",
 ]
+ip_whitelisting = false
 push_port = 8081

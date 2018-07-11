@@ -9,9 +9,10 @@ use chrono::Local;
 use db;
 use diesel::PgConnection;
 use errors::*;
+use rocket::State;
 use rocket::response::Redirect;
 use rocket_contrib::Template;
-use web::session::{SiteAdmin, User};
+use web::session::{IpWhitelisting, SiteAdmin, User};
 use web::models;
 
 #[derive(Serialize)]
@@ -84,10 +85,16 @@ fn students(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<year>/tutors")]
-fn tutors(year: i16, conn: db::Conn, user: SiteAdmin) -> Result<Template> {
+fn tutors(year: i16, ip_whitelisting: State<IpWhitelisting>, conn: db::Conn, user: SiteAdmin) -> Result<Template> {
+    let ip_whitelist = match ip_whitelisting.0 {
+        true => Some(tutor::load_whitelist(year, &conn)?),
+        false => None,
+    };
+
     let context = tutor::Context {
         base: BaseContext::new("tutors", year, &user, &conn)?,
         tutors: tutor::load_tutors(year, &conn)?,
+        ip_whitelist: ip_whitelist,
     };
 
     Ok(Template::render("admin-tutors", context))

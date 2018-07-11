@@ -39,7 +39,9 @@ The `global` section contains settings that apply to all environments. The
 database and `site_admins` contains a list of administrators that can create
 new years and add other tutors and year-specific administrators. The key
 `push_port` specifies the port used for the push sever which uses server sent
-events (SSE) to push changes directly to all tutors.
+events (SSE) to push changes directly to all tutors. The `ip_whitelisting`
+key can be set to true to enable an IP whitelist for (only) tutors that can
+be configured in the admin interface.
 
 The database is initialised automatically when running hwpb for the first time.
 

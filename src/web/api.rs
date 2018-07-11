@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use csv::ReaderBuilder;
-use db;
+use db::{self, PgInetExpressionMethods};
 use diesel;
 use diesel::prelude::*;
 use errors::{ApiError, ApiResult, ResultExt};
@@ -679,6 +679,52 @@ fn put_tutor_admin(tutor: i32, is_admin: Json<bool>, conn: db::Conn, user: SiteA
         add_audit_log(full_tutor.year, None, user.name(), &conn,
             &format!("Tutor {} (#{}) is {} admin", full_tutor.username,
             tutor, if *is_admin { "now" } else { "no longer" }))?;
+
+        Ok(NoContent)
+    })
+}
+
+#[derive(Deserialize)]
+pub struct NewIpWhitelistEntry {
+    pub ipnet: String,
+    pub year: i16,
+}
+
+#[post("/ip-whitelist", data = "<entry>")]
+fn post_ip_whitelist(entry: Json<NewIpWhitelistEntry>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Json<i32>> {
+    conn.transaction(|| {
+        let entry = entry.into_inner();
+        let (id, ipnet) = diesel::insert_into(db::ip_whitelist::table)
+            .values((
+                db::ip_whitelist::ipnet.eq(db::to_inet(entry.ipnet)),
+                db::ip_whitelist::year.eq(entry.year),
+            ))
+            .returning((
+                db::ip_whitelist::id,
+                db::ip_whitelist::ipnet.abbrev(),
+            ))
+            .get_result::<(_,String)>(&*conn)?;
+
+        add_audit_log(entry.year, None, user.name(), &conn,
+            &format!("Create new ip whitelist entry {} (#{})", ipnet, id))?;
+
+        Ok(Json(id))
+    })
+}
+
+#[delete("/ip-whitelist/<entry>")]
+fn delete_ip_whitelist(entry: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
+    conn.transaction(|| {
+        let (year, ipnet) = diesel::delete(
+            db::ip_whitelist::table.find(entry))
+            .returning((
+                db::ip_whitelist::year,
+                db::ip_whitelist::ipnet.abbrev(),
+            ))
+            .get_result::<(i16, String)>(&*conn)?;
+
+        add_audit_log(year, None, user.name(), &conn,
+            &format!("Remove ip whitelist entry {} (#{})", ipnet, entry))?;
 
         Ok(NoContent)
     })

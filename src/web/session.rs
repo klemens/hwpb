@@ -1,4 +1,4 @@
-use db;
+use db::{self, PgInetExpressionMethods};
 use diesel::prelude::*;
 use errors::{self, ResultExt};
 use rocket::{Config, Outcome, State};
@@ -9,6 +9,7 @@ use rocket::response::{Flash, Redirect};
 use rocket_contrib::Template;
 use serde_json;
 use std::collections::{HashMap, HashSet};
+use std::net::SocketAddr;
 use std::ops::Deref;
 use std::path::PathBuf;
 use user;
@@ -140,6 +141,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for NotLoggedIn {
     }
 }
 
+pub struct IpWhitelisting(pub bool);
+
 #[get("/", rank = 2)]
 fn nologin_index() -> Redirect {
     redirect_to_login("/")
@@ -179,7 +182,10 @@ struct LoginForm {
 }
 
 #[post("/login", data = "<login>")]
-fn post_login(mut cookies: Cookies, login: Form<LoginForm>, site_admins: State<SiteAdmins>, conn: db::Conn) -> errors::Result<Result<Redirect, Flash<Redirect>>> {
+fn post_login(mut cookies: Cookies, login: Form<LoginForm>,
+        site_admins: State<SiteAdmins>, ip_whitelisting: State<IpWhitelisting>,
+        address: SocketAddr, conn: db::Conn)
+        -> errors::Result<Result<Redirect, Flash<Redirect>>> {
     let login = login.into_inner();
     let redirect = URI::percent_decode_lossy(login.redirect.as_bytes());
 
@@ -206,6 +212,22 @@ fn post_login(mut cookies: Cookies, login: Form<LoginForm>, site_admins: State<S
     if !user.site_admin && user.tutor_years.is_empty() {
         let msg = "Ungültiger Benutzername!";
         return Ok(Err(Flash::error(redirect_to_login(&redirect), msg)))
+    }
+
+    // Site admins can always login from any ip address
+    if ip_whitelisting.0 && !user.site_admin {
+        let ip = db::to_inet(address.ip().to_string());
+
+        let containing_nets: i64 = db::ip_whitelist::table
+            .filter(db::ip_whitelist::ipnet.contains_or_equals(ip))
+            .filter(db::ip_whitelist::year.eq_any(&user.tutor_years))
+            .count()
+            .get_result(&*conn)?;
+
+        if containing_nets == 0 {
+            let msg = "Login auf diesem Gerät nicht möglich!";
+            return Ok(Err(Flash::error(redirect_to_login(&redirect), msg)))
+        }
     }
 
     let result = user::authenticate(&user.name, &login.password);
