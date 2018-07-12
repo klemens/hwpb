@@ -5,3 +5,7 @@
 table {
     width: 100%;
 }
+
+nav.analysis > a.complete {
+    background: #BF360C;
+}

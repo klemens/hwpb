@@ -101,6 +101,7 @@ fn run() -> Result<()> {
         ])
         .mount("/analysis", routes![
             web::analysis::passed,
+            web::analysis::passed_complete,
             web::analysis::missing_reworks,
         ])
         .mount("/admin", routes![

@@ -1,4 +1,5 @@
 use bit_vec::BitVec;
+use csv::Writer;
 use db;
 use diesel::dsl::not;
 use diesel::prelude::*;
@@ -8,12 +9,14 @@ use itertools::Itertools;
 use rocket_contrib::Template;
 use std::cmp::Ordering;
 use std::collections::{HashMap, BTreeSet};
-use web::session::User;
+use web::admin::export::CsvResponse;
+use web::session::{SiteAdmin, User};
 use web::models::is_writable_year;
 
 #[derive(Serialize)]
 struct Analysis {
     heading: &'static str,
+    show_export_links: bool,
     students: Vec<Student>,
     year: i16,
     read_only_year: bool,
@@ -39,6 +42,7 @@ fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Templ
 
     let context = Analysis {
         heading: "Zugelassene Studenten",
+        show_export_links: user.is_site_admin(),
         students: students,
         year: year,
         read_only_year: !is_writable_year(year, &conn)?,
@@ -49,6 +53,48 @@ fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Templ
         "text" => Ok(Template::render("analysis-text", &context)),
         e => Err(format!("Invalid format specified: {}", e).into()),
     }
+}
+
+#[get("/passed-complete/<year>")]
+fn passed_complete(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<CsvResponse> {
+    // Load all students
+    let mut students = db::students::table
+        .filter(db::students::year.eq(year))
+        .order(db::students::matrikel)
+        .load::<db::Student>(&*conn)?;
+
+    // Load all students that pass the course
+    let (elaborations_by_student, _) =
+        load_elaborations_by_student(year, None, Some(true), &*conn)?;
+    let passed_students: BTreeSet<_> = elaborations_by_student.into_iter()
+        .filter_map(|(student, elaboration)| {
+            if elaboration.all() { Some(student.matrikel) } else { None }
+        })
+        .collect();
+
+    // Sort passed students to the front
+    students.sort_by_key(|student| {
+        !passed_students.contains(&student.matrikel)
+    });
+
+    let mut csv = Writer::from_writer(vec![]);
+
+    for student in students {
+        let passed = match passed_students.contains(&student.matrikel) {
+            true => "bestanden",
+            false => "nicht bestanden",
+        };
+
+        csv.write_field(student.matrikel)?;
+        csv.write_field(student.name)?;
+        csv.write_field(passed)?;
+        csv.write_record(None::<&[u8]>)?; // Finish record
+    }
+
+    Ok(CsvResponse {
+        filename: format!("Hardwarepraktikum-{}.csv", year),
+        content: csv.into_inner().chain_err(|| "Could not finalize csv writer")?
+    })
 }
 
 #[get("/missing-reworks/<year>?<export>")]
@@ -87,6 +133,7 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Res
 
     let context = Analysis {
         heading: "Fehlende Nachbesserungen",
+        show_export_links: false,
         students: students,
         year: year,
         read_only_year: !is_writable_year(year, &conn)?,

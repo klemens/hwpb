@@ -1,7 +1,7 @@
 mod audit;
 mod event;
 mod experiment;
-mod export;
+pub mod export;
 mod student;
 mod tutor;
 

@@ -10,6 +10,15 @@
 {% block title %}{{ heading }} ({{ year }}){% endblock title %}
 {% block heading %}<a href="/{{ year }}">{{ heading }} ({{ year }})</a>{% endblock heading %}
 
+{% block content %}
+    {% if show_export_links %}
+    <nav class="analysis">
+        <a class="complete" href="/analysis/passed-complete/{{ year }}">CSV-Export für das Studienbüro (mit allen Teilnehmern)</a>
+    </nav>
+    {% endif %}
+    {{super()}}
+{% endblock content %}
+
 {% block main %}
     <div class="box-wrapper">
         <table>

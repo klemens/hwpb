@@ -277,6 +277,24 @@ ol.comma-separated > li.hide-comma::after {
     font-weight: bold;
 }
 
+nav.analysis {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%; /* seems to be necessary when margin: auto in flexbox */
+    max-width: 41.6rem;
+    margin: .2rem auto 0;
+}
+
+nav.analysis a {
+    flex: auto;
+    text-decoration: none;
+    padding: .3rem .5rem;
+    margin: .3rem;
+    background: #33691e;
+    color: #ffffff;
+    box-shadow: 1px 1px 3px -1px black;
+}
+
 .search {
     display: flex;
     flex-direction: column;
