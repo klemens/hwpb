@@ -157,17 +157,3 @@ pub struct NewTutor {
     pub year: i16,
     pub is_admin: bool,
 }
-
-use std::borrow::Borrow;
-
-impl Borrow<str> for Student {
-    fn borrow(&self) -> &str {
-        &self.name
-    }
-}
-
-impl Borrow<str> for Task {
-    fn borrow(&self) -> &str {
-        &self.name
-    }
-}
