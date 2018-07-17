@@ -14,9 +14,9 @@
         <dl>
             <dt>Format</dt>
             <dd>UTF-8-codierte <a href="https://tools.ietf.org/html/rfc4180">CSV</a>-Datei
-                ohne Header mit den Spalten Matrikelnummer, Name und optional Benutzername.</dd>
+                ohne Header mit den Spalten Matrikelnummer, Vorname und optional Familienname und Benutzername.</dd>
             <dt>Beispiel</dt>
-            <dd><pre>8164574,Maria Schneider,ms18gwhd<br />2256397,Anna Walter,<br />3692519,"Franz Maier, MdL",fm41abdf</pre></dd>
+            <dd><pre>8164574,Maria,Schneider,ms18gwhd<br />2256397,Anna,Walter,<br />3692519,Björk,,fm41abdf</pre></dd>
         </dl>
     </div>
 {% endblock overlay %}
@@ -29,9 +29,10 @@
                 <thead>
                     <tr>
                         <th><input name="matrikel" required="required" placeholder="Matrikel" size="1"/></th>
-                        <th><input name="name" required="required" placeholder="Name des neuen Teilnehmers" size="70"/></th>
+                        <th><input name="given-name" required="required" placeholder="Vorname des neuen Teilnehmers" size="35"/></th>
+                        <th><input name="family-name" placeholder="Familienname (optional)" size="35"/></th>
                         <th class="instructed"><input disabled="disabled" placeholder="Belehrt"/></th>
-                        <th><input name="username" placeholder="Benutzername" size="10"/></th>
+                        <th><input name="username" placeholder="Benutzername" title="optional" size="10"/></th>
                         <th><input disabled="disabled" placeholder="Gruppen" size="4"/></th>
                         <th><button type="submit" title="Teilnehmer hinzufügen (Batch-Import über den roten Button unten)"><div class="button round add">+</div></button></th>
                     </tr>
@@ -39,7 +40,8 @@
                 {% for student in students %}
                 <tr data-id="{{ student.id }}">
                     <td>{{ student.matrikel }}</td>
-                    <td>{{ student.name }}</td>
+                    <td>{{ student.given_name }}</td>
+                    <td>{{ student.family_name }}</td>
                     <td class="instructed">
                         <label><input type="checkbox" {% if student.instructed %}checked="checked"{% endif %}/></label>
                     </td>

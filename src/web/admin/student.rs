@@ -14,7 +14,8 @@ pub struct Student {
     pub id: i32,
     pub matrikel: String,
     pub username: Option<String>,
-    pub name: String,
+    pub given_name: String,
+    pub family_name: String,
     pub groups: Vec<i32>,
     pub instructed: bool,
 }
@@ -39,7 +40,8 @@ pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
                 id: student.id,
                 matrikel: student.matrikel,
                 username: student.username,
-                name: student.name,
+                given_name: student.given_name,
+                family_name: student.family_name,
                 groups: groups,
                 instructed: student.instructed,
             }
@@ -53,7 +55,10 @@ pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
         match (a.groups.len() == 0, b.groups.len() == 0) {
             (true, false) => Ordering::Less,
             (false, true) => Ordering::Greater,
-            (_, _) => a.name.cmp(&b.name),
+            (_, _) => {
+                a.family_name.cmp(&b.family_name)
+                    .then_with(|| a.given_name.cmp(&b.given_name))
+            }
         }
     });
 

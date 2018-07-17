@@ -44,7 +44,7 @@ thead button::-moz-focus-inner{
     border: 0;
 }
 
-tbody > tr:hover > td:nth-of-type(-n+5) {
+tbody > tr:hover > td:nth-of-type(-n+6) {
     background: rgba(151, 151, 151, 0.2);
 }
 

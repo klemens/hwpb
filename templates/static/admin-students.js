@@ -65,14 +65,13 @@ async function importStudents(event) {
 async function onNewStudent(event) {
     event.preventDefault();
 
-    let matrikel = document.querySelector("#add-student input[name='matrikel']").value;
-    let name = document.querySelector("#add-student input[name='name']").value;
+    let matrikel = document.querySelector("#add-student input[name='matrikel']").value.trim();
+    let givenName = document.querySelector("#add-student input[name='given-name']").value.trim();
+    let familyName = document.querySelector("#add-student input[name='family-name']").value.trim();
     let username = document.querySelector("#add-student input[name='username']").value;
     let year = parseInt(document.body.dataset.year);
 
-    matrikel = matrikel.trim();
-    name = name.trim();
-    if(matrikel.length == 0 || name.length == 0) {
+    if(matrikel.length == 0 || givenName.length == 0) {
         toast("error", "Ungültige Eingabe");
         return;
     }
@@ -90,9 +89,10 @@ async function onNewStudent(event) {
             headers: new Headers({"Content-Type": "application/json"}),
             body: JSON.stringify({
                 matrikel: matrikel,
-                name: name,
                 year: year,
-                username: username
+                username: username,
+                given_name: givenName,
+                family_name: familyName
             })
         });
         handleResponse(response);
@@ -108,9 +108,10 @@ async function onDeleteStudent(event) {
     let targetRow = event.target.closest("tr");
 
     let id = targetRow.dataset.id;
-    let name = targetRow.querySelector("td:nth-of-type(2)").textContent;
+    let givenName = targetRow.querySelector("td:nth-of-type(2)").textContent;
+    let familyName = targetRow.querySelector("td:nth-of-type(3)").textContent;
 
-    if(!confirm(name + " wirklich löschen?")) {
+    if(!confirm(givenName + " " + familyName + " wirklich löschen?")) {
         return;
     }
 

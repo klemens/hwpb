@@ -243,10 +243,10 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Ap
             .values(&mapping)
             .execute(&*conn)?;
 
-        let student_name: String = db::students::table.find(student)
-            .select(db::students::name).get_result(&*conn)?;
+        let full_student = db::students::table.find(student)
+            .get_result::<db::Student>(&*conn)?;
         add_audit_log(year, Some(group), user.name(), &*conn,
-            &format!("Add {} (#{}) to group", student_name, student))?;
+            &format!("Add {} (#{}) to group", full_student.name(), student))?;
 
         Ok(NoContent)
     })
@@ -275,10 +275,10 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
             .execute(&*conn)
             .and_then(db::expect1)?;
 
-        let student_name: String = db::students::table.find(student)
-            .select(db::students::name).get_result(&*conn)?;
+        let full_student = db::students::table.find(student)
+            .get_result::<db::Student>(&*conn)?;
         add_audit_log(year, Some(group), user.name(), &*conn,
-            &format!("Remove {} (#{}) from group", student_name, student))?;
+            &format!("Remove {} (#{}) from group", full_student.name(), student))?;
 
         Ok(NoContent)
     })
@@ -537,8 +537,8 @@ fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> 
         .get_result(&*conn)?;
 
     add_audit_log(student.year, None, user, conn,
-        &format!("Create new student {} ({}, {}, #{})",
-            student.name, student.matrikel,
+        &format!("Create new student {} {} ({}, {}, #{})",
+            student.given_name, student.family_name, student.matrikel,
             student.username.as_ref().map_or("-", |s| s), id))?;
 
     Ok(id)
@@ -558,7 +558,8 @@ fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> A
     #[derive(Debug, Deserialize)]
     struct Student {
         matrikel: String,
-        name: String,
+        given_name: String,
+        family_name: String,
         username: Option<String>,
     }
 
@@ -573,7 +574,8 @@ fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> A
             let student: Student = student?;
             let student = db::NewStudent {
                 matrikel: student.matrikel,
-                name: student.name,
+                given_name: student.given_name,
+                family_name: student.family_name,
                 year: year,
                 username: student.username,
             };
@@ -600,7 +602,7 @@ fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoConte
 
         add_audit_log(full_student.year, None, user.name(), &conn,
             &format!("Remove student {} ({}, {}, #{})",
-                full_student.name, full_student.matrikel,
+                full_student.name(), full_student.matrikel,
                 full_student.username.as_ref().map_or("-", |s| s), student))?;
 
         Ok(NoContent)
@@ -621,7 +623,7 @@ fn put_student_instucted(student: i32, instructed: Json<bool>, conn: db::Conn, u
             .and_then(db::expect1)?;
 
         add_audit_log(full_student.year, None, user.name(), &conn,
-            &format!("Student {} (#{}) is {} instructed", full_student.name,
+            &format!("Student {} (#{}) is {} instructed", full_student.name(),
             student, if *instructed { "now" } else { "no longer" }))?;
 
         Ok(NoContent)

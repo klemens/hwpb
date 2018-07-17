@@ -238,7 +238,7 @@ pub fn load_event(date: &NaiveDate, push_url: &str, conn: &PgConnection) -> Resu
             desk: group.desk,
             students: students.into_iter().map(|s| Student {
                 id: s.id,
-                name: s.name,
+                name: s.name(),
                 instructed: s.instructed,
             }).collect(),
             tasks: Vec::with_capacity(tasks.len()),
@@ -344,7 +344,7 @@ pub fn load_group(group: i32, push_url: &str, conn: &PgConnection) -> Result<Gro
         .1.into_iter()
         .map(|student| Student {
             id: student.id,
-            name: student.name,
+            name: student.name(),
             instructed: student.instructed,
         })
         .collect();
@@ -374,20 +374,23 @@ pub fn find_students<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection)
         .into_boxed();
     for term in terms {
         query = query.filter(
-            students::name.ilike(format!("%{}%", term.as_ref())).or(
-                students::matrikel.ilike(format!("%{}%", term.as_ref())).or(
-                    // TODO: ilike is currently not implemented for nullable types
-                    students::username.like(format!("%{}%", term.as_ref()))
+            students::given_name.ilike(format!("%{}%", term.as_ref())).or(
+                students::family_name.ilike(format!("%{}%", term.as_ref())).or(
+                    students::matrikel.ilike(format!("%{}%", term.as_ref())).or(
+                        // TODO: ilike is currently not implemented for nullable types
+                        students::username.like(format!("%{}%", term.as_ref()))
+                    )
                 )
             )
         );
     }
 
-    Ok(query.order(students::name.asc()).load::<db::Student>(conn).map(|students| {
+    let by_full_name = (students::given_name.asc(), students::family_name.asc());
+    Ok(query.order(by_full_name).load::<db::Student>(conn).map(|students| {
         students.into_iter().map(|student| {
             Student {
                 id: student.id,
-                name: student.name,
+                name: student.name(),
                 instructed: student.instructed,
             }
         }).collect()
@@ -405,10 +408,12 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection) -
             .into_boxed();
         for term in terms {
             query = query.filter(
-                students::name.ilike(format!("%{}%", term.as_ref())).or(
-                    students::matrikel.ilike(format!("%{}%", term.as_ref())).or(
-                        // TODO: ilike is currently not implemented for nullable types
-                        students::username.like(format!("%{}%", term.as_ref()))
+                students::given_name.ilike(format!("%{}%", term.as_ref())).or(
+                    students::family_name.ilike(format!("%{}%", term.as_ref())).or(
+                        students::matrikel.ilike(format!("%{}%", term.as_ref())).or(
+                            // TODO: ilike is currently not implemented for nullable types
+                            students::username.like(format!("%{}%", term.as_ref()))
+                        )
                     )
                 )
             );
@@ -427,7 +432,7 @@ pub fn find_groups<T: AsRef<str>>(terms: &[T], year: i16, conn: &PgConnection) -
             let students = students.into_iter().map(|student| {
                 Student {
                     id: student.id,
-                    name: student.name,
+                    name: student.name(),
                     instructed: student.instructed,
                 }
             }).collect();

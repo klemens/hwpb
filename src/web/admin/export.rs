@@ -73,7 +73,8 @@ pub fn create_csv(year: i16, conn: &PgConnection) -> Result<Vec<u8>> {
 
     // Write csv header
     csv.write_field("Matrikelnummer")?;
-    csv.write_field("Name")?;
+    csv.write_field("Vorname")?;
+    csv.write_field("Familienname")?;
     csv.write_field("Benutzername")?;
     csv.write_field("Sicherheitsbelehrung")?;
     for experiment in experiments.iter() {
@@ -92,7 +93,8 @@ pub fn create_csv(year: i16, conn: &PgConnection) -> Result<Vec<u8>> {
     // Writer one record for every student
     for student in students {
         csv.write_field(student.matrikel)?;
-        csv.write_field(student.name)?;
+        csv.write_field(student.given_name)?;
+        csv.write_field(student.family_name)?;
         csv.write_field(student.username.as_ref().map_or("", |s| s))?;
         csv.write_field(display_bool(student.instructed))?;
 

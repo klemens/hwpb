@@ -61,19 +61,30 @@ pub struct NewGroup {
 pub struct Student {
     pub id: i32,
     pub matrikel: String,
-    pub name: String,
     pub year: i16,
     pub username: Option<String>,
     pub instructed: bool,
+    pub given_name: String,
+    pub family_name: String,
+}
+
+impl Student {
+    pub fn name(&self) -> String {
+        match self.family_name.is_empty() {
+            true => self.given_name.clone(),
+            false => format!("{} {}", self.given_name, self.family_name)
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Insertable)]
 #[table_name="students"]
 pub struct NewStudent {
     pub matrikel: String,
-    pub name: String,
     pub year: i16,
     pub username: Option<String>,
+    pub given_name: String,
+    pub family_name: String,
 }
 
 #[derive(Debug, Queryable, Insertable, Identifiable, Associations)]

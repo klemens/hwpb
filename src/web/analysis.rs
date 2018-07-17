@@ -77,7 +77,8 @@ fn passed_complete(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<CsvRes
         };
 
         csv.write_field(student.matrikel)?;
-        csv.write_field(student.name)?;
+        csv.write_field(student.given_name)?;
+        csv.write_field(student.family_name)?;
         csv.write_field(passed)?;
         csv.write_record(None::<&[u8]>)?; // Finish record
     }
@@ -217,8 +218,8 @@ pub fn load_tasks_by_student(year: i16, include_extra_tasks: bool, conn: &PgConn
 
             (Student {
                 id: student.id,
+                name: student.name(),
                 matrikel: student.matrikel,
-                name: student.name,
                 username: student.username,
                 groups: groups,
                 instructed: student.instructed,
@@ -284,8 +285,8 @@ pub fn load_elaborations_by_student(year: i16, rework_required: Option<bool>,
 
             (Student {
                 id: student.id,
+                name: student.name(),
                 matrikel: student.matrikel,
-                name: student.name,
                 username: student.username,
                 groups: groups,
                 instructed: student.instructed,

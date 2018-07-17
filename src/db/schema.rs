@@ -78,10 +78,11 @@ table! {
     students (id) {
         id -> Int4,
         matrikel -> Text,
-        name -> Text,
         year -> Int2,
         username -> Nullable<Text>,
         instructed -> Bool,
+        given_name -> Text,
+        family_name -> Text,
     }
 }
 
