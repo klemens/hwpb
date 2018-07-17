@@ -22,13 +22,8 @@ struct Analysis {
     read_only_year: bool,
 }
 
-#[derive(FromForm)]
-struct Export {
-    format: String,
-}
-
-#[get("/passed/<year>?<export>")]
-fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
+#[get("/passed/<year>")]
+fn passed(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
     let (elaborations_by_student, _) =
@@ -48,11 +43,7 @@ fn passed(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Templ
         read_only_year: !is_writable_year(year, &conn)?,
     };
 
-    match export.format.as_str() {
-        "html" => Ok(Template::render("analysis", &context)),
-        "text" => Ok(Template::render("analysis-text", &context)),
-        e => Err(format!("Invalid format specified: {}", e).into()),
-    }
+    Ok(Template::render("analysis", &context))
 }
 
 #[get("/passed-complete/<year>")]
@@ -97,8 +88,8 @@ fn passed_complete(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<CsvRes
     })
 }
 
-#[get("/missing-reworks/<year>?<export>")]
-fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Result<Template> {
+#[get("/missing-reworks/<year>")]
+fn missing_reworks(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
     let (tasks_by_student, _) = load_tasks_by_student(year, false, &*conn)?;
@@ -139,11 +130,7 @@ fn missing_reworks(year: i16, export: Export, conn: db::Conn, user: User) -> Res
         read_only_year: !is_writable_year(year, &conn)?,
     };
 
-    match export.format.as_str() {
-        "html" => Ok(Template::render("analysis", &context)),
-        "text" => Ok(Template::render("analysis-text", &context)),
-        e => Err(format!("Invalid format specified: {}", e).into()),
-    }
+    Ok(Template::render("analysis", &context))
 }
 
 

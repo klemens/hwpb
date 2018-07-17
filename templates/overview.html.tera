@@ -13,8 +13,8 @@
 
 {% block content %}
     <nav class="analysis">
-        <a href="/analysis/missing-reworks/{{ year }}?format=html">Fehlende Nachbesserungen</a>
-        <a href="/analysis/passed/{{ year }}?format=html">Zugelassene Studenten</a>
+        <a href="/analysis/missing-reworks/{{ year }}">Fehlende Nachbesserungen</a>
+        <a href="/analysis/passed/{{ year }}">Zugelassene Studenten</a>
         {% if is_admin %}
         <a class="admin" href="/admin/{{ year }}">Verwaltung</a>
         {% endif %}

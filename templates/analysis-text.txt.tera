@@ -1,3 +1,0 @@
-{% for student in students %}
-{{ student.matrikel }}
-{% endfor %}
