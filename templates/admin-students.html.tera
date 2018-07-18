@@ -1,5 +1,7 @@
 {% extends "admin-base" %}
 
+{% import "macros" as macros %}
+
 {% block head %}
     {{super()}}
     <link rel="stylesheet" href="/static/admin-students.css" />
@@ -28,12 +30,30 @@
             <table>
                 <thead>
                     <tr>
-                        <th><input name="matrikel" required="required" placeholder="Matrikel" size="1"/></th>
-                        <th><input name="given-name" required="required" placeholder="Vorname des neuen Teilnehmers" size="35"/></th>
-                        <th><input name="family-name" placeholder="Familienname (optional)" size="35"/></th>
-                        <th class="instructed"><input disabled="disabled" placeholder="Belehrt"/></th>
-                        <th><input name="username" placeholder="Benutzername" title="optional" size="10"/></th>
-                        <th><input disabled="disabled" placeholder="Gruppen" size="4"/></th>
+                        <th class="matrikel sortable">
+                            <input name="matrikel" required="required" placeholder="Matrikel" /><!--
+                            -->{{ macros::sort_link(column="matrikel", order=order) }}
+                        </th>
+                        <th class="sortable">
+                            <input name="given-name" required="required" placeholder="Vorname des neuen Teilnehmers" /><!--
+                            -->{{ macros::sort_link(column="given-name", order=order) }}
+                        </th>
+                        <th class="sortable">
+                            <input name="family-name" placeholder="Familienname (optional)" /><!--
+                            -->{{ macros::sort_link(column="family-name", order=order) }}
+                        </th>
+                        <th class="instructed sortable">
+                            <input disabled="disabled" placeholder="Belehrt"/><!--
+                            -->{{ macros::sort_link(column="instructed", order=order) }}
+                        </th>
+                        <th class="username sortable">
+                            <input name="username" placeholder="Benutzername" title="optional" /><!--
+                            -->{{ macros::sort_link(column="username", order=order) }}
+                        </th>
+                        <th class="groups sortable">
+                            <input disabled="disabled" name="groups" placeholder="Gruppen" size="4"/><!--
+                            -->{{ macros::sort_link(column="groups", order=order) }}
+                        </th>
                         <th><button type="submit" title="Teilnehmer hinzufügen (Batch-Import über den roten Button unten)"><div class="button round add">+</div></button></th>
                     </tr>
                 </thead>

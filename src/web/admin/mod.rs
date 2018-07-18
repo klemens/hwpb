@@ -74,11 +74,18 @@ fn events(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 
 #[get("/<year>/students")]
 fn students(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+    students_ordered(year, student::Order::default(), conn, user)
+}
+
+#[get("/<year>/students?<order>")]
+fn students_ordered(year: i16, order: student::Order, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_admin_for(year)?;
 
+    let (students, chosen_order) = student::load_students(year, order, &conn)?;
     let context = student::Context {
         base: BaseContext::new("students", year, &user, &conn)?,
-        students: student::load_students(year, &conn)?,
+        students: students,
+        order: chosen_order,
     };
 
     Ok(Template::render("admin-students", context))

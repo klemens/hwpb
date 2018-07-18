@@ -2,11 +2,14 @@ use db;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use errors::*;
+use std::borrow::Borrow;
+use std::cmp::Ordering;
 
 #[derive(Serialize)]
 pub struct Context {
     pub base: super::BaseContext,
     pub students: Vec<Student>,
+    pub order: Order,
 }
 
 #[derive(Serialize)]
@@ -20,7 +23,13 @@ pub struct Student {
     pub instructed: bool,
 }
 
-pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
+#[derive(Default, FromForm, Serialize)]
+pub struct Order {
+    order: Option<String>,
+    reverse: Option<bool>,
+}
+
+pub fn load_students(year: i16, mut order: Order, conn: &PgConnection) -> Result<(Vec<Student>, Order)> {
     let students = db::students::table
         .filter(db::students::year.eq(year))
         .load::<db::Student>(conn)?;
@@ -49,18 +58,37 @@ pub fn load_students(year: i16, conn: &PgConnection) -> Result<Vec<Student>> {
         .collect();
 
     students.sort_unstable_by(|a, b| {
-        use std::cmp::Ordering;
+        let ordering = match order.order.as_ref().map(Borrow::borrow) {
+            Some("matrikel") => a.matrikel.cmp(&b.matrikel),
+            Some("given-name") => a.given_name.cmp(&b.given_name),
+            Some("family-name") => a.family_name.cmp(&b.family_name),
+            Some("instructed") => a.instructed.cmp(&b.instructed),
+            Some("username") => a.username.cmp(&b.username),
+            _ => order_by_groups(a, b),
+        };
 
-        // sort students without a group to the top
-        match (a.groups.len() == 0, b.groups.len() == 0) {
-            (true, false) => Ordering::Less,
-            (false, true) => Ordering::Greater,
-            (_, _) => {
-                a.family_name.cmp(&b.family_name)
-                    .then_with(|| a.given_name.cmp(&b.given_name))
-            }
+        match order.reverse {
+            Some(true) => ordering.reverse(),
+            _ => ordering,
         }
     });
 
-    Ok(students)
+    // Always return the chosen ordering for rendering
+    order.order.get_or_insert("groups".into());
+    order.reverse.get_or_insert(false);
+
+    Ok((students, order))
+}
+
+/// Order students without a group to the top, otherwise order by
+/// family and then first name.
+fn order_by_groups(a: &Student, b: &Student) -> Ordering {
+    match (a.groups.len() == 0, b.groups.len() == 0) {
+        (true, false) => Ordering::Less,
+        (false, true) => Ordering::Greater,
+        (_, _) => {
+            a.family_name.cmp(&b.family_name)
+                .then_with(|| a.given_name.cmp(&b.given_name))
+        }
+    }
 }

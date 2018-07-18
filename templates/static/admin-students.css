@@ -48,9 +48,40 @@ tbody > tr:hover > td:nth-of-type(-n+6) {
     background: rgba(151, 151, 151, 0.2);
 }
 
-th.instructed {
-    width: 4rem;
+th.sortable {
+    text-align: left;
 }
+th.sortable > input {
+    width: calc(100% - 1.4rem);
+}
+th.sortable > div.sort-direction {
+    display: inline-block;
+    font-size: .8rem;
+    color: rgba(0,0,0,0.2);
+}
+th.sortable > div.sort-direction > a {
+    display: block;
+    padding: 0 .2rem;
+    text-decoration: none;
+    color: inherit;
+}
+th.sortable > div.sort-direction.current {
+    color: rgba(0,0,0,0.8);
+}
+
+th.matrikel {
+    width: 5.4rem;
+}
+th.instructed {
+    width: 5.4rem;
+}
+th.username {
+    width: 9rem;
+}
+th.groups {
+    width: 6rem;
+}
+
 td.instructed {
     padding: 0;
 }

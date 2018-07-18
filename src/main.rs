@@ -109,6 +109,7 @@ fn run() -> Result<()> {
             web::admin::experiments,
             web::admin::events,
             web::admin::students,
+            web::admin::students_ordered,
             web::admin::tutors,
             web::admin::audit_index,
             web::admin::audit,
