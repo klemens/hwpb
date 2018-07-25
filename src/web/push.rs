@@ -43,3 +43,18 @@ pub struct Elaboration {
     pub rework: bool,
     pub accepted: bool,
 }
+
+#[derive(Serialize)]
+#[serde(tag = "type")]
+pub enum Group {
+    New { day: i32 },
+    Change { group: i32 },
+}
+
+#[derive(Serialize)]
+#[serde(tag = "type")]
+pub enum Student {
+    Add { group: i32, student: i32, name: String },
+    Remove { student: i32 },
+    Instructed { student: i32, instructed: bool },
+}

@@ -44,6 +44,10 @@ fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> ApiResul
             &format!("Create new group at desk {} on {} (#{}) with comment '{}'",
                 group.desk, day_name, group.day_id, group.comment))?;
 
+        push::SERVER.push(year, "group", &push::Group::New {
+            day: group.day_id,
+        }).ok();
+
         Ok(NoContent)
     })
 }
@@ -224,6 +228,8 @@ fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> Ap
         add_audit_log(year, Some(group), user.name(), &*conn,
             &format!("Change desk to {}", desk))?;
 
+        push::SERVER.push(year, "group", &push::Group::Change { group }).ok();
+
         Ok(NoContent)
     })
 }
@@ -247,6 +253,10 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Ap
             .get_result::<db::Student>(&*conn)?;
         add_audit_log(year, Some(group), user.name(), &*conn,
             &format!("Add {} (#{}) to group", full_student.name(), student))?;
+
+        push::SERVER.push(year, "student", &push::Student::Add {
+            group, student, name: full_student.name()
+        }).ok();
 
         Ok(NoContent)
     })
@@ -279,6 +289,8 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
             .get_result::<db::Student>(&*conn)?;
         add_audit_log(year, Some(group), user.name(), &*conn,
             &format!("Remove {} (#{}) from group", full_student.name(), student))?;
+
+        push::SERVER.push(year, "student", &push::Student::Remove { student }).ok();
 
         Ok(NoContent)
     })
@@ -625,6 +637,10 @@ fn put_student_instucted(student: i32, instructed: Json<bool>, conn: db::Conn, u
         add_audit_log(full_student.year, None, user.name(), &conn,
             &format!("Student {} (#{}) is {} instructed", full_student.name(),
             student, if *instructed { "now" } else { "no longer" }))?;
+
+        push::SERVER.push(full_student.year, "student", &push::Student::Instructed {
+            student, instructed: *instructed
+        }).ok();
 
         Ok(NoContent)
     })
