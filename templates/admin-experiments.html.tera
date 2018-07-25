@@ -9,7 +9,7 @@
 {% block title %}Versuche {{super()}}{% endblock title %}
 
 {% block main %}
-    <div id="add-experiment" class="button round floating-add" title="Versuch hinzufügen">+</div>
+    <div id="add-experiment" class="button round floating-add" title="Versuch hinzufügen"></div>
     <div class="box-wrapper"><!--
         {% for experiment in experiments %}
         --><div class="experiment box" data-id="{{ experiment.id }}">

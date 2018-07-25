@@ -24,7 +24,7 @@
 {% endblock overlay %}
 
 {% block main %}
-    <div id="import-students" class="button round floating-add" title="Teilnehmer als CSV-Datei importieren">+</div>
+    <div id="import-students" class="button round floating-add" title="Teilnehmer als CSV-Datei importieren"></div>
     <div class="box-wrapper">
         <form id="add-student" autocomplete="off">
             <table>

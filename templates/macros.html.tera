@@ -13,7 +13,7 @@
         {% else %}
             <h2><a class="group" href="/group/{{ group.id }}">Gruppe {{ group.desk }}</a> <a class="change-desk" href=""><img alt="Tischnummer ändern" src="/static/icons/edit.svg" /></a></h2>
             <ul class="students comma-separated">
-                <li class="add button round hide-comma">+</li>
+                <li class="add button round hide-comma"></li>
                 {% for student in group.students %}
                 <li data-id="{{ student.id }}" data-instructed="{{ student.instructed }}" {% if not student.instructed %}title="Fehlende Sicherheitsbelehrung!"{% endif %}>{{ student.name }}</li>
                 {% endfor %}

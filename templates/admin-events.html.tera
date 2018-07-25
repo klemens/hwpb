@@ -9,7 +9,7 @@
 {% block title %}Termine {{super()}}{% endblock title %}
 
 {% block main %}
-    <div id="add-day" class="button round floating-add" title="Versuchstag hinzufügen">+</div>
+    <div id="add-day" class="button round floating-add" title="Versuchstag hinzufügen"></div>
     <div class="box-wrapper"><!--
         {% for day in days %}
         --><div class="day box" data-id="{{ day.id }}">
