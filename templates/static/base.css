@@ -83,8 +83,8 @@ input {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
-    width: 40rem;
+    bottom: 2rem;
+    width: 45rem;
     max-width: 100%;
     margin: 1rem auto;
     padding: .3rem;
@@ -99,6 +99,20 @@ input {
 
 .toast.info {
     background: #00bcd4;
+}
+
+.toast.reload {
+    display: flex;
+    align-items: center;
+    color: white;
+    background: #33691e;
+}
+
+.toast.reload > div.button {
+    padding: .1rem .5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 #overlay {

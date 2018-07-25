@@ -29,12 +29,27 @@ function toast(type, message) {
     let toast = document.createElement("div");
     toast.classList.add("toast");
     toast.classList.add(type);
-    toast.textContent = prefix + message;
+
+    if(type === "reload") {
+        let reloadLink = document.createElement("div");
+        reloadLink.classList.add("button");
+        reloadLink.textContent = "↻";
+        reloadLink.addEventListener("click", () => {
+            document.location.reload();
+        });
+        toast.appendChild(reloadLink);
+
+        let messageBox = document.createElement("div");
+        messageBox.textContent = message;
+        toast.appendChild(messageBox);
+    } else {
+        toast.textContent = prefix + message;
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 7500);
+    }
 
     document.body.appendChild(toast);
-    setTimeout(() => {
-        document.body.removeChild(toast);
-    }, 7500);
 }
 
 

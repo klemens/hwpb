@@ -88,7 +88,7 @@ async function onNewGroup(event) {
         });
         handleResponse(response);
 
-        toast("info", "Die neue Gruppe wurde hinzugefügt. Seite neuladen um sie anzuzeigen!")
+        toast("reload", "Die neue Gruppe wurde hinzugefügt. Seite neuladen um sie anzuzeigen oder weitere Gruppen hinzufügen!")
     } catch(e) {
         toast("error", e);
     }
@@ -115,7 +115,7 @@ async function onGroupDeskChange(event) {
         });
         handleResponse(response);
 
-        toast("info", "Die Tischnummer der Gruppe wurde geändert. Seite neuladen um sie anzuzeigen!")
+        toast("reload", "Die Tischnummer der Gruppe wurde geändert. Seite neuladen um sie anzuzeigen!")
     } catch(e) {
         toast("error", e);
     }
