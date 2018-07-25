@@ -45,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
         editButton.addEventListener("click", onGroupDeskChange);
     }
 
-    document.addEventListener("keypress", handleKeyPress);
+    document.querySelector("header .stats")
+        .addEventListener("click", toggleCompactMode);
 
     restoreSessionState();
 });
@@ -120,19 +121,16 @@ async function onGroupDeskChange(event) {
     }
 }
 
-function handleKeyPress(event) {
-    if(event.ctrlKey && event.key === "#") {
-        let experiment = document.querySelector("#main > .experiment");
-        let compactActive = experiment.classList.contains("compact");
+function toggleCompactMode() {
+    let experiment = document.querySelector("#main > .experiment");
+    let compactActive = experiment.classList.contains("compact");
 
-        if(compactActive) {
-            experiment.classList.remove("compact");
-            sessionStorage.removeItem("compact");
-        } else {
-            experiment.classList.add("compact");
-            sessionStorage.setItem("compact", "yes");
-            toast("info", "Kompaktmodus aktiv, STRG+# zum Deaktivieren")
-        }
+    if(compactActive) {
+        experiment.classList.remove("compact");
+        sessionStorage.removeItem("compact");
+    } else {
+        experiment.classList.add("compact");
+        sessionStorage.setItem("compact", "yes");
     }
 }
 

@@ -2,10 +2,12 @@ header > div.limit-width {
     max-width: 72rem;
     margin: auto;
     display: flex;
+    align-items: center;
 }
 
 header h1 {
     flex: auto;
+    margin: .5rem 0;
 }
 
 header a.nav {
@@ -17,7 +19,15 @@ header a.nav {
 }
 
 header a.nav[href="/"] {
-    visibility: hidden;
+    pointer-events: none;
+    opacity: .3;
+}
+
+header .stats {
+    flex: none;
+    width: 1.4em;
+    padding: .3em .2em;
+    cursor: pointer;
 }
 
 .experiment {

@@ -17,6 +17,7 @@
     <div class="limit-width">
         <a class="nav" href="/{{ prev_event }}">«</a>
         {{super()}}
+        <img class="stats" src="/static/icons/statistics.svg" title="Kompakte Fortschrittsansicht umschalten" />
         <a class="nav" href="/{{ next_event }}">»</a>
     </div>
 {% endblock header %}
