@@ -1,6 +1,9 @@
 #![feature(plugin, custom_derive, nll)]
 #![plugin(rocket_codegen)]
 
+// Fixed in upcoming diesel (https://github.com/rust-lang/rust/issues/50504)
+#![allow(proc_macro_derive_resolution_fallback)]
+
 extern crate bit_vec;
 extern crate chrono;
 extern crate csv;

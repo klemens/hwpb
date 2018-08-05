@@ -11,16 +11,10 @@ cargo build --release
 Note that you need a recent nightly version of the compiler, because we depend
 on the web framework `Rocket`, which requires some unstable features that are
 not available in a stable or beta version of Rust. The exact version necessary
-is noted in the [`README.md`] and may change when updating `Rocket`.
+is noted in the `rust-toolchain` file and may change when updating `Rocket`.
 
-If you are using `rustup` to manage your Rust installation, you can override
-the used compiler version only for this project (i.e. the current directory):
-
-```sh
-$ rustup override set nightly-2018-06-13
-$ rustc --version
-rustc 1.28.0-nightly (b68432d56 2018-06-12)
-```
+If you are using `rustup` to manage your Rust installation, it will
+automatically install and use the correct version.
 
 ## Configure
 
