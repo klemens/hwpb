@@ -37,11 +37,16 @@ fn run() -> Result<()> {
         .chain_err(|| "DATABASE_URL not set")?
         .to_owned();
 
+    // check if we should truncate the database (delete all years)
+    let truncate_database = rocket.config()
+        .get_bool("truncate_database_on_start")
+        .unwrap_or(false);
+
     // run any pending database migrations
     db::run_migrations(&database_url)?;
 
     // add current year on first run
-    db::init_year(&database_url)?;
+    db::init_year(truncate_database, &database_url)?;
 
     // check if ip whitelisting is enabled (default is disabled)
     let ip_whitelisting = rocket.config().get_bool("ip_whitelisting")

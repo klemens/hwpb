@@ -25,24 +25,25 @@ pub fn run_migrations(database_url: &str) -> Result<()> {
         .chain_err(|| "Could not run pending migrations.")
 }
 
-pub fn init_year(database_url: &str) -> Result<()> {
+pub fn init_year(truncate_database: bool, database_url: &str) -> Result<()> {
     let conn = PgConnection::establish(database_url)
         .chain_err(|| "Could not connect to DB to init year")?;
 
     conn.transaction(|| {
-        let count: i64 = years::table
-            .count()
-            .get_result(&conn)?;
+        let num_years = if truncate_database {
+            // Delete all years from the database
+            let years = years::table.select(years::id).load(&conn)?;
+            for year in years {
+                delete_year(year, &conn)?;
+            }
 
-        if count == 0 {
-            let year = Year {
-                id: Utc::today().year() as i16,
-                writable: true,
-            };
+            0
+        } else {
+            years::table.count().get_result(&conn)?
+        };
 
-            diesel::insert_into(years::table)
-                .values(&year)
-                .execute(&conn)?;
+        if num_years == 0 {
+            add_current_year(&conn)?;
         }
 
         Ok(())
@@ -88,6 +89,24 @@ pub fn expect1(count: usize) -> QueryResult<usize> {
         1 => Ok(count),
         _ => Err(diesel::NotFound),
     }
+}
+
+/// Add the current year to the database
+///
+/// This will fail if the year already exists.
+///
+/// Should be run inside a transaction.
+pub(crate) fn add_current_year(conn: &PgConnection) -> Result<()> {
+    let year = Year {
+        id: Utc::today().year() as i16,
+        writable: true,
+    };
+
+    diesel::insert_into(years::table)
+        .values(&year)
+        .execute(conn)?;
+
+    Ok(())
 }
 
 /// Delete the group with the given id

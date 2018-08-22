@@ -39,6 +39,9 @@ be configured in the admin interface.
 
 The database is initialised automatically when running hwpb for the first time.
 
+The `truncate_database_on_start` key enables deletion of all data from the
+database on every start of hwpb.
+
 ## Deploy
 
 Besides the `Rocket.toml` configuration file, hwpb expects its templates in a

@@ -346,6 +346,14 @@ fn delete_year(year: i16, conn: db::Conn, _user: SiteAdmin) -> ApiResult<NoConte
 
         // No audit log entry, because the year does no longer exist
 
+        // Add back the current year if we just deleted the last year,
+        // because you can only add a year through the admin view of
+        // an already exsiting year.
+        let num_years: i64 = db::years::table.count().get_result(&*conn)?;
+        if num_years == 0 {
+            db::add_current_year(&conn)?;
+        }
+
         Ok(NoContent)
     })
 }
