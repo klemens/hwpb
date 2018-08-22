@@ -18,3 +18,10 @@
             <button type="submit">Login</button>
         </form>
 {% endblock main %}
+
+{% block content %}
+    {{super()}}
+    {% if message %}
+    <div class="toast login">{{ message | safe }}</div>
+    {% endif %}
+{% endblock content %}

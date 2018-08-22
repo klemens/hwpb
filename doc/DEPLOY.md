@@ -40,7 +40,9 @@ be configured in the admin interface.
 The database is initialised automatically when running hwpb for the first time.
 
 The `truncate_database_on_start` key enables deletion of all data from the
-database on every start of hwpb.
+database on every start of hwpb, while the `login_message` key lets you
+display a custom (HTML) message on the login screen. Together, these can be
+used to setup a demo system for hwpb.
 
 ## Deploy
 

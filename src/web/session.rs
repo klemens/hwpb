@@ -142,6 +142,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for NotLoggedIn {
 }
 
 pub struct IpWhitelisting(pub bool);
+pub struct LoginMessage(pub Option<String>);
 
 #[get("/", rank = 2)]
 fn nologin_index() -> Redirect {
@@ -164,11 +165,15 @@ struct LoginOptions {
 }
 
 #[get("/login?<options>")]
-fn get_login(options: LoginOptions, error: Option<FlashMessage>) -> Template {
+fn get_login(options: LoginOptions, error: Option<FlashMessage>, message: State<LoginMessage>) -> Template {
     let mut context = HashMap::new();
     context.insert("redirect", options.redirect.as_str());
     if let Some(ref error) = error {
         context.insert("error", error.msg());
+    }
+
+    if let Some(ref message) = message.0 {
+        context.insert("message", message);
     }
 
     Template::render("login", &context)

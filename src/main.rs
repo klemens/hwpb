@@ -25,7 +25,7 @@ mod user;
 mod web;
 
 use errors::*;
-use web::session::IpWhitelisting;
+use web::session::{IpWhitelisting, LoginMessage};
 use web::push;
 
 quick_main!(run);
@@ -51,6 +51,9 @@ fn run() -> Result<()> {
     // check if ip whitelisting is enabled (default is disabled)
     let ip_whitelisting = rocket.config().get_bool("ip_whitelisting")
         .unwrap_or(false);
+    // get the login message if one is set
+    let login_message = rocket.config().get_str("login_message")
+        .map(String::from).ok();
 
     // start push server
     let (push_url, listen_addr) = push::parameters(rocket.config())?;
@@ -59,6 +62,7 @@ fn run() -> Result<()> {
     rocket
         .manage(db::init_pool(&database_url)?)
         .manage(IpWhitelisting(ip_whitelisting))
+        .manage(LoginMessage(login_message))
         .manage(push_url)
         .mount("/", routes![
             web::index,

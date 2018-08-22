@@ -34,3 +34,9 @@ p.error {
     font-weight: bold;
     text-align: center;
 }
+
+.toast.login {
+    padding: .4rem 1rem;
+    color: white;
+    background: #33691e;
+}

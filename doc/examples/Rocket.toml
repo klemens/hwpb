@@ -13,5 +13,6 @@ site_admins = [
     "user2",
 ]
 ip_whitelisting = false
+#login_message = "Message including <b>HTML</b> for the login screen."
 truncate_database_on_start = false
 push_port = 8081
