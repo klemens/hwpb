@@ -8,7 +8,7 @@ pub use self::schema::*;
 
 use chrono::{Datelike, Utc};
 use diesel;
-use diesel::prelude::*;
+use diesel::{delete, dsl::any, prelude::*};
 use errors::*;
 use diesel::r2d2::{self, ConnectionManager};
 use rocket::http::Status;
@@ -88,4 +88,83 @@ pub fn expect1(count: usize) -> QueryResult<usize> {
         1 => Ok(count),
         _ => Err(diesel::NotFound),
     }
+}
+
+/// Delete the group with the given id
+///
+/// Also removes all completions and elaborations of the group.
+///
+/// Should be run inside a transaction.
+pub(crate) fn delete_group(group: i32, conn: &PgConnection) -> Result<()> {
+    // Delete all completions of the group
+    diesel::delete(completions::table
+        .filter(completions::group_id.eq(group)))
+        .execute(conn)?;
+
+    // Delete all elaborations of the group
+    diesel::delete(elaborations::table
+        .filter(elaborations::group_id.eq(group)))
+        .execute(conn)?;
+
+    // Delete group mappings (but not the students themselves)
+    diesel::delete(group_mappings::table
+        .filter(group_mappings::group_id.eq(group)))
+        .execute(conn)?;
+
+    diesel::delete(groups::table
+        .find(group))
+        .execute(conn)?;
+
+    Ok(())
+}
+
+/// Delete the entire year with the given id
+///
+/// Also deletes everything associated with the year, including groups,
+/// students, completions, elaborations, events, experiments, tasks,
+/// tutors and audit log entries.
+///
+/// Should be run inside a transaction.
+pub(crate) fn delete_year(year: i16, conn: &PgConnection) -> Result<()> {
+    // Load all days for the deletion of groups and events
+    let days = days::table
+        .filter(days::year.eq(year))
+        .select(days::id)
+        .load::<i32>(conn)?;
+
+    // Load all groups belonging to any of the days…
+    let groups = groups::table
+        .filter(groups::day_id.eq(any(&days)))
+        .select(groups::id)
+        .load(conn)?;
+    // …and delete them one by one
+    for group in groups {
+        delete_group(group, conn)?;
+    }
+
+    // Delete all events belonging to any of the days and the days
+    delete(events::table.filter(events::day_id.eq(any(&days)))).execute(conn)?;
+    delete(days::table.filter(days::year.eq(year))).execute(conn)?;
+
+    // Load all experiments of the given year…
+    let experiments = experiments::table
+        .filter(experiments::year.eq(year))
+        .select(experiments::id)
+        .load::<i32>(conn)?;
+    // …and delete all tasks referencing any of them
+    diesel::delete(tasks::table
+        .filter(tasks::experiment_id.eq(any(experiments))))
+        .execute(conn)?;
+
+    // Delete all experiments, students, tutors, and whitelist and audit log entries
+    delete(experiments::table.filter(experiments::year.eq(year))).execute(conn)?;
+    delete(students::table.filter(students::year.eq(year))).execute(conn)?;
+    delete(tutors::table.filter(tutors::year.eq(year))).execute(conn)?;
+    delete(ip_whitelist::table.filter(ip_whitelist::year.eq(year))).execute(conn)?;
+    delete(audit_logs::table.filter(audit_logs::year.eq(year))).execute(conn)?;
+
+    // Delete the given year
+    delete(years::table.find(year)).execute(conn)?;
+
+    Ok(())
 }

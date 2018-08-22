@@ -339,6 +339,17 @@ fn put_year(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> 
     })
 }
 
+#[delete("/year/<year>")]
+fn delete_year(year: i16, conn: db::Conn, _user: SiteAdmin) -> ApiResult<NoContent> {
+    conn.transaction(|| {
+        db::delete_year(year, &conn)?;
+
+        // No audit log entry, because the year does no longer exist
+
+        Ok(NoContent)
+    })
+}
+
 #[put("/year/<year>/closed")]
 fn put_year_writable(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
     conn.transaction(|| {

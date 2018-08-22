@@ -6,6 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if(closeYear !== null) {
         closeYear.addEventListener("click", onCloseYear);
     }
+    let deleteYear = document.querySelector("#delete-year");
+    if(deleteYear !== null) {
+        deleteYear.addEventListener("click", onDeleteYear);
+    }
 });
 
 async function onYearChange(event) {
@@ -68,6 +72,33 @@ async function onCloseYear() {
         handleResponse(response);
 
         location.reload();
+    } catch(e) {
+        toast("error", e);
+    }
+}
+
+async function onDeleteYear() {
+    let year = document.body.dataset.year;
+
+    let confirmMessage =
+        "Möchten Sie das Jahr " + year + " wirklich endgültig löschen?\n\n" +
+        "Dabei werden sämtliche dieses Jahr betreffende Daten endgültig gelöscht, " +
+        "inklusive der Teilnehmer, Betreuer und des Audit-Logs.\n\n" +
+        "Dies kann nicht rückgängig gemacht werden!";
+
+    if(!confirm(confirmMessage)) {
+        return;
+    }
+
+    try {
+        let url = "/api/year/" + year;
+
+        let response = await myfetch(url, {
+            method: "DELETE"
+        });
+        handleResponse(response);
+
+        location = "/";
     } catch(e) {
         toast("error", e);
     }

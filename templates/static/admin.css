@@ -39,16 +39,28 @@ header a.export > img {
     filter: invert(1);
 }
 
-header img.padlock {
+#close-year,
+#delete-year {
     margin-left: .7rem;
     margin-right: .4rem;
     height: 1.5rem;
+    width: 1.5rem;
     align-self: center;
+    cursor: pointer;
     filter: invert(1);
 }
 
 #close-year {
-    cursor: pointer;
+    background: url("/static/icons/unlocked.svg");
+}
+#close-year:hover {
+    background: url("/static/icons/locked.svg");
+}
+#delete-year {
+    background: url("/static/icons/locked.svg");
+}
+#delete-year:hover {
+    background: url("/static/icons/delete.svg");
 }
 
 header select {

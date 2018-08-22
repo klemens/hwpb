@@ -83,6 +83,7 @@ fn run() -> Result<()> {
             web::api::search_groups,
             web::api::search_students,
             web::api::put_year,
+            web::api::delete_year,
             web::api::put_year_writable,
             web::api::post_experiment,
             web::api::delete_experiment,
