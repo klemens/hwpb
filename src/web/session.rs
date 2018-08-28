@@ -8,7 +8,6 @@ use rocket::http::uri::URI;
 use rocket::request::{self, FlashMessage, Form, FromRequest, Request};
 use rocket::response::{Flash, Redirect};
 use rocket_contrib::Template;
-use serde_json;
 use std::collections::{HashMap, HashSet};
 use std::net::SocketAddr;
 use std::ops::Deref;

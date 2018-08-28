@@ -1,5 +1,3 @@
-#![feature(rust_2018_preview, uniform_paths)]
-
 use std::env;
 use std::fs::File;
 use std::io::Write;

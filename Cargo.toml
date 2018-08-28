@@ -1,6 +1,9 @@
+cargo-features = ["edition"]
+
 [package]
 name = "hwpb"
 version = "1.0.0-beta.2"
+edition = "2018"
 authors = ["Klemens Schölhorn <klemens@schoelhorn.eu>"]
 
 build = "src/build.rs"

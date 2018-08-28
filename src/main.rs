@@ -1,24 +1,14 @@
-#![feature(rust_2018_preview, uniform_paths)]
-#![feature(plugin, custom_derive, nll)]
+#![feature(plugin, custom_derive, uniform_paths)]
 #![plugin(rocket_codegen)]
 
 // Fixed in upcoming diesel (https://github.com/rust-lang/rust/issues/50504)
 #![allow(proc_macro_derive_resolution_fallback)]
 
-extern crate bit_vec;
-extern crate chrono;
-extern crate csv;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_migrations;
 #[macro_use] extern crate error_chain;
-extern crate hyper_sse;
-extern crate itertools;
 #[macro_use] extern crate lazy_static;
-extern crate pam_auth;
-extern crate rocket;
-extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
-extern crate serde_json;
 
 mod db;
 mod errors;

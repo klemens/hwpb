@@ -5,7 +5,6 @@ use crate::web::models::find_writable_year;
 use crate::web::push;
 use crate::web::session::{SiteAdmin, User};
 use csv::ReaderBuilder;
-use diesel;
 use diesel::prelude::*;
 use rocket::Data;
 use rocket::response::status::NoContent;

@@ -5,7 +5,6 @@ mod models;
 pub mod push;
 pub mod session;
 
-use chrono;
 use crate::db;
 use crate::errors::*;
 use crate::web::session::User;
