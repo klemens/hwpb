@@ -7,9 +7,9 @@ pub use self::models::*;
 pub use self::schema::*;
 
 use chrono::{Datelike, Utc};
+use crate::errors::*;
 use diesel;
 use diesel::{delete, dsl::any, prelude::*};
-use errors::*;
 use diesel::r2d2::{self, ConnectionManager};
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};

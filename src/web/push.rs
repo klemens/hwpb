@@ -1,4 +1,4 @@
-use errors::*;
+use crate::errors::*;
 use hyper_sse::Server;
 use rocket::Config;
 use std::net::SocketAddr;

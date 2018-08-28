@@ -6,14 +6,14 @@ pub mod push;
 pub mod session;
 
 use chrono;
-use db;
-use errors::*;
+use crate::db;
+use crate::errors::*;
+use crate::web::session::User;
 use rocket::State;
 use rocket::http::RawStr;
 use rocket::request::FromParam;
 use rocket::response::NamedFile;
 use rocket_contrib::Template;
-use web::session::User;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 

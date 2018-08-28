@@ -1,3 +1,4 @@
+#![feature(rust_2018_preview, uniform_paths)]
 #![feature(plugin, custom_derive, nll)]
 #![plugin(rocket_codegen)]
 
@@ -24,9 +25,9 @@ mod errors;
 mod user;
 mod web;
 
-use errors::*;
-use web::session::{IpWhitelisting, LoginMessage};
-use web::push;
+use crate::errors::*;
+use crate::web::session::{IpWhitelisting, LoginMessage};
+use crate::web::push;
 
 quick_main!(run);
 

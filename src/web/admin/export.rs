@@ -1,15 +1,15 @@
+use crate::db;
+use crate::errors::*;
+use crate::web::analysis;
 use csv::Writer;
-use db;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use errors::*;
 use rocket::http::ContentType;
 use rocket::http::hyper::header;
 use rocket::request::Request;
 use rocket::response::{self, Responder, Response};
 use std::collections::HashMap;
 use std::io::Cursor;
-use web::analysis;
 
 pub struct CsvResponse {
     pub filename: String,

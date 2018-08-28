@@ -6,14 +6,14 @@ mod student;
 mod tutor;
 
 use chrono::Local;
-use db;
+use crate::db;
+use crate::errors::*;
+use crate::web::session::{IpWhitelisting, SiteAdmin, User};
+use crate::web::models;
 use diesel::PgConnection;
-use errors::*;
 use rocket::State;
 use rocket::response::Redirect;
 use rocket_contrib::Template;
-use web::session::{IpWhitelisting, SiteAdmin, User};
-use web::models;
 
 #[derive(Serialize)]
 pub struct BaseContext {

@@ -1,7 +1,7 @@
-use db;
+use crate::db;
+use crate::errors::*;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use errors::*;
 use std::collections::HashMap;
 
 #[derive(Serialize)]

@@ -1,7 +1,7 @@
-use db::{self, PgInetExpressionMethods};
+use crate::db::{self, PgInetExpressionMethods};
+use crate::errors::*;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
-use errors::*;
 
 #[derive(Serialize)]
 pub struct Context {
