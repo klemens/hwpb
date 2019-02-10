@@ -34,7 +34,7 @@
             <h2>{{ experiment.name }}</h2>
             <ul>
                 {% for event in experiment.events %}
-                <li><a href="/{{ event.date }}">{{ event.day }}<br />{{ event.date }}</a></li>
+                <li><a href="/{{ event.date }}/{{ event.day }}">{{ event.day }}<br />{{ event.date }}</a></li>
                 {% endfor %}
             </ul>
         </div><!--

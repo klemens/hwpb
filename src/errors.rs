@@ -6,6 +6,10 @@ error_chain!{
         Db(::diesel::result::Error);
         Json(::serde_json::error::Error);
     }
+
+    errors {
+        AmbiguousDate {}
+    }
 }
 
 #[derive(Debug)]

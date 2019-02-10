@@ -11,7 +11,7 @@ use crate::web::session::User;
 use rocket::State;
 use rocket::http::RawStr;
 use rocket::request::FromParam;
-use rocket::response::NamedFile;
+use rocket::response::{NamedFile, Redirect};
 use rocket_contrib::templates::Template;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
@@ -65,8 +65,15 @@ pub fn overview(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<date>")]
-pub fn event(date: Date, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
-    let context = models::load_event(&date, &push_url.0, &conn)?;
+pub fn event_finder(date: Date, conn: db::Conn, _user: User) -> Result<Redirect> {
+    let day = models::find_event_day_by_date(&date, &conn)?;
+
+    Ok(Redirect::to(format!("/{}/{}", *date, day)))
+}
+
+#[get("/<date>/<day>", rank = 2)]
+pub fn event(date: Date, day: String, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
+    let context = models::load_event(&date, &day, &push_url.0, &conn)?;
 
     user.ensure_tutor_for(context.year)?;
 

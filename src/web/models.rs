@@ -195,13 +195,30 @@ pub fn find_events(year: i16, conn: &PgConnection) -> Result<Vec<Experiment>> {
     Ok(result)
 }
 
-pub fn load_event(date: &NaiveDate, push_url: &str, conn: &PgConnection) -> Result<Event> {
-    use db::{completions, elaborations, events, groups, tasks};
+pub fn find_event_day_by_date(date: &NaiveDate, conn: &PgConnection) -> Result<String> {
+    use db::{days, events};
+
+    let mut events = events::table
+        .inner_join(db::days::table)
+        .filter(events::date.eq(date))
+        .select(days::name)
+        .load::<(String)>(conn)?;
+
+    match events.len() {
+        0 => Err("No event found".into()),
+        1 => Ok(events.pop().unwrap()),
+        _ => Err(ErrorKind::AmbiguousDate.into()),
+    }
+}
+
+pub fn load_event(date: &NaiveDate, day: &str, push_url: &str, conn: &PgConnection) -> Result<Event> {
+    use db::{completions, days, elaborations, events, groups, tasks};
 
     let (event, day, experiment) = events::table
         .inner_join(db::days::table)
         .inner_join(db::experiments::table)
         .filter(events::date.eq(date))
+        .filter(days::name.eq(day))
         .first::<(db::Event, db::Day, db::Experiment)>(conn)?;
 
     let tasks = tasks::table.filter(tasks::experiment_id.eq(&event.experiment_id))
@@ -256,12 +273,14 @@ pub fn load_event(date: &NaiveDate, push_url: &str, conn: &PgConnection) -> Resu
     }
 
     // find previous and next event if any
-    let prev_event: Option<db::Event> = events::table
+    let prev_event: Option<(db::Event, db::Day)> = events::table
+        .inner_join(db::days::table)
         .filter(events::day_id.eq(&event.day_id))
         .filter(events::date.lt(&event.date))
         .order(events::date.desc())
         .first(conn).optional()?;
-    let next_event: Option<db::Event> = events::table
+    let next_event: Option<(db::Event, db::Day)> = events::table
+        .inner_join(db::days::table)
         .filter(events::day_id.eq(&event.day_id))
         .filter(events::date.gt(&event.date))
         .order(events::date.asc())
@@ -276,8 +295,8 @@ pub fn load_event(date: &NaiveDate, push_url: &str, conn: &PgConnection) -> Resu
         experiment_id: experiment.id,
         experiment: experiment.name,
         groups: web_groups,
-        prev_event: prev_event.map(|e| format!("{}", e.date)),
-        next_event: next_event.map(|e| format!("{}", e.date)),
+        prev_event: prev_event.map(|(e, d)| format!("{}/{}", e.date, d.name)),
+        next_event: next_event.map(|(e, d)| format!("{}/{}", e.date, d.name)),
         push: PushEndpoint {
             url: push_url.into(),
             auth_token: push::SERVER.generate_auth_token(Some(day.year))?,

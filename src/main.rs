@@ -55,6 +55,7 @@ fn run() -> Result<()> {
         .mount("/", routes![
             web::index,
             web::overview,
+            web::event_finder,
             web::event,
             web::group,
             web::static_file,
