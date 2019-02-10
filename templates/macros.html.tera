@@ -44,6 +44,6 @@
 {% endmacro group_card %}
 
 {% macro sort_link(column, order) %}
-{% set current = column == order.order %}
+{%- set current = column == order.order -%}
 <div class="sort-direction {% if current %}current{% endif %}"><a href="?order={{ column }}{% if current and not order.reverse %}&amp;reverse=true{% endif %}">{% if current and order.reverse %}🠉{% else %}🠋{% endif %}</a></div>
 {% endmacro sort_link %}
