@@ -1,13 +1,10 @@
-#![feature(plugin, custom_derive, uniform_paths)]
-#![plugin(rocket_codegen)]
-
-// Fixed in upcoming diesel (https://github.com/rust-lang/rust/issues/50504)
-#![allow(proc_macro_derive_resolution_fallback)]
+#![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_migrations;
 #[macro_use] extern crate error_chain;
 #[macro_use] extern crate lazy_static;
+#[macro_use] extern crate rocket;
 #[macro_use] extern crate serde_derive;
 
 mod db;
@@ -119,8 +116,8 @@ fn run() -> Result<()> {
             web::admin::audit,
             web::admin::export,
         ])
-        .attach(rocket_contrib::Template::fairing())
-        .attach(rocket::fairing::AdHoc::on_attach(|rocket| {
+        .attach(rocket_contrib::templates::Template::fairing())
+        .attach(rocket::fairing::AdHoc::on_attach("Load admins", |rocket| {
             match web::session::load_site_admins(rocket.config()) {
                 Ok(site_admins) => Ok(rocket.manage(site_admins)),
                 Err(error) => {

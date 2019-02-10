@@ -12,8 +12,9 @@ use crate::web::session::{IpWhitelisting, SiteAdmin, User};
 use crate::web::models;
 use diesel::PgConnection;
 use rocket::State;
+use rocket::request::Form;
 use rocket::response::Redirect;
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 
 #[derive(Serialize)]
 pub struct BaseContext {
@@ -42,14 +43,14 @@ impl BaseContext {
 }
 
 #[get("/<year>")]
-fn index(year: i16, user: User) -> Result<Redirect> {
+pub fn index(year: i16, user: User) -> Result<Redirect> {
     user.ensure_admin_for(year)?;
 
-    Ok(Redirect::to(&format!("/admin/{}/experiments", year)))
+    Ok(Redirect::to(format!("/admin/{}/experiments", year)))
 }
 
 #[get("/<year>/experiments")]
-fn experiments(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+pub fn experiments(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_admin_for(year)?;
 
     let context = experiment::Context {
@@ -61,7 +62,7 @@ fn experiments(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<year>/events")]
-fn events(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+pub fn events(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_admin_for(year)?;
 
     let context = event::Context {
@@ -73,15 +74,15 @@ fn events(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<year>/students")]
-fn students(year: i16, conn: db::Conn, user: User) -> Result<Template> {
-    students_ordered(year, student::Order::default(), conn, user)
+pub fn students(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+    students_ordered(year, Form(student::Order::default()), conn, user)
 }
 
-#[get("/<year>/students?<order>")]
-fn students_ordered(year: i16, order: student::Order, conn: db::Conn, user: User) -> Result<Template> {
+#[get("/<year>/students?<order..>")]
+pub fn students_ordered(year: i16, order: Form<student::Order>, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_admin_for(year)?;
 
-    let (students, chosen_order) = student::load_students(year, order, &conn)?;
+    let (students, chosen_order) = student::load_students(year, order.into_inner(), &conn)?;
     let context = student::Context {
         base: BaseContext::new("students", year, &user, &conn)?,
         students: students,
@@ -92,7 +93,7 @@ fn students_ordered(year: i16, order: student::Order, conn: db::Conn, user: User
 }
 
 #[get("/<year>/tutors")]
-fn tutors(year: i16, ip_whitelisting: State<IpWhitelisting>, conn: db::Conn, user: SiteAdmin) -> Result<Template> {
+pub fn tutors(year: i16, ip_whitelisting: State<IpWhitelisting>, conn: db::Conn, user: SiteAdmin) -> Result<Template> {
     let ip_whitelist = match ip_whitelisting.0 {
         true => Some(tutor::load_whitelist(year, &conn)?),
         false => None,
@@ -108,16 +109,16 @@ fn tutors(year: i16, ip_whitelisting: State<IpWhitelisting>, conn: db::Conn, use
 }
 
 #[get("/<year>/audit")]
-fn audit_index(year: i16, _user: SiteAdmin) -> Redirect {
-    Redirect::to(&format!("/admin/{}/audit?limit=100", year))
+pub fn audit_index(year: i16, _user: SiteAdmin) -> Redirect {
+    Redirect::to(format!("/admin/{}/audit?limit=100", year))
 }
 
-#[get("/<year>/audit?<filters>")]
-fn audit(year: i16, filters: audit::Filters, conn: db::Conn, user: SiteAdmin) -> Result<Template> {
+#[get("/<year>/audit?<filters..>")]
+pub fn audit(year: i16, filters: Form<audit::Filters>, conn: db::Conn, user: SiteAdmin) -> Result<Template> {
     let context = audit::Context {
         base: BaseContext::new("audit", year, &user, &conn)?,
         logs: audit::load_logs(year, &filters, &conn)?,
-        filters: filters,
+        filters: filters.into_inner(),
         authors: audit::load_authors(&conn)?,
     };
 
@@ -125,7 +126,7 @@ fn audit(year: i16, filters: audit::Filters, conn: db::Conn, user: SiteAdmin) ->
 }
 
 #[get("/<year>/export")]
-fn export(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<export::CsvResponse> {
+pub fn export(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<export::CsvResponse> {
     let name = format!("hwpb-export-{}.csv", Local::today().format("%Y-%m-%d"));
     let csv = export::create_csv(year, &conn)?;
 

@@ -4,10 +4,10 @@ use crate::user;
 use diesel::prelude::*;
 use rocket::{Config, Outcome, State};
 use rocket::http::{Cookie, Cookies, Status};
-use rocket::http::uri::URI;
+use rocket::http::uri::{Origin, Uri};
 use rocket::request::{self, FlashMessage, Form, FromRequest, Request};
 use rocket::response::{Flash, Redirect};
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 use std::collections::{HashMap, HashSet};
 use std::net::SocketAddr;
 use std::ops::Deref;
@@ -144,29 +144,24 @@ pub struct IpWhitelisting(pub bool);
 pub struct LoginMessage(pub Option<String>);
 
 #[get("/", rank = 2)]
-fn nologin_index() -> Redirect {
+pub fn nologin_index() -> Redirect {
     redirect_to_login("/")
 }
 
 #[get("/<_path..>", rank = 3)]
-fn nologin_path(uri: &URI, _path: PathBuf, _user: NotLoggedIn) -> Redirect {
-    redirect_to_login(uri.as_str())
+pub fn nologin_path(uri: &Origin, _path: PathBuf, _user: NotLoggedIn) -> Redirect {
+    redirect_to_login(&uri.to_string())
 }
 
 #[get("/login")]
-fn login_redirect(_user: User) -> Redirect {
+pub fn login_redirect(_user: User) -> Redirect {
     Redirect::to("/")
 }
 
-#[derive(FromForm)]
-struct LoginOptions {
-    redirect: String,
-}
-
-#[get("/login?<options>")]
-fn get_login(options: LoginOptions, error: Option<FlashMessage>, message: State<LoginMessage>) -> Template {
+#[get("/login?<redirect>")]
+pub fn get_login(redirect: String, error: Option<FlashMessage>, message: State<LoginMessage>) -> Template {
     let mut context = HashMap::new();
-    context.insert("redirect", options.redirect.as_str());
+    context.insert("redirect", redirect.as_str());
     if let Some(ref error) = error {
         context.insert("error", error.msg());
     }
@@ -179,19 +174,19 @@ fn get_login(options: LoginOptions, error: Option<FlashMessage>, message: State<
 }
 
 #[derive(FromForm)]
-struct LoginForm {
+pub struct LoginForm {
     username: String,
     password: String,
     redirect: String,
 }
 
 #[post("/login", data = "<login>")]
-fn post_login(mut cookies: Cookies, login: Form<LoginForm>,
+pub fn post_login(mut cookies: Cookies, login: Form<LoginForm>,
         site_admins: State<SiteAdmins>, ip_whitelisting: State<IpWhitelisting>,
         address: SocketAddr, conn: db::Conn)
         -> errors::Result<Result<Redirect, Flash<Redirect>>> {
     let login = login.into_inner();
-    let redirect = URI::percent_decode_lossy(login.redirect.as_bytes());
+    let redirect = Uri::percent_decode_lossy(login.redirect.as_bytes());
 
     let mut user = User {
         site_admin: site_admins.0.contains(&login.username),
@@ -238,7 +233,7 @@ fn post_login(mut cookies: Cookies, login: Form<LoginForm>,
     if result == Ok(true) {
         let user = serde_json::to_string(&user)?;
         cookies.add_private(Cookie::new("user", user));
-        Ok(Ok(Redirect::to(&redirect)))
+        Ok(Ok(Redirect::to(redirect.to_string())))
     } else {
         let msg = "Ungültiger Benutzername oder Passwort!";
         Ok(Err(Flash::error(redirect_to_login(&redirect), msg)))
@@ -246,13 +241,13 @@ fn post_login(mut cookies: Cookies, login: Form<LoginForm>,
 }
 
 #[get("/logout")]
-fn logout(mut cookies: Cookies) -> Redirect {
+pub fn logout(mut cookies: Cookies) -> Redirect {
     cookies.remove_private(Cookie::named("user"));
     Redirect::to("/")
 }
 
 fn redirect_to_login(sucess_redirect: &str) -> Redirect {
-    let success_redirect = URI::percent_encode(sucess_redirect)
+    let success_redirect = Uri::percent_encode(sucess_redirect)
         .replace("&", "%26"); // '&' is not encoded by default like '?'
-    Redirect::to(&format!("/login?redirect={}", success_redirect))
+    Redirect::to(format!("/login?redirect={}", success_redirect))
 }

@@ -7,8 +7,8 @@ use crate::web::session::{SiteAdmin, User};
 use csv::ReaderBuilder;
 use diesel::prelude::*;
 use rocket::Data;
-use rocket::response::status::NoContent;
-use rocket_contrib::Json;
+use rocket::http::Status;
+use rocket_contrib::json::Json;
 
 fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnection, change: &str) -> ApiResult<()> {
     let log = db::NewAuditLog {
@@ -27,7 +27,7 @@ fn add_audit_log(year: i16, group: Option<i32>, author: &str, conn: &PgConnectio
 }
 
 #[post("/group", data = "<group>")]
-fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let id: i32 = diesel::insert_into(db::groups::table)
             .values(&*group)
@@ -47,12 +47,12 @@ fn post_group(group: Json<db::NewGroup>, conn: db::Conn, user: User) -> ApiResul
             day: group.day_id,
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/group/<group>/completed/<task>")]
-fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     let completion = db::Completion {
         group_id: group,
         task_id: task,
@@ -80,12 +80,12 @@ fn put_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResul
             completed: true,
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[delete("/group/<group>/completed/<task>")]
-fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
         user.ensure_tutor_for(year)?;
@@ -108,18 +108,18 @@ fn delete_completion(group: i32, task: i32, conn: db::Conn, user: User) -> ApiRe
             completed: false,
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[derive(Deserialize)]
-struct Elaboration {
+pub struct Elaboration {
     rework_required: bool,
     accepted: bool,
 }
 
 #[put("/group/<group>/elaboration/<experiment>", data = "<elaboration>")]
-fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, conn: db::Conn, user: User) -> ApiResult<Status> {
     let elaboration = db::Elaboration {
         group_id: group,
         experiment_id: experiment,
@@ -157,12 +157,12 @@ fn put_elaboration(group: i32, experiment: i32, elaboration: Json<Elaboration>, 
             accepted: elaboration.accepted,
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[delete("/group/<group>/elaboration/<experiment>")]
-fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
         user.ensure_tutor_for(year)?;
@@ -185,12 +185,12 @@ fn delete_elaboration(group: i32, experiment: i32, conn: db::Conn, user: User) -
             accepted: false,
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/group/<group>/comment", data = "<comment>")]
-fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
         user.ensure_tutor_for(year)?;
@@ -209,12 +209,12 @@ fn put_group_comment(group: i32, comment: Json<String>, conn: db::Conn, user: Us
             comment: &comment,
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/group/<group>/desk", data = "<desk>")]
-fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
         user.ensure_tutor_for(year)?;
@@ -229,12 +229,12 @@ fn put_group_desk(group: i32, desk: Json<i32>, conn: db::Conn, user: User) -> Ap
 
         push::SERVER.push(year, "group", &push::Group::Change { group }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/group/<group>/student/<student>")]
-fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     let mapping = db::GroupMapping {
         student_id: student,
         group_id: group,
@@ -257,12 +257,12 @@ fn put_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> Ap
             group, student, name: full_student.name()
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[delete("/group/<group>/student/<student>")]
-fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let year = find_writable_year(group, &*conn)?;
         user.ensure_tutor_for(year)?;
@@ -291,18 +291,18 @@ fn delete_group_student(group: i32, student: i32, conn: db::Conn, user: User) ->
 
         push::SERVER.push(year, "student", &push::Student::Remove { student }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[derive(Deserialize)]
-struct Search {
+pub struct Search {
     terms: Vec<String>,
     year: i16,
 }
 
 #[post("/group/search", data = "<search>")]
-fn search_groups(search: Json<Search>, conn: db::Conn, user: User) -> ApiResult<Json<Vec<super::models::SearchGroup>>> {
+pub fn search_groups(search: Json<Search>, conn: db::Conn, user: User) -> ApiResult<Json<Vec<super::models::SearchGroup>>> {
     user.ensure_tutor_for(search.year)?;
 
     let groups = super::models::find_groups(&search.terms, search.year, &conn)?;
@@ -311,7 +311,7 @@ fn search_groups(search: Json<Search>, conn: db::Conn, user: User) -> ApiResult<
 }
 
 #[post("/student/search", data = "<search>")]
-fn search_students(search: Json<Search>, conn: db::Conn, user: User) -> ApiResult<Json<Vec<super::models::Student>>> {
+pub fn search_students(search: Json<Search>, conn: db::Conn, user: User) -> ApiResult<Json<Vec<super::models::Student>>> {
     user.ensure_tutor_for(search.year)?;
 
     let students = super::models::find_students(&search.terms, search.year, &conn)?;
@@ -320,7 +320,7 @@ fn search_students(search: Json<Search>, conn: db::Conn, user: User) -> ApiResul
 }
 
 #[put("/year/<year>")]
-fn put_year(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
+pub fn put_year(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<Status> {
     let db_year = db::Year {
         id: year,
         writable: true,
@@ -334,12 +334,12 @@ fn put_year(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> 
         add_audit_log(year, None, user.name(), &conn,
             &format!("Create new year {}", year))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[delete("/year/<year>")]
-fn delete_year(year: i16, conn: db::Conn, _user: SiteAdmin) -> ApiResult<NoContent> {
+pub fn delete_year(year: i16, conn: db::Conn, _user: SiteAdmin) -> ApiResult<Status> {
     conn.transaction(|| {
         db::delete_year(year, &conn)?;
 
@@ -353,12 +353,12 @@ fn delete_year(year: i16, conn: db::Conn, _user: SiteAdmin) -> ApiResult<NoConte
             db::add_current_year(&conn)?;
         }
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/year/<year>/closed")]
-fn put_year_writable(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
+pub fn put_year_writable(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<Status> {
     conn.transaction(|| {
         diesel::update(db::years::table.filter(db::years::id.eq(year)))
             .set(db::years::writable.eq(false))
@@ -367,12 +367,12 @@ fn put_year_writable(year: i16, conn: db::Conn, user: SiteAdmin) -> ApiResult<No
         add_audit_log(year, None, user.name(), &conn,
             &format!("Close year {} (no longer modifiable)", year))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[post("/experiment", data = "<experiment>")]
-fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
+pub fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         user.ensure_admin_for(experiment.year)?;
 
@@ -389,7 +389,7 @@ fn post_experiment(experiment: Json<db::NewExperiment>, conn: db::Conn, user: Us
 }
 
 #[delete("/experiment/<experiment>")]
-fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let full_experiment = db::experiments::table
             .find(experiment)
@@ -404,12 +404,12 @@ fn delete_experiment(experiment: i32, conn: db::Conn, user: User) -> ApiResult<N
         add_audit_log(full_experiment.year, None, user.name(), &conn,
             &format!("Remove experiment {} (#{})", full_experiment.name, experiment))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[post("/experiment/<experiment>/task", data = "<task>")]
-fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
+pub fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         let full_experiment = db::experiments::table
             .find(experiment)
@@ -433,7 +433,7 @@ fn post_experiment_task(experiment: i32, task: Json<String>, conn: db::Conn, use
 }
 
 #[delete("/experiment/<experiment>/task/<task>")]
-fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let (task_name, experiment_name, year) = db::tasks::table
             .inner_join(db::experiments::table)
@@ -456,12 +456,12 @@ fn delete_experiment_task(experiment: i32, task: i32, conn: db::Conn, user: User
             &format!("Remove task {} (#{}) from experiment {} (#{})",
                 task_name, task, experiment_name, experiment))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/experiment/<experiment>/day/<day>/event", data = "<date>")]
-fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user: User) -> ApiResult<Status> {
     let date: NaiveDate = date.parse().chain_err(|| "Invalid date")?;
 
     conn.transaction(|| {
@@ -493,12 +493,12 @@ fn put_event(experiment: i32, day: i32, date: Json<String>, conn: db::Conn, user
             &format!("Set event date to {} for day {} (#{}) and experiment {} (#{})",
                 date, day_name, day, experiment_name, experiment))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[delete("/experiment/<experiment>/day/<day>/event")]
-fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         diesel::delete(db::events::table
             .find((day, experiment))) // beware the order of the columns!
@@ -518,12 +518,12 @@ fn delete_event(experiment: i32, day: i32, conn: db::Conn, user: User) -> ApiRes
             &format!("Remove event date for day {} (#{}) and experiment {} (#{})",
                 day_name, day, experiment_name, experiment))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[post("/day", data = "<day>")]
-fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
+pub fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         user.ensure_admin_for(day.year)?;
 
@@ -540,7 +540,7 @@ fn post_day(day: Json<db::NewDay>, conn: db::Conn, user: User) -> ApiResult<Json
 }
 
 #[delete("/day/<day>")]
-fn delete_day(day: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_day(day: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let full_day = db::days::table
             .find(day)
@@ -555,7 +555,7 @@ fn delete_day(day: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
         add_audit_log(full_day.year, None, user.name(), &conn,
             &format!("Remove day {} (#{})", full_day.name, day))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
@@ -575,7 +575,7 @@ fn insert_student(student: &db::NewStudent, conn: &PgConnection, user: &str) -> 
 }
 
 #[post("/student", data = "<student>")]
-fn post_student(student: Json<db::NewStudent>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
+pub fn post_student(student: Json<db::NewStudent>, conn: db::Conn, user: User) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         user.ensure_admin_for(student.year)?;
 
@@ -584,7 +584,7 @@ fn post_student(student: Json<db::NewStudent>, conn: db::Conn, user: User) -> Ap
 }
 
 #[post("/students/<year>", format = "text/csv", data = "<students>")]
-fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> ApiResult<Status> {
     #[derive(Debug, Deserialize)]
     struct Student {
         matrikel: String,
@@ -613,12 +613,12 @@ fn post_students_csv(year: i16, students: Data, conn: db::Conn, user: User) -> A
             insert_student(&student, &conn, user.name())?;
         }
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[delete("/student/<student>")]
-fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let full_student = db::students::table
             .find(student)
@@ -635,12 +635,12 @@ fn delete_student(student: i32, conn: db::Conn, user: User) -> ApiResult<NoConte
                 full_student.name(), full_student.matrikel,
                 full_student.username.as_ref().map_or("-", |s| s), student))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/student/<student>/instructed", data = "<instructed>")]
-fn put_student_instucted(student: i32, instructed: Json<bool>, conn: db::Conn, user: User) -> ApiResult<NoContent> {
+pub fn put_student_instucted(student: i32, instructed: Json<bool>, conn: db::Conn, user: User) -> ApiResult<Status> {
     conn.transaction(|| {
         let full_student = db::students::table
             .find(student)
@@ -660,12 +660,12 @@ fn put_student_instucted(student: i32, instructed: Json<bool>, conn: db::Conn, u
             student, instructed: *instructed
         }).ok();
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[post("/tutor", data = "<tutor>")]
-fn post_tutor(tutor: Json<db::NewTutor>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Json<i32>> {
+pub fn post_tutor(tutor: Json<db::NewTutor>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         let id = diesel::insert_into(db::tutors::table)
             .values(&*tutor)
@@ -681,7 +681,7 @@ fn post_tutor(tutor: Json<db::NewTutor>, conn: db::Conn, user: SiteAdmin) -> Api
 }
 
 #[delete("/tutor/<tutor>")]
-fn delete_tutor(tutor: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
+pub fn delete_tutor(tutor: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult<Status> {
     conn.transaction(|| {
         let full_tutor = db::tutors::table
             .find(tutor)
@@ -696,12 +696,12 @@ fn delete_tutor(tutor: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoCont
             &format!("Remove tutor {} (#{}, {})", full_tutor.username,
             tutor, if full_tutor.is_admin { "admin" } else { "no admin" }))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
 #[put("/tutor/<tutor>/is_admin", data = "<is_admin>")]
-fn put_tutor_admin(tutor: i32, is_admin: Json<bool>, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
+pub fn put_tutor_admin(tutor: i32, is_admin: Json<bool>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Status> {
     conn.transaction(|| {
         let full_tutor = db::tutors::table
             .find(tutor)
@@ -716,7 +716,7 @@ fn put_tutor_admin(tutor: i32, is_admin: Json<bool>, conn: db::Conn, user: SiteA
             &format!("Tutor {} (#{}) is {} admin", full_tutor.username,
             tutor, if *is_admin { "now" } else { "no longer" }))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }
 
@@ -727,7 +727,7 @@ pub struct NewIpWhitelistEntry {
 }
 
 #[post("/ip-whitelist", data = "<entry>")]
-fn post_ip_whitelist(entry: Json<NewIpWhitelistEntry>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Json<i32>> {
+pub fn post_ip_whitelist(entry: Json<NewIpWhitelistEntry>, conn: db::Conn, user: SiteAdmin) -> ApiResult<Json<i32>> {
     conn.transaction(|| {
         let entry = entry.into_inner();
         let (id, ipnet) = diesel::insert_into(db::ip_whitelist::table)
@@ -749,7 +749,7 @@ fn post_ip_whitelist(entry: Json<NewIpWhitelistEntry>, conn: db::Conn, user: Sit
 }
 
 #[delete("/ip-whitelist/<entry>")]
-fn delete_ip_whitelist(entry: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult<NoContent> {
+pub fn delete_ip_whitelist(entry: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult<Status> {
     conn.transaction(|| {
         let (year, ipnet) = diesel::delete(
             db::ip_whitelist::table.find(entry))
@@ -762,6 +762,6 @@ fn delete_ip_whitelist(entry: i32, conn: db::Conn, user: SiteAdmin) -> ApiResult
         add_audit_log(year, None, user.name(), &conn,
             &format!("Remove ip whitelist entry {} (#{})", ipnet, entry))?;
 
-        Ok(NoContent)
+        Ok(Status::NoContent)
     })
 }

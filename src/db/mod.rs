@@ -95,7 +95,7 @@ pub fn expect1(count: usize) -> QueryResult<usize> {
 /// This will fail if the year already exists.
 ///
 /// Should be run inside a transaction.
-pub(crate) fn add_current_year(conn: &PgConnection) -> Result<()> {
+pub fn add_current_year(conn: &PgConnection) -> Result<()> {
     let year = Year {
         id: Utc::today().year() as i16,
         writable: true,
@@ -113,7 +113,7 @@ pub(crate) fn add_current_year(conn: &PgConnection) -> Result<()> {
 /// Also removes all completions and elaborations of the group.
 ///
 /// Should be run inside a transaction.
-pub(crate) fn delete_group(group: i32, conn: &PgConnection) -> Result<()> {
+pub fn delete_group(group: i32, conn: &PgConnection) -> Result<()> {
     // Delete all completions of the group
     diesel::delete(completions::table
         .filter(completions::group_id.eq(group)))
@@ -143,7 +143,7 @@ pub(crate) fn delete_group(group: i32, conn: &PgConnection) -> Result<()> {
 /// tutors and audit log entries.
 ///
 /// Should be run inside a transaction.
-pub(crate) fn delete_year(year: i16, conn: &PgConnection) -> Result<()> {
+pub fn delete_year(year: i16, conn: &PgConnection) -> Result<()> {
     // Load all days for the deletion of groups and events
     let days = days::table
         .filter(days::year.eq(year))

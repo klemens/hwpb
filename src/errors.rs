@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 error_chain!{
     foreign_links {
         Csv(::csv::Error);

@@ -12,11 +12,11 @@ use rocket::State;
 use rocket::http::RawStr;
 use rocket::request::FromParam;
 use rocket::response::NamedFile;
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
-struct Date(chrono::NaiveDate);
+pub struct Date(chrono::NaiveDate);
 
 impl<'a> FromParam<'a> for Date {
     type Error = chrono::format::ParseError;
@@ -35,7 +35,7 @@ impl Deref for Date {
 }
 
 #[get("/")]
-fn index(conn: db::Conn, user: User) -> Result<Template> {
+pub fn index(conn: db::Conn, user: User) -> Result<Template> {
     let filtered_years = models::find_years(&conn)?
         .into_iter()
         .filter(|year| user.is_tutor_for(year.name))
@@ -51,7 +51,7 @@ fn index(conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<year>", rank = 2)]
-fn overview(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+pub fn overview(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
     let context = models::Overview {
@@ -65,7 +65,7 @@ fn overview(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/<date>")]
-fn event(date: Date, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
+pub fn event(date: Date, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
     let context = models::load_event(&date, &push_url.0, &conn)?;
 
     user.ensure_tutor_for(context.year)?;
@@ -74,7 +74,7 @@ fn event(date: Date, push_url: State<push::Url>, conn: db::Conn, user: User) -> 
 }
 
 #[get("/group/<group>")]
-fn group(group: i32, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
+pub fn group(group: i32, push_url: State<push::Url>, conn: db::Conn, user: User) -> Result<Template> {
     let context = models::load_group(group, &push_url.0, &conn)?;
 
     user.ensure_tutor_for(context.year)?;
@@ -83,16 +83,16 @@ fn group(group: i32, push_url: State<push::Url>, conn: db::Conn, user: User) -> 
 }
 
 #[get("/static/<path..>")]
-fn static_file(path: PathBuf) -> Option<NamedFile> {
+pub fn static_file(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("templates/static/").join(path)).ok()
 }
 
 #[get("/manifest.json")]
-fn manifest() -> Option<NamedFile> {
+pub fn manifest() -> Option<NamedFile> {
     NamedFile::open(Path::new("templates/manifest.json")).ok()
 }
 
 #[get("/service-worker.js")]
-fn service_worker() -> Option<NamedFile> {
+pub fn service_worker() -> Option<NamedFile> {
     NamedFile::open(Path::new("templates/static/service-worker.js")).ok()
 }

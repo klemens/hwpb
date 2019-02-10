@@ -9,7 +9,7 @@ use diesel::dsl::not;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use itertools::Itertools;
-use rocket_contrib::Template;
+use rocket_contrib::templates::Template;
 use std::cmp::Ordering;
 use std::collections::{HashMap, BTreeSet};
 
@@ -23,7 +23,7 @@ struct Analysis {
 }
 
 #[get("/passed/<year>")]
-fn passed(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+pub fn passed(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
     let (elaborations_by_student, _) =
@@ -47,7 +47,7 @@ fn passed(year: i16, conn: db::Conn, user: User) -> Result<Template> {
 }
 
 #[get("/passed-complete/<year>")]
-fn passed_complete(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<CsvResponse> {
+pub fn passed_complete(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<CsvResponse> {
     // Load all students
     let mut students = db::students::table
         .filter(db::students::year.eq(year))
@@ -90,7 +90,7 @@ fn passed_complete(year: i16, conn: db::Conn, _user: SiteAdmin) -> Result<CsvRes
 }
 
 #[get("/missing-reworks/<year>")]
-fn missing_reworks(year: i16, conn: db::Conn, user: User) -> Result<Template> {
+pub fn missing_reworks(year: i16, conn: db::Conn, user: User) -> Result<Template> {
     user.ensure_tutor_for(year)?;
 
     let (tasks_by_student, _) = load_tasks_by_student(year, false, &*conn)?;
