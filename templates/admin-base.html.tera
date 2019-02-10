@@ -27,9 +27,9 @@
         {% if base.site_admin %}
             <a class="export" href="/admin/{{ base.year }}/export"><img src="/static/icons/export-csv.svg"></a>
             {% if base.read_only_year %}
-            <img id="delete-year" title="Dieses Jahr wurde bereits abgeschlossen und kann nicht mehr verändert werden. Klicken, um das Jahr endgültig zu löschen." />
+            <div id="delete-year" title="Dieses Jahr wurde bereits abgeschlossen und kann nicht mehr verändert werden. Klicken, um das Jahr endgültig zu löschen."></div>
             {% else %}
-            <img id="close-year" title="Dieses Jahr abschließen" />
+            <div id="close-year" title="Dieses Jahr abschließen"></div>
             {% endif %}
         {% endif %}
         <select autocomplete="off">
