@@ -14,7 +14,7 @@ diesel = { version = "1.4", features = ["postgres", "chrono", "network-address",
 diesel_migrations = { version = "1.4", features = ["postgres"] }
 error-chain = "0.12"
 hyper-sse = "0.1.0"
-itertools = "0.7"
+itertools = "0.8"
 lazy_static = "1"
 pam = "0.7.0"
 rocket = "0.4"
