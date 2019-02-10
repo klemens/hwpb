@@ -1,0 +1,5 @@
+# Allow user authenticaton for hwpb
+# You may have use login instead of system-auth on some systems
+
+auth include system-auth
+account include system-auth

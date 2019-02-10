@@ -53,7 +53,9 @@ be changed by setting the `template_dir` parameter in the config file.
 Authentication is handled by the PAM library, so for local users to be able to
 log in, the user running hwpb must have read access to `/etc/shadow` to check
 passwords. A better alternative is to use a remote authentication plugin for
-PAM like SSS, NIS or LDAP, which works without access to `/etc/shadow`.
+PAM like SSS, NIS or LDAP, which works without access to `/etc/shadow`. If
+your system ships with a restictive default (`other`) PAM policy, copy the
+[provided PAM policy] to `/etc/pam.d/hwpb` (the filename _must_ be `hwpb`).
 
 It is advisable to run hwpb as a non-privileged user using a service manager
 and letting a web server handle client connections and encryption. You can use
@@ -65,5 +67,6 @@ starting point. The former expects the binary, the `templates` folder and the
 [`README.md`]: ../README.md
 [example config]: examples/Rocket.toml
 [rocket documentation]: https://api.rocket.rs/rocket/config/
+[provided PAM policy]: examples/hwpb.pam
 [example systemd service]: examples/hwpb.service
 [example nginx config]: examples/hwbp.nginx
