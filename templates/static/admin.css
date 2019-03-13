@@ -41,6 +41,7 @@ header a.export > img {
 
 #close-year,
 #delete-year {
+    flex: 0 0 auto;
     margin-left: .7rem;
     margin-right: .4rem;
     height: 1.5rem;
