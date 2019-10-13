@@ -6,8 +6,8 @@ use diesel::expression::{AsExpression, Expression};
 use diesel::pg::Pg;
 use diesel::sql_types::{Inet, Text};
 
-sql_function!(abbrev, Abbrev, (x: Inet) -> Text);
-sql_function!(inet, InetCons, (x: Text) -> Inet);
+sql_function!(fn abbrev(x: Inet) -> Text);
+sql_function!(fn inet(x: Text) -> Inet);
 
 diesel_infix_operator!(Contains, " >> ", backend: Pg);
 diesel_infix_operator!(ContainsOrEqual, " >>= ", backend: Pg);
@@ -34,7 +34,7 @@ pub trait PgInetExpressionMethods: Expression<SqlType = Inet> + Sized {
     /// Convert to a abbreviated display format.
     ///
     /// Hosts are displayed without the CIDR netmask.
-    fn abbrev(self) -> Abbrev<Self> {
+    fn abbrev(self) -> abbrev::HelperType<Self> {
         abbrev(self)
     }
 }
